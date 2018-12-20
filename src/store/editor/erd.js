@@ -6,7 +6,7 @@ import ERD from '@/js/editor/ERD'
 
 Vue.use(Vuex)
 
-const TABLE_WIDTH = 692
+const TABLE_WIDTH = 710
 const TABLE_HEIGHT = 88
 const COLUMN_HEIGHT = 25
 

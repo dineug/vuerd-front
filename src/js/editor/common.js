@@ -57,7 +57,7 @@ export const setZIndex = function () {
 
 // dataTypeHint show/hide 콜백 함수
 export const setDataTypeHint = function (e) {
-  if (!$(e.target).closest('.data_type_list').length) {
+  if (!$(e.target).closest('.erd_data_type_list').length) {
     storeERD.commit({
       type: 'dataTypeHintVisibleAll',
       isDataTypeHint: false

@@ -155,6 +155,12 @@ export default {
             dataType: $li.filter('.selected').text()
           })
         }
+        // key: Tab
+      } else if (e.keyCode === 9) {
+        storeERD.commit({
+          type: 'dataTypeHintVisibleAll',
+          isDataTypeHint: false
+        })
       } else {
         // 데이터타입 검색 정렬
         if (isDataTypeHint) {
@@ -176,7 +182,7 @@ export default {
         columnId: columnId,
         dataType: dataType
       })
-      $(e.target).parents('div').find('.erd_data_type').focus()
+      $(e.target).parent().parent('div').find('.erd_data_type').focus()
     },
     // 마우스 hover addClass
     dataTypeHintAddClass (e) {
@@ -221,7 +227,7 @@ export default {
     height: 5000px;
 
     .erd_table {
-      width: 692px;
+      width: 710px;
       position: absolute;
       box-sizing: border-box;
       background-color: $table_background;
@@ -256,6 +262,7 @@ export default {
           float: left;
           margin-right: 10px;
           margin-bottom: 2px;
+          font-size: 14px;
         }
         .erd_column_not_null {
           width: 45px;
