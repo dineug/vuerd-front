@@ -1,6 +1,7 @@
 import $ from 'jquery'
 import storeERD from '@/store/editor/erd'
 import dataType from '@/store/editor/dataType'
+import JSLog from '../JSLog'
 
 // UUID 생성
 export const guid = () => {
@@ -103,6 +104,22 @@ function getPoint (ui) {
     right: {
       x: ui.left + ui.width,
       y: ui.top + (ui.height / 2)
+    },
+    lt: {
+      x: ui.left,
+      y: ui.top
+    },
+    rt: {
+      x: ui.left + ui.width,
+      y: ui.top
+    },
+    lb: {
+      x: ui.left,
+      y: ui.top + ui.height
+    },
+    rb: {
+      x: ui.left + ui.width,
+      y: ui.top + ui.height
     }
   }
 }
@@ -117,8 +134,21 @@ function convertPoints (v) {
   }
   const startPoint = getPoint(startTable.ui)
 
+  const filter = it => {
+    return it === 'left' || it === 'right' || it === 'top' || it === 'bottom'
+  }
+
   // 연결좌표 처리
-  if (endTable) {
+  if (endTable && v.points[0].id === v.points[1].id) {
+    // self
+    const endPoint = getPoint(endTable.ui)
+    key.start = 'top'
+    key.end = 'right'
+    v.points[0].x = startPoint.rt.x - 20
+    v.points[0].y = startPoint.rt.y
+    v.points[1].x = endPoint.rt.x
+    v.points[1].y = endPoint.rt.y + 20
+  } else if (endTable) {
     const endPoint = getPoint(endTable.ui)
     let minXY = Math.abs(startPoint.left.x - endPoint.left.x) + Math.abs(startPoint.left.y - endPoint.left.y)
     v.points[0].x = startPoint.left.x
@@ -126,8 +156,8 @@ function convertPoints (v) {
     v.points[1].x = endPoint.left.x
     v.points[1].y = endPoint.left.y
 
-    Object.keys(startPoint).forEach(function (k) {
-      Object.keys(endPoint).forEach(function (k2) {
+    Object.keys(startPoint).filter(filter).forEach(function (k) {
+      Object.keys(endPoint).filter(filter).forEach(function (k2) {
         let tempXY = Math.abs(startPoint[k].x - endPoint[k2].x) + Math.abs(startPoint[k].y - endPoint[k2].y)
         if (minXY > tempXY) {
           minXY = tempXY
@@ -145,7 +175,7 @@ function convertPoints (v) {
     v.points[0].x = startPoint.left.x
     v.points[0].y = startPoint.left.y
 
-    Object.keys(startPoint).forEach(function (k) {
+    Object.keys(startPoint).filter(filter).forEach(function (k) {
       let tempXY = Math.abs(startPoint[k].x - v.points[1].x) + Math.abs(startPoint[k].y - v.points[1].y)
       if (minXY > tempXY) {
         minXY = tempXY
@@ -192,7 +222,9 @@ function getPath (v, key) {
     path.push(`M${v.points[0].x} ${line.start.y2}`)
   }
 
-  if (key.start === 'left' || key.start === 'right') {
+  if (v.points[0].id === v.points[1].id) {
+    path.push(`Q ${v.points[0].x + PATH_END_HEIGHT} ${v.points[0].y - PATH_HEIGHT}`)
+  } else if (key.start === 'left' || key.start === 'right') {
     path.push(`Q ${(v.points[0].x + v.points[1].x) / 2} ${v.points[0].y}`)
   } else {
     path.push(`Q ${v.points[0].x} ${(v.points[0].y + v.points[1].y) / 2}`)

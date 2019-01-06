@@ -130,6 +130,7 @@ export default new Vuex.Store({
       // line drawing 시작
       if (ERD.core.event.isCursor && !ERD.core.event.isDraw) {
         const table = getData(state.tables, data.id)
+        // table pk 컬럼이 있는지 체크 없으면 자동생성
         const id = guid()
         state.lines.push({
           id: id,
@@ -152,10 +153,7 @@ export default new Vuex.Store({
 
         // line drawing 종료
       } else if (ERD.core.event.isDraw) {
-        const line = getData(state.lines, ERD.core.event.lineId)
-        if (data.id !== line.points[0].id) {
-          ERD.core.event.endCursor(data.id)
-        }
+        ERD.core.event.endCursor(data.id)
       }
     },
     // column 선택

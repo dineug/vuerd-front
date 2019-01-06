@@ -53,10 +53,10 @@ module.exports = {
 
   build: {
     // Template for index.html
-    index: path.resolve(__dirname, '../../vuerd-backend/src/main/resources/templates/index.html'),
+    index: path.resolve(__dirname, '../../vuerd-backend/index.html'),
 
     // Paths
-    assetsRoot: path.resolve(__dirname, '../../vuerd-backend/src/main/resources/static'),
+    assetsRoot: path.resolve(__dirname, '../../vuerd-backend/public/static'),
     assetsSubDirectory: '',
     assetsPublicPath: '/static',
 
