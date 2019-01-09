@@ -33,8 +33,8 @@
                 li(v-for="dataType in column.ui.dataTypes" @click="changeColumnDataType($event, table.id, column.id, dataType.name)" @mouseover="dataTypeHintAddClass") {{ dataType.name }}
 
             // 컬럼 not-null
-            input.erd_column_not_null(type="text" readonly value="NULL" @click="changeNull(table.id, column.id)" v-if="column.isNull")
-            input.erd_column_not_null(type="text" readonly value="N-N" @click="changeNull(table.id, column.id)" v-else)
+            input.erd_column_not_null(type="text" readonly value="N-N" @click="changeNull(table.id, column.id)" v-if="column.options.notNull")
+            input.erd_column_not_null(type="text" readonly value="NULL" @click="changeNull(table.id, column.id)" v-else)
 
             // 컬럼 comment
             input(type="text" placeholder="comment" v-model="column.comment")

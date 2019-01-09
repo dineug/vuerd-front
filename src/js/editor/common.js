@@ -1,7 +1,6 @@
 import $ from 'jquery'
 import storeERD from '@/store/editor/erd'
 import dataType from '@/store/editor/dataType'
-import JSLog from '../JSLog'
 
 // UUID 생성
 export const guid = () => {

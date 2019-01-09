@@ -70,7 +70,13 @@ export default new Vuex.Store({
             name: null,
             comment: null,
             dataType: null,
-            isNull: true,
+            options: {
+              autoIncrement: false,
+              primaryKey: false,
+              unique: false,
+              notNull: false,
+              unsigned: false
+            },
             ui: {
               selected: false,
               key: {
@@ -101,7 +107,7 @@ export default new Vuex.Store({
     changeNull (state, data) {
       const table = getData(state.tables, data.tableId)
       const column = getData(table.columns, data.columnId)
-      column.isNull = !column.isNull
+      column.options.notNull = !column.options.notNull
     },
     // DB 변경
     changeDB (state, data) {
@@ -247,6 +253,7 @@ function setColumnKey (state, key) {
     for (let column of table.columns) {
       if (column.ui.selected) {
         column.ui.key[key] = !column.ui.key[key]
+        if (key === 'pk' || key === 'pfk') column.options.primaryKey = column.ui.key[key]
         check = true
         break
       }
