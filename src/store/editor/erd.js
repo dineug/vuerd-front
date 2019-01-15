@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import {guid, getData, getDataTypeSearch} from '@/js/editor/common'
+import { guid, getData, getDataTypeSearch } from '@/js/editor/common'
 import dataType from './dataType'
 import ERD from '@/js/editor/ERD'
 

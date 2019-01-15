@@ -12,7 +12,7 @@
 import $ from 'jquery'
 import ERD from '@/js/editor/ERD'
 import storeERD from '@/store/editor/erd'
-import {getZIndex} from '@/js/editor/common'
+import { getZIndex } from '@/js/editor/common'
 
 export default {
   name: 'TableMenu',
@@ -27,13 +27,13 @@ export default {
         },
         {
           type: 'erd-0-1',
-          icon: '/static/images/erd/erd-0-1.png',
+          icon: '/img/erd/erd-0-1.png',
           name: '1:1',
           keymap: ''
         },
         {
           type: 'erd-0-1-N',
-          icon: '/static/images/erd/erd-0-1-N.png',
+          icon: '/img/erd/erd-0-1-N.png',
           name: '1:N',
           keymap: ''
         }
@@ -88,9 +88,9 @@ export default {
       offset.height = $el.height()
 
       if (!(offset.top <= e.clientY &&
-          e.clientY <= offset.top + offset.height &&
-          offset.left <= e.clientX &&
-          e.clientX <= offset.left + offset.width)) {
+        e.clientY <= offset.top + offset.height &&
+        offset.left <= e.clientX &&
+        e.clientX <= offset.left + offset.width)) {
         $el.hide()
       }
     }.bind(this.$el))

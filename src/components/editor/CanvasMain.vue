@@ -47,10 +47,10 @@
 <script>
 import JSLog from '@/js/JSLog'
 import $ from 'jquery'
-import 'jquery-ui'
+import 'jquery-ui-bundle'
 import storeERD from '@/store/editor/erd'
 import draggable from 'vuedraggable'
-import {setZIndex, setDataTypeHint} from '@/js/editor/common'
+import { setZIndex, setDataTypeHint } from '@/js/editor/common'
 
 export default {
   name: 'CanvasMain',
@@ -247,6 +247,7 @@ export default {
         button {
           margin-right: 5px;
         }
+
         input {
           width: 41%;
           height: 100%;
@@ -264,10 +265,12 @@ export default {
           margin-bottom: 2px;
           font-size: 14px;
         }
+
         .erd_column_not_null {
           width: 45px;
           cursor: pointer;
         }
+
         button {
           padding: 0;
           width: 25px;
@@ -302,12 +305,15 @@ export default {
           width: 16px;
           color: $table_background;
         }
+
         .pk {
           color: $key_pk;
         }
+
         .fk {
           color: $key_fk;
         }
+
         .pfk {
           color: $key_pfk;
         }
