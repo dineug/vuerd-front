@@ -8,10 +8,10 @@
 
 <script>
 import '@/js/editor/ERD'
-import TableMenu from './TableMenu'
-import CanvasMenu from './CanvasMenu'
-import CanvasMain from './CanvasMain'
-import CanvasSvg from './CanvasSvg'
+import TableMenu from '@/components/editor/TableMenu'
+import CanvasMenu from '@/components/editor/CanvasMenu'
+import CanvasMain from '@/components/editor/CanvasMain'
+import CanvasSvg from '@/components/editor/CanvasSvg'
 
 export default {
   name: 'ERD',
@@ -24,7 +24,6 @@ export default {
 }
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="scss">
   #erd {
     display: flex;

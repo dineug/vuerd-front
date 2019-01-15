@@ -6,7 +6,7 @@ let isAnimate = true
 
 function init () {
   // RENDERER
-  renderer = new THREE.WebGLRenderer({canvas: document.getElementById('menu_canvas'), antialias: true})
+  renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('menu_canvas'), antialias: true })
   renderer.setClearColor(0x282828)
 
   // CAMERA
@@ -26,7 +26,7 @@ function init () {
   geometry = new THREE.IcosahedronBufferGeometry(85, 1)
   // geometry = new THREE.CubeGeometry(100, 100, 100)
 
-  material = new THREE.MeshLambertMaterial({color: 0x429db3})
+  material = new THREE.MeshLambertMaterial({ color: 0x429db3 })
   mesh = new THREE.Mesh(geometry, material)
   mesh.position.set(0, 0, -1000)
 

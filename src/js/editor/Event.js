@@ -1,6 +1,6 @@
 import $ from 'jquery'
 import JSLog from '../JSLog'
-import {getData} from './common'
+import { getData } from './common'
 import storeERD from '@/store/editor/erd'
 
 /**

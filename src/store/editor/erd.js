@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import {guid, getData, getDataTypeSearch} from '@/js/editor/common'
+import { guid, getData, getDataTypeSearch } from '@/js/editor/common'
 import dataType from './dataType'
 import ERD from '@/js/editor/ERD'
 
@@ -70,7 +70,13 @@ export default new Vuex.Store({
             name: null,
             comment: null,
             dataType: null,
-            isNull: true,
+            options: {
+              autoIncrement: false,
+              primaryKey: false,
+              unique: false,
+              notNull: false,
+              unsigned: false
+            },
             ui: {
               selected: false,
               key: {
@@ -101,7 +107,7 @@ export default new Vuex.Store({
     changeNull (state, data) {
       const table = getData(state.tables, data.tableId)
       const column = getData(table.columns, data.columnId)
-      column.isNull = !column.isNull
+      column.options.notNull = !column.options.notNull
     },
     // DB 변경
     changeDB (state, data) {
@@ -130,6 +136,7 @@ export default new Vuex.Store({
       // line drawing 시작
       if (ERD.core.event.isCursor && !ERD.core.event.isDraw) {
         const table = getData(state.tables, data.id)
+        // table pk 컬럼이 있는지 체크 없으면 자동생성
         const id = guid()
         state.lines.push({
           id: id,
@@ -152,10 +159,7 @@ export default new Vuex.Store({
 
         // line drawing 종료
       } else if (ERD.core.event.isDraw) {
-        const line = getData(state.lines, ERD.core.event.lineId)
-        if (data.id !== line.points[0].id) {
-          ERD.core.event.endCursor(data.id)
-        }
+        ERD.core.event.endCursor(data.id)
       }
     },
     // column 선택
@@ -249,6 +253,7 @@ function setColumnKey (state, key) {
     for (let column of table.columns) {
       if (column.ui.selected) {
         column.ui.key[key] = !column.ui.key[key]
+        if (key === 'pk' || key === 'pfk') column.options.primaryKey = column.ui.key[key]
         check = true
         break
       }

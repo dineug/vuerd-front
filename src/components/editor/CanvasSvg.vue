@@ -16,7 +16,7 @@
 
 <script>
 import storeERD from '@/store/editor/erd'
-import {convertLine} from '@/js/editor/common'
+import { convertLine } from '@/js/editor/common'
 
 export default {
   name: 'CanvasSvg',
