@@ -16,7 +16,7 @@
 
 <script>
 import storeERD from '@/store/editor/erd'
-import { convertLine } from '@/js/editor/common'
+import * as util from '@/js/editor/util'
 
 export default {
   name: 'CanvasSvg',
@@ -29,8 +29,9 @@ export default {
     toLines () {
       const data = []
       this.lines.forEach(v => {
-        data.push(convertLine(v))
+        data.push(util.convertLine(v))
       })
+      // 중첩 path 재가공 필요
       return data
     }
   }

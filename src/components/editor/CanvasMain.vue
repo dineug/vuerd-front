@@ -9,9 +9,9 @@
       .erd_table_header
         input(type="text" placeholder="table" v-model="table.name")
         input(type="text" placeholder="comment" v-model="table.comment")
-        button(class="btn btn-outline-primary" @click="addColumn(table.id)")
+        button(class="btn btn-outline-primary" @click="columnAdd(table.id)")
           font-awesome-icon(icon="plus")
-        button(class="btn btn-outline-danger" @click="deleteTable(table.id)")
+        button(class="btn btn-outline-danger" @click="tableDelete(table.id)")
           font-awesome-icon(icon="times")
 
       draggable(v-model="table.columns" :options="{group:'table'}" @end="draggableEnd")
@@ -30,27 +30,26 @@
             div
               input.erd_data_type(type="text" placeholder="dataType" v-model="column.dataType" @keyup="dataTypeHintVisible($event, table.id, column.id, true)")
               ul.erd_data_type_list(v-if="column.ui.isDataTypeHint")
-                li(v-for="dataType in column.ui.dataTypes" @click="changeColumnDataType($event, table.id, column.id, dataType.name)" @mouseover="dataTypeHintAddClass") {{ dataType.name }}
+                li(v-for="dataType in column.ui.dataTypes" @click="columnChangeDataType($event, table.id, column.id, dataType.name)" @mouseover="dataTypeHintAddClass") {{ dataType.name }}
 
             // 컬럼 not-null
-            input.erd_column_not_null(type="text" readonly value="N-N" @click="changeNull(table.id, column.id)" v-if="column.options.notNull")
-            input.erd_column_not_null(type="text" readonly value="NULL" @click="changeNull(table.id, column.id)" v-else)
+            input.erd_column_not_null(type="text" readonly value="N-N" @click="columnChangeNull(table.id, column.id)" v-if="column.options.notNull")
+            input.erd_column_not_null(type="text" readonly value="NULL" @click="columnChangeNull(table.id, column.id)" v-else)
 
             // 컬럼 comment
             input(type="text" placeholder="comment" v-model="column.comment")
 
             // 컬럼 삭제 버튼
-            button(class="btn" @click="deleteColumn(table.id, column.id)")
+            button(class="btn" @click="columnDelete(table.id, column.id)")
               font-awesome-icon(icon="times")
 </template>
 
 <script>
-import JSLog from '@/js/JSLog'
 import $ from 'jquery'
 import 'jquery-ui-bundle'
 import storeERD from '@/store/editor/erd'
 import draggable from 'vuedraggable'
-import { setZIndex, setDataTypeHint } from '@/js/editor/common'
+import * as util from '@/js/editor/util'
 
 export default {
   name: 'CanvasMain',
@@ -65,41 +64,37 @@ export default {
   },
   methods: {
     // 컬럼 추가
-    addColumn (id) {
-      JSLog('CanvasMain', 'addColumn', id)
+    columnAdd (id) {
       storeERD.commit({
-        type: 'addColumn',
+        type: 'columnAdd',
         id: id
       })
     },
     // 컬럼 삭제
-    deleteColumn (tableId, columnId) {
-      JSLog('CanvasMain', 'deleteColumn', tableId, columnId)
+    columnDelete (tableId, columnId) {
       storeERD.commit({
-        type: 'deleteColumn',
+        type: 'columnDelete',
         tableId: tableId,
         columnId: columnId
       })
     },
     // NULL 조건 변경
-    changeNull (tableId, columnId) {
+    columnChangeNull (tableId, columnId) {
       storeERD.commit({
-        type: 'changeNull',
+        type: 'columnChangeNull',
         tableId: tableId,
         columnId: columnId
       })
     },
     // 테이블 삭제
-    deleteTable (id) {
-      JSLog('CanvasMain', 'deleteTable', id)
+    tableDelete (id) {
       storeERD.commit({
-        type: 'deleteTable',
+        type: 'tableDelete',
         id: id
       })
     },
     // 테이블 선택
     tableSelected (id) {
-      JSLog('CanvasMain', 'tableSelected', id)
       storeERD.commit({
         type: 'tableSelected',
         id: id,
@@ -109,7 +104,6 @@ export default {
     },
     // 컬럼 선택
     columnSelected (tableId, columnId) {
-      JSLog('CanvasMain', 'columnSelected', tableId, columnId)
       storeERD.commit({
         type: 'columnSelected',
         tableId: tableId,
@@ -149,7 +143,7 @@ export default {
       } else if (e.keyCode === 13) {
         if (index !== -1) {
           storeERD.commit({
-            type: 'changeColumnDataType',
+            type: 'columnChangeDataType',
             tableId: tableId,
             columnId: columnId,
             dataType: $li.filter('.selected').text()
@@ -174,10 +168,9 @@ export default {
       }
     },
     // 데이터변경
-    changeColumnDataType (e, tableId, columnId, dataType) {
-      JSLog('changeColumnDataType', tableId, columnId, dataType)
+    columnChangeDataType (e, tableId, columnId, dataType) {
       storeERD.commit({
-        type: 'changeColumnDataType',
+        type: 'columnChangeDataType',
         tableId: tableId,
         columnId: columnId,
         dataType: dataType
@@ -207,9 +200,9 @@ export default {
           left: ui.offset.left
         })
       }
-    }).off('mousedown', setZIndex).mousedown(setZIndex)
+    }).off('mousedown', util.setZIndex).mousedown(util.setZIndex)
     // 데이터 타입 힌트 hide
-    $(document).off('mousedown', setDataTypeHint).on('mousedown', setDataTypeHint)
+    $(document).off('mousedown', util.setDataTypeHint).on('mousedown', util.setDataTypeHint)
   }
 }
 </script>
@@ -227,7 +220,7 @@ export default {
     height: 5000px;
 
     .erd_table {
-      width: 710px;
+      width: 630px;
       position: absolute;
       box-sizing: border-box;
       background-color: $table_background;

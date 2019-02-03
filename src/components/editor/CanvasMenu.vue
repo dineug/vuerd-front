@@ -3,12 +3,11 @@
     canvas#menu_canvas(@click="menu")
     select.dbType(@change="selectDB" v-if="menuCheck")
       option(v-for="DBType in DBTypes" :value="DBType") {{ DBType }}
-    button.addTable(class="btn btn-primary" @click="addTable" v-if="menuCheck")
+    button.tableAdd(class="btn btn-primary" @click="tableAdd" v-if="menuCheck")
       font-awesome-icon(icon="table")
 </template>
 
 <script>
-import JSLog from '@/js/JSLog'
 import storeERD from '@/store/editor/erd'
 import menu from '@/js/editor/THREE_menu'
 
@@ -22,13 +21,11 @@ export default {
   },
   methods: {
     // 테이블 추가
-    addTable () {
-      JSLog('CanvasMenu', 'addTable')
-      storeERD.commit({type: 'addTable'})
+    tableAdd () {
+      storeERD.commit({ type: 'tableAdd' })
     },
     // DB 선택
     selectDB (e) {
-      JSLog('CanvasMenu', 'selectDB')
       storeERD.commit({
         type: 'changeDB',
         DBType: e.target.value
@@ -62,7 +59,7 @@ export default {
       z-index: 2147483647;
       left: 110px;
     }
-    .addTable {
+    .tableAdd {
       position: fixed;
       z-index: 2147483647;
       top: 40px;

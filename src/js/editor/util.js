@@ -65,6 +65,61 @@ export const setDataTypeHint = function (e) {
   }
 }
 
+// 자동 이름 생성 column, table
+export const autoName = (list, name, num) => {
+  if (!num) num = 1
+  for (let v of list) {
+    if (name === v.name) {
+      return autoName(list, name + num, num + 1)
+    }
+  }
+  return name
+}
+
+// 테이블 pk 컬럼 리스트 반환
+export const getPKColumns = id => {
+  const table = getData(storeERD.state.tables, id)
+  const columns = []
+  for (let column of table.columns) {
+    if (column.options.primaryKey) {
+      columns.push(column)
+    }
+  }
+  return columns
+}
+
+// column 데이터 셋팅
+export const initColumn = (column, dColumn) => {
+  Object.keys(dColumn).forEach(key => {
+    if (typeof dColumn[key] === 'object') {
+      initColumn(column[key], dColumn[key])
+    } else {
+      column[key] = dColumn[key]
+    }
+  })
+}
+
+// column 선택 초기화
+export const columnSelectedNone = state => {
+  state.tables.forEach(table => {
+    table.columns.forEach(v => {
+      v.ui.selected = false
+    })
+  })
+}
+
+// PrimaryKey check
+export const tableIsPrimaryKey = columns => {
+  let isPK = false
+  for (let column of columns) {
+    if (column.options.primaryKey) {
+      isPK = true
+      break
+    }
+  }
+  return isPK
+}
+
 // line convert
 export const convertLine = v => {
   // start,end key 및 points data convert

@@ -1,6 +1,6 @@
-import $ from 'jquery'
 import JSLog from '../JSLog'
-import { getData } from './common'
+import $ from 'jquery'
+import * as util from './util'
 import storeERD from '@/store/editor/erd'
 
 /**
@@ -61,8 +61,6 @@ class Event {
 
   // 오른쪽 클릭 이벤트 실행
   onRightClick (e) {
-    JSLog('initialize', 'onRightClick')
-    JSLog('to', this.rightClickListener)
     this.rightClickListener.forEach(v => {
       if (typeof v.fn === 'function') v.fn(e)
     })
@@ -71,7 +69,7 @@ class Event {
   // 전역 커서 설정
   cursor (type) {
     if (type) {
-      $('body').css('cursor', `url("/static/images/erd/${type}.png") 16 16, auto`)
+      $('body').css('cursor', `url("/img/erd/${type}.png") 16 16, auto`)
       this.isCursor = true
       this.type = type
     } else {
@@ -99,18 +97,50 @@ class Event {
     $(document).off('mousemove', this.eventTarget)
     this.isDraw = false
     if (id) {
-      const table = getData(storeERD.state.tables, id)
+      const table = util.getData(storeERD.state.tables, id)
+
+      // fk 컬럼 생성
+      const startColumnIds = []
+      const endColumnIds = []
+      const line = util.getData(storeERD.state.lines, this.lineId)
+      const columns = util.getPKColumns(line.points[0].id)
+      columns.forEach(v => {
+        const columnId = util.guid()
+        startColumnIds.push(v.id)
+        endColumnIds.push(columnId)
+        storeERD.commit({
+          type: 'columnAdd',
+          id: id,
+          isInit: true,
+          column: {
+            id: columnId,
+            name: util.autoName(table.columns, v.name),
+            comment: v.comment,
+            dataType: v.dataType,
+            ui: {
+              key: {
+                fk: true
+              }
+            }
+          }
+        })
+      })
+
+      // line drawing
       storeERD.commit({
         type: 'lineDraw',
         id: this.lineId,
         x: table.ui.left,
         y: table.ui.top,
-        tableId: id
+        tableId: id,
+        startColumnIds: startColumnIds,
+        endColumnIds: endColumnIds
       })
+
       this.cursor()
     } else {
       storeERD.commit({
-        type: 'deleteLine',
+        type: 'lineDelete',
         id: this.lineId
       })
     }

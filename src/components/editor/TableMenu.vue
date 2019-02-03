@@ -12,7 +12,7 @@
 import $ from 'jquery'
 import ERD from '@/js/editor/ERD'
 import storeERD from '@/store/editor/erd'
-import { getZIndex } from '@/js/editor/common'
+import * as util from '@/js/editor/util'
 
 export default {
   name: 'TableMenu',
@@ -74,7 +74,7 @@ export default {
       $el.css({
         top: `${e.clientY}px`,
         left: `${e.clientX}px`,
-        'z-index': getZIndex('.erd_table')
+        'z-index': util.getZIndex('.erd_table')
       })
       $el.show()
     }.bind(this.$el))
