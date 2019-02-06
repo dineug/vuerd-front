@@ -6,7 +6,7 @@ import event from './Event'
  */
 class ERD {
   constructor () {
-    JSLog('Class ERD')
+    JSLog('module loaded', 'ERD')
 
     // 모듈 객체
     this.core = {
@@ -18,7 +18,7 @@ class ERD {
 
   // 종속성 초기화
   setInit (core) {
-    JSLog('Class ERD Init')
+    JSLog('module dependency init', 'ERD')
     Object.keys(core).forEach(function (v) {
       core[v].init(core)
     })

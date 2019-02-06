@@ -3,6 +3,8 @@ import * as util from '@/js/editor/util'
 import storeERD from './erd'
 import dataType from './dataType'
 
+JSLog('store loaded', 'mutationsColumn')
+
 export default {
   // 컬럼 추가
   add (state, data) {
@@ -24,11 +26,9 @@ export default {
           },
           ui: {
             selected: false,
-            key: {
-              pk: false,
-              fk: false,
-              pfk: false
-            },
+            pk: false,
+            fk: false,
+            pfk: false,
             isDataTypeHint: false,
             dataTypes: dataType[state.DBType]
           }
@@ -50,6 +50,40 @@ export default {
         table.columns.splice(i, 1)
         table.ui.height -= storeERD.state.COLUMN_HEIGHT
         break
+      }
+    }
+    // 관계처리
+    for (let line of state.lines) {
+      if (line.points[0].id === data.tableId || line.points[1].id === data.tableId) {
+        let endColumnId = ''
+        for (let i in line.points[0].columnIds) {
+          if (data.columnId === line.points[0].columnIds[i] || data.columnId === line.points[1].columnIds[i]) {
+            endColumnId = line.points[1].columnIds[i]
+            line.points[0].columnIds.splice(i, 1)
+            line.points[1].columnIds.splice(i, 1)
+            break
+          }
+        }
+        if (line.points[0].id === data.tableId) {
+          const endTable = util.getData(state.tables, line.points[1].id)
+          for (let column of endTable.columns) {
+            if (column.id === endColumnId) {
+              if (column.ui.pfk) {
+                column.ui.pk = true
+                column.ui.pfk = false
+              } else if (column.ui.fk) {
+                column.ui.fk = false
+              }
+              break
+            }
+          }
+        }
+        if (line.points[0].columnIds.length === 0 || line.points[1].columnIds.length === 0) {
+          this.commit({
+            type: 'lineDelete',
+            id: line.id
+          })
+        }
       }
     }
   },
@@ -75,16 +109,23 @@ export default {
       let check = false
       for (let column of table.columns) {
         if (column.ui.selected) {
-          if (column.ui.key.fk) {
-            column.ui.key.fk = false
-            column.ui.key.pfk = true
-          } else if (column.ui.key.pfk) {
-            column.ui.key.fk = true
-            column.ui.key.pfk = false
-          } else {
-            column.ui.key[data.key] = !column.ui.key[data.key]
+          if (data.key === 'pk') {
+            column.options.primaryKey = !column.options.primaryKey
+            if (column.options.primaryKey) {
+              column.options.notNull = true
+            }
           }
-          if (data.key === 'pk') column.options.primaryKey = !column.options.primaryKey
+          if (column.ui.fk) {
+            column.ui.fk = false
+            column.ui.pfk = true
+            util.changeIdentification(state, table)
+          } else if (column.ui.pfk) {
+            column.ui.fk = true
+            column.ui.pfk = false
+            util.changeIdentification(state, table)
+          } else {
+            column.ui[data.key] = !column.ui[data.key]
+          }
           check = true
           break
         }

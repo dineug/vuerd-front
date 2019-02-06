@@ -1,10 +1,13 @@
+import JSLog from '../JSLog'
 import $ from 'jquery'
 import storeERD from '@/store/editor/erd'
 import dataType from '@/store/editor/dataType'
 
+JSLog('module loaded', 'util')
+
 // UUID 생성
 export const guid = () => {
-  function s4 () {
+  const s4 = () => {
     return ((1 + Math.random()) * 0x10000 | 0).toString(16).substring(1)
   }
 
@@ -118,6 +121,30 @@ export const tableIsPrimaryKey = columns => {
     }
   }
   return isPK
+}
+
+// 관계 식별, 비식별 변경
+export const changeIdentification = (state, table) => {
+  for (let line of state.lines) {
+    if (line.points[1].id === table.id) {
+      let isPk = true
+      for (let columnId of line.points[1].columnIds) {
+        for (let column of table.columns) {
+          if (column.id === columnId) {
+            if (!column.options.primaryKey) isPk = false
+            break
+          }
+        }
+        if (!isPk) break
+      }
+      storeERD.commit({
+        type: 'lineChangeIdentification',
+        id: line.id,
+        isIdentification: isPk
+      })
+      break
+    }
+  }
 }
 
 // line convert

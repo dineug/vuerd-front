@@ -1,6 +1,8 @@
 import JSLog from '@/js/JSLog'
 import * as util from '@/js/editor/util'
 
+JSLog('store loaded', 'mutationsLine')
+
 export default {
   // line drawing
   draw (state, data) {
@@ -21,5 +23,11 @@ export default {
         break
       }
     }
+  },
+  // line 식별, 비식별 변경
+  changeIdentification (state, data) {
+    JSLog('mutations', 'line', 'changeIdentification')
+    const line = util.getData(state.lines, data.id)
+    line.isIdentification = data.isIdentification
   }
 }

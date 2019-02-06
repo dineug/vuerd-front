@@ -1,4 +1,7 @@
+import JSLog from '../JSLog'
 import * as THREE from 'three'
+
+JSLog('module loaded', 'THREE_menu')
 
 let camera, scene, renderer
 let geometry, material, mesh, light, light1

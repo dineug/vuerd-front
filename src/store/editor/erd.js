@@ -1,3 +1,4 @@
+import JSLog from '@/js/JSLog'
 import Vue from 'vue'
 import Vuex from 'vuex'
 import dataType from './dataType'
@@ -5,6 +6,7 @@ import table from './mutationsTable'
 import column from './mutationsColumn'
 import line from './mutationsLine'
 
+JSLog('store loaded', 'erd')
 Vue.use(Vuex)
 
 // ERD 데이터
@@ -55,9 +57,11 @@ export default new Vuex.Store({
     dataTypeHintVisibleAll: column.dataTypeHintVisibleAll,
     // 컬럼 데이터타입 검색
     changeDataTypeHint: column.changeDataTypeHint,
-    // line drawing
+    // 관계 drawing
     lineDraw: line.draw,
-    // line 삭제
-    lineDelete: line.delete
+    // 관계 삭제
+    lineDelete: line.delete,
+    // 관계 식별, 비식별 변경
+    lineChangeIdentification: line.changeIdentification
   }
 })

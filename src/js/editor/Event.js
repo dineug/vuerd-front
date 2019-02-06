@@ -8,7 +8,7 @@ import storeERD from '@/store/editor/erd'
  */
 class Event {
   constructor () {
-    JSLog('Class Event')
+    JSLog('module loaded', 'Event')
 
     this.core = null
     this.rightClickListener = []
@@ -23,7 +23,7 @@ class Event {
 
   // 종속성 초기화
   init (core) {
-    JSLog('Class Event init')
+    JSLog('module dependency init', 'Event')
     this.core = core
   }
 
@@ -117,10 +117,11 @@ class Event {
             name: util.autoName(table.columns, v.name),
             comment: v.comment,
             dataType: v.dataType,
+            options: {
+              notNull: true
+            },
             ui: {
-              key: {
-                fk: true
-              }
+              fk: true
             }
           }
         })

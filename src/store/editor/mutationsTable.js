@@ -3,6 +3,8 @@ import * as util from '@/js/editor/util'
 import storeERD from './erd'
 import ERD from '@/js/editor/ERD'
 
+JSLog('store loaded', 'mutationsTable')
+
 export default {
   // 테이블 추가
   add (state) {
@@ -30,16 +32,32 @@ export default {
         break
       }
     }
-    // line 삭제
+    // 관계처리
     for (let i = 0; i < state.lines.length; i++) {
-      let check = false
+      let isLine = false
       for (let j in state.lines[i].points) {
         if (data.id === state.lines[i].points[j].id) {
-          check = true
+          isLine = true
           break
         }
       }
-      if (check) {
+      if (isLine) {
+        if (data.id === state.lines[i].points[0].id) {
+          const endTable = util.getData(state.tables, state.lines[i].points[1].id)
+          for (let column of endTable.columns) {
+            for (let columnId of state.lines[i].points[1].columnIds) {
+              if (columnId === column.id) {
+                if (column.ui.pfk) {
+                  column.ui.pk = true
+                  column.ui.pfk = false
+                } else if (column.ui.fk) {
+                  column.ui.fk = false
+                }
+                break
+              }
+            }
+          }
+        }
         this.commit({
           type: 'lineDelete',
           id: state.lines[i].id
@@ -65,7 +83,7 @@ export default {
     if (data.onlyTableSelected) {
       util.columnSelectedNone(state)
     }
-    // line drawing 시작
+    // 관계 drawing 시작
     if (ERD.core.event.isCursor && !ERD.core.event.isDraw) {
       const table = util.getData(state.tables, data.id)
       // table pk 컬럼이 있는지 체크 없으면 자동생성
@@ -77,12 +95,11 @@ export default {
           column: {
             name: util.autoName(table.columns, 'column_name'),
             options: {
-              primaryKey: true
+              primaryKey: true,
+              notNull: true
             },
             ui: {
-              key: {
-                pk: true
-              }
+              pk: true
             }
           }
         })
@@ -109,7 +126,7 @@ export default {
       })
       ERD.core.event.startCursor(id)
 
-      // line drawing 종료
+      // 관계 drawing 종료
     } else if (ERD.core.event.isDraw) {
       ERD.core.event.endCursor(data.id)
     }
@@ -120,7 +137,7 @@ export default {
     const table = util.getData(state.tables, data.id)
     table.ui.top = data.top
     table.ui.left = data.left
-    // line 업데이트
+    // 관계 업데이트
     state.lines.forEach(line => {
       line.points.forEach(v => {
         if (v.id === data.id) {

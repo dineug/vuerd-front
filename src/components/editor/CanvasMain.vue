@@ -2,7 +2,7 @@
   transition-group#main_canvas(name="slide-fade" tag="div")
     // 테이블
     .erd_table(:class="{ selected: table.ui.selected}" v-for="table in tables" :key="table.id" @mousedown="tableSelected(table.id)" :table_id="table.id"
-    :style="`top: ${table.ui.top}px; left: ${table.ui.left}px;`")
+    :style="`width: ${TABLE_WIDTH}px; top: ${table.ui.top}px; left: ${table.ui.left}px;`")
 
       // 테이블 해더
       .erd_table_top
@@ -20,7 +20,7 @@
           .erd_column(v-for="column in table.columns" :key="column.id" :class="{ selected: column.ui.selected}" @mousedown="columnSelected(table.id, column.id)")
 
             // 컬럼 key
-            .erd_column_key(:class="{ pk: column.ui.key.pk, fk: column.ui.key.fk, pfk: column.ui.key.pfk }")
+            .erd_column_key(:class="{ pk: column.ui.pk, fk: column.ui.fk, pfk: column.ui.pfk }")
               font-awesome-icon(icon="key")
 
             // 컬럼 이름
@@ -59,6 +59,7 @@ export default {
   data () {
     return {
       tables: storeERD.state.tables,
+      TABLE_WIDTH: storeERD.state.TABLE_WIDTH,
       onlyTableSelected: true
     }
   },
@@ -220,7 +221,6 @@ export default {
     height: 5000px;
 
     .erd_table {
-      width: 630px;
       position: absolute;
       box-sizing: border-box;
       background-color: $table_background;

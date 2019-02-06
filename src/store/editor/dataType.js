@@ -1,3 +1,7 @@
+import JSLog from '@/js/JSLog'
+
+JSLog('store loaded', 'dataType')
+
 // mysql5.7 dataType
 const MySQL = {
   dataTypes: [
