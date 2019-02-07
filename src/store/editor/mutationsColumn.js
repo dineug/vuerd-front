@@ -61,6 +61,7 @@ export default {
             endColumnId = state.lines[i].points[1].columnIds[j]
             state.lines[i].points[0].columnIds.splice(j, 1)
             state.lines[i].points[1].columnIds.splice(j, 1)
+            util.changeIdentification(state, util.getData(state.tables, state.lines[i].points[1].id))
             break
           }
         }
