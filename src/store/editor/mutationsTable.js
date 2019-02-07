@@ -42,6 +42,7 @@ export default {
         }
       }
       if (isLine) {
+        // fk시 해제처리
         if (data.id === state.lines[i].points[0].id) {
           const endTable = util.getData(state.tables, state.lines[i].points[1].id)
           for (let column of endTable.columns) {
@@ -58,6 +59,7 @@ export default {
             }
           }
         }
+        // 관계 컬럼이 0개시 삭제
         this.commit({
           type: 'lineDelete',
           id: state.lines[i].id

@@ -62,6 +62,8 @@ export default new Vuex.Store({
     // 관계 삭제
     lineDelete: line.delete,
     // 관계 식별, 비식별 변경
-    lineChangeIdentification: line.changeIdentification
+    lineChangeIdentification: line.changeIdentification,
+    // 관계 컬럼 이동 유효성
+    lineValidColumn: line.validColumn
   }
 })

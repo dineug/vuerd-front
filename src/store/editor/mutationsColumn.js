@@ -53,19 +53,20 @@ export default {
       }
     }
     // 관계처리
-    for (let line of state.lines) {
-      if (line.points[0].id === data.tableId || line.points[1].id === data.tableId) {
-        let endColumnId = ''
-        for (let i in line.points[0].columnIds) {
-          if (data.columnId === line.points[0].columnIds[i] || data.columnId === line.points[1].columnIds[i]) {
-            endColumnId = line.points[1].columnIds[i]
-            line.points[0].columnIds.splice(i, 1)
-            line.points[1].columnIds.splice(i, 1)
+    for (let i = 0; i < state.lines.length; i++) {
+      if (state.lines[i].points[0].id === data.tableId || state.lines[i].points[1].id === data.tableId) {
+        let endColumnId = null
+        for (let j in state.lines[i].points[0].columnIds) {
+          if (data.columnId === state.lines[i].points[0].columnIds[j] || data.columnId === state.lines[i].points[1].columnIds[j]) {
+            endColumnId = state.lines[i].points[1].columnIds[j]
+            state.lines[i].points[0].columnIds.splice(j, 1)
+            state.lines[i].points[1].columnIds.splice(j, 1)
             break
           }
         }
-        if (line.points[0].id === data.tableId) {
-          const endTable = util.getData(state.tables, line.points[1].id)
+        // fk시 해제처리
+        if (state.lines[i].points[0].id === data.tableId) {
+          const endTable = util.getData(state.tables, state.lines[i].points[1].id)
           for (let column of endTable.columns) {
             if (column.id === endColumnId) {
               if (column.ui.pfk) {
@@ -78,11 +79,13 @@ export default {
             }
           }
         }
-        if (line.points[0].columnIds.length === 0 || line.points[1].columnIds.length === 0) {
+        // 관계 컬럼이 0개시 삭제
+        if (state.lines[i].points[0].columnIds.length === 0 || state.lines[i].points[1].columnIds.length === 0) {
           this.commit({
             type: 'lineDelete',
-            id: line.id
+            id: state.lines[i].id
           })
+          i--
         }
       }
     }

@@ -17,7 +17,7 @@
       draggable(v-model="table.columns" :options="{group:'table'}" @end="draggableEnd")
         transition-group(name="slide-fade" tag="div")
           // 컬럼
-          .erd_column(v-for="column in table.columns" :key="column.id" :class="{ selected: column.ui.selected}" @mousedown="columnSelected(table.id, column.id)")
+          .erd_column(v-for="column in table.columns" :key="column.id" :class="{ selected: column.ui.selected}" @mousedown="columnSelected(table.id, column.id)" :column_id="column.id")
 
             // 컬럼 key
             .erd_column_key(:class="{ pk: column.ui.pk, fk: column.ui.fk, pfk: column.ui.pfk }")
@@ -184,15 +184,20 @@ export default {
       $(e.target).addClass('selected')
     },
     // draggableEnd event
-    draggableEnd () {
+    draggableEnd (e) {
       storeERD.commit({
         type: 'tableHeightReset'
+      })
+      storeERD.commit({
+        type: 'lineValidColumn',
+        id: $(e.item).attr('column_id')
       })
     }
   },
   updated () {
     // table 이동 이벤트
     $('.erd_table').draggable({
+      handle: '.erd_table_top',
       drag (e, ui) {
         storeERD.commit({
           type: 'tableTracker',
@@ -225,12 +230,12 @@ export default {
       box-sizing: border-box;
       background-color: $table_background;
       opacity: 0.9;
-      cursor: move;
       padding: 10px;
       z-index: 1;
 
       .erd_table_top {
         height: 15px;
+        cursor: move;
       }
 
       .erd_table_header {
