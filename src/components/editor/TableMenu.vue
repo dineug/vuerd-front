@@ -1,5 +1,5 @@
 <template lang="pug">
-  ul#menu_table
+  ul#menu_table(v-if="isShow" :style="`top: ${top}px; left: ${left}px; z-index: ${zIndex};`")
     li(v-for="menu in menus" :key="menu.id" @click="menuAction(menu.type)")
       span
         img(:src="menu.icon" v-if="menu.icon !== ''")
@@ -9,7 +9,6 @@
 </template>
 
 <script>
-import $ from 'jquery'
 import ERD from '@/js/editor/ERD'
 import storeERD from '@/store/editor/erd'
 import * as util from '@/js/editor/util'
@@ -18,6 +17,10 @@ export default {
   name: 'TableMenu',
   data () {
     return {
+      top: 0,
+      left: 0,
+      zIndex: 0,
+      isShow: false,
       menus: [
         {
           type: 'pk',
@@ -64,14 +67,13 @@ export default {
   mounted () {
     // 오른쪽 클릭 이벤트 등록
     ERD.core.event.addRightClick(function (e) {
-      const $el = $(this)
-      $el.css({
-        top: `${e.clientY}px`,
-        left: `${e.clientX}px`,
-        'z-index': util.getZIndex()
-      })
-      $el.show()
-    }.bind(this.$el))
+      this.top = e.clientY
+      this.left = e.clientX
+      this.zIndex = util.getZIndex()
+      this.isShow = true
+    }.bind(this))
+    // 이벤트 핸들러에 컴포넌트 등록
+    ERD.core.event.components.TableMenu = this
   }
 }
 </script>
@@ -83,7 +85,6 @@ export default {
     background-color: $mbg;
     position: fixed;
     opacity: 0.9;
-    display: none;
 
     li {
       width: 100%;

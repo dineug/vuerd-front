@@ -49,7 +49,6 @@ import $ from 'jquery'
 import 'jquery-ui-bundle'
 import storeERD from '@/store/editor/erd'
 import draggable from 'vuedraggable'
-import * as util from '@/js/editor/util'
 
 export default {
   name: 'CanvasMain',

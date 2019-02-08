@@ -16,6 +16,9 @@ class Event {
     this.isDraw = false
     this.lineId = null
     this.cursor = null
+    this.components = {
+      TableMenu: null
+    }
 
     this.setEvent()
   }
@@ -54,7 +57,7 @@ class Event {
       JSLog('event', 'mousedown')
       // 테이블 메뉴 hide
       if (!$(e.target).closest('#menu_table').length) {
-        $('#menu_table').hide()
+        this.components.TableMenu.isShow = false
       }
       // 데이터 타입 힌트 hide
       if (!$(e.target).closest('.erd_data_type_list').length) {
@@ -63,6 +66,10 @@ class Event {
           isDataTypeHint: false
         })
       }
+    }.bind(this)).on('mouseup', function (e) {
+      // 마우스 업 이벤트
+      JSLog('event', 'mouseup')
+
     }.bind(this))
   }
 
