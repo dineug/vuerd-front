@@ -1,5 +1,5 @@
 <template lang="pug">
-  ul.menuTable
+  ul#menu_table
     li(v-for="menu in menus" :key="menu.id" @click="menuAction(menu.type)")
       span
         img(:src="menu.icon" v-if="menu.icon !== ''")
@@ -51,17 +51,11 @@ export default {
           })
           break
         case 'erd-0-1-N':
-          if (ERD.core.event.isCursor) {
-            ERD.core.event.cursor()
-          } else {
-            ERD.core.event.cursor(type)
-          }
-          break
         case 'erd-0-1':
           if (ERD.core.event.isCursor) {
-            ERD.core.event.cursor()
+            ERD.core.event.onCursor('stop')
           } else {
-            ERD.core.event.cursor(type)
+            ERD.core.event.onCursor('start', type)
           }
           break
       }
@@ -74,25 +68,9 @@ export default {
       $el.css({
         top: `${e.clientY}px`,
         left: `${e.clientX}px`,
-        'z-index': util.getZIndex('.erd_table')
+        'z-index': util.getZIndex()
       })
       $el.show()
-    }.bind(this.$el))
-    // 메뉴 hide
-    $(document).on('mousedown', function (e) {
-      const $el = $(this)
-      let offset = $el.offset()
-      offset.top -= document.documentElement.scrollTop
-      offset.left -= document.documentElement.scrollLeft
-      offset.width = $el.width()
-      offset.height = $el.height()
-
-      if (!(offset.top <= e.clientY &&
-        e.clientY <= offset.top + offset.height &&
-        offset.left <= e.clientX &&
-        e.clientX <= offset.left + offset.width)) {
-        $el.hide()
-      }
     }.bind(this.$el))
   }
 }
@@ -100,7 +78,7 @@ export default {
 
 <style lang="scss" scoped>
   $mbg: #191919;
-  .menuTable {
+  #menu_table {
     color: #a2a2a2;
     background-color: $mbg;
     position: fixed;

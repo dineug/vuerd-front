@@ -1,5 +1,4 @@
 import JSLog from '../JSLog'
-import $ from 'jquery'
 import storeERD from '@/store/editor/erd'
 import dataType from '@/store/editor/dataType'
 
@@ -42,30 +41,14 @@ export const getDataTypeSearch = key => {
 }
 
 // max z-index 반환
-export const getZIndex = el => {
+export const getZIndex = () => {
   let max = 0
-  $(el).each(function () {
-    const zIndex = Number($(this).css('z-index'))
-    if (max < zIndex) {
-      max = zIndex
+  storeERD.state.tables.forEach(v => {
+    if (v.ui.zIndex > max) {
+      max = v.ui.zIndex
     }
   })
   return ++max
-}
-
-// z-index 콜백 함수
-export const setZIndex = function () {
-  $(this).css('z-index', getZIndex('.erd_table'))
-}
-
-// dataTypeHint show/hide 콜백 함수
-export const setDataTypeHint = function (e) {
-  if (!$(e.target).closest('.erd_data_type_list').length) {
-    storeERD.commit({
-      type: 'dataTypeHintVisibleAll',
-      isDataTypeHint: false
-    })
-  }
 }
 
 // 자동 이름 생성 column, table

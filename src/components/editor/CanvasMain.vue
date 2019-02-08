@@ -2,7 +2,7 @@
   transition-group#main_canvas(name="slide-fade" tag="div")
     // 테이블
     .erd_table(:class="{ selected: table.ui.selected}" v-for="table in tables" :key="table.id" @mousedown="tableSelected(table.id)" :table_id="table.id"
-    :style="`width: ${TABLE_WIDTH}px; top: ${table.ui.top}px; left: ${table.ui.left}px;`")
+    :style="`width: ${TABLE_WIDTH}px; top: ${table.ui.top}px; left: ${table.ui.left}px; z-index: ${table.ui.zIndex};`")
 
       // 테이블 해더
       .erd_table_top
@@ -206,9 +206,7 @@ export default {
           left: ui.offset.left
         })
       }
-    }).off('mousedown', util.setZIndex).mousedown(util.setZIndex)
-    // 데이터 타입 힌트 hide
-    $(document).off('mousedown', util.setDataTypeHint).on('mousedown', util.setDataTypeHint)
+    })
   }
 }
 </script>
@@ -217,9 +215,9 @@ export default {
   $table_background: #191919;
   $table_selected: #14496d;
   /* column key color */
-  $key_pk: #666600;
-  $key_fk: #ff6680;
-  $key_pfk: #003366;
+  $key_pk: #B4B400;
+  $key_fk: #dda8b1;
+  $key_pfk: #60b9c4;
 
   #main_canvas {
     width: 5000px;

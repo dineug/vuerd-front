@@ -9,7 +9,7 @@ export default {
   // 테이블 추가
   add (state) {
     JSLog('mutations', 'table', 'add')
-    state.tables.push({
+    const newTable = {
       id: util.guid(),
       name: '',
       comment: '',
@@ -19,9 +19,23 @@ export default {
         top: document.documentElement.scrollTop + 100,
         left: document.documentElement.scrollLeft + 200,
         width: storeERD.state.TABLE_WIDTH,
-        height: storeERD.state.TABLE_HEIGHT
+        height: storeERD.state.TABLE_HEIGHT,
+        zIndex: util.getZIndex()
       }
-    })
+    }
+    let isPosition = true
+    while (isPosition) {
+      isPosition = false
+      for (let table of state.tables) {
+        if (table.ui.top === newTable.ui.top && table.ui.left === newTable.ui.left) {
+          isPosition = true
+          newTable.ui.top += 50
+          newTable.ui.left += 50
+          break
+        }
+      }
+    }
+    state.tables.push(newTable)
   },
   // 테이블 삭제
   delete (state, data) {
@@ -80,6 +94,12 @@ export default {
   // 테이블 선택
   selected (state, data) {
     JSLog('mutations', 'table', 'selected')
+    const table = util.getData(state.tables, data.id)
+    // z-index 처리
+    const zIndex = util.getZIndex()
+    if (table.ui.zIndex !== zIndex - 1) {
+      table.ui.zIndex = zIndex
+    }
     state.tables.forEach(v => {
       v.ui.selected = data.id === v.id
     })
@@ -89,7 +109,6 @@ export default {
     }
     // 관계 drawing 시작
     if (ERD.core.event.isCursor && !ERD.core.event.isDraw) {
-      const table = util.getData(state.tables, data.id)
       // table pk 컬럼이 있는지 체크 없으면 자동생성
       if (!util.tableIsPrimaryKey(table.columns)) {
         this.commit({
@@ -111,7 +130,7 @@ export default {
       const id = util.guid()
       state.lines.push({
         id: id,
-        type: ERD.core.event.type,
+        type: ERD.core.event.cursor,
         isIdentification: false,
         points: [
           {
@@ -128,11 +147,11 @@ export default {
           }
         ]
       })
-      ERD.core.event.startCursor(id)
+      ERD.core.event.onDraw('start', id)
 
       // 관계 drawing 종료
     } else if (ERD.core.event.isDraw) {
-      ERD.core.event.endCursor(data.id)
+      ERD.core.event.onDraw('stop', data.id)
     }
   },
   // 테이블 top, left 변경
