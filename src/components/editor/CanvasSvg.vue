@@ -1,6 +1,6 @@
 <template lang="pug">
   svg#svg_canvas
-    g(v-for="data in toLines" :key="data.id")
+    g(v-for="data in toLines" :key="data.id" @mouseover="hover($event, data.id)" @mouseleave="hoverOff(data.id)")
       // start draw
       line(:x1="data.path.line.start.x1" :y1="data.path.line.start.y1" :x2="data.path.line.start.x2" :y2="data.path.line.start.y2" :stroke="data.isIdentification ? '#60b9c4' : '#dda8b1'" stroke-width="3")
       path(:d="data.path.d()" :stroke="data.isIdentification ? '#60b9c4' : '#dda8b1'" :stroke-dasharray="data.isIdentification ? 0 : 10" stroke-width="3" fill="transparent")
@@ -15,7 +15,6 @@
 </template>
 
 <script>
-import JSLog from '@/js/JSLog'
 import $ from 'jquery'
 import storeERD from '@/store/editor/erd'
 import * as util from '@/js/editor/util'
@@ -51,10 +50,36 @@ export default {
       return convertLines
     }
   },
-  updated () {
-    $('g').off('click').click(e => {
-      JSLog('g', 'click')
-    })
+  methods: {
+    hover (e, id) {
+      const $g = $(e.target).parent('g')
+      $g.addClass('relation_active')
+      $g.find('line').addClass('relation_active')
+      $g.find('path').addClass('relation_active')
+      $g.find('circle').addClass('relation_active')
+      storeERD.commit({
+        type: 'lineHover',
+        id: id,
+        isHover: true
+      })
+    },
+    hoverOff (id) {
+      $(this.$el).find('g').each(function () {
+        const isClass = $(this).hasClass('relation_active')
+        if (isClass) {
+          $(this).removeClass('relation_active')
+          $(this).find('line').removeClass('relation_active')
+          $(this).find('path').removeClass('relation_active')
+          $(this).find('circle').removeClass('relation_active')
+          return false
+        }
+      })
+      storeERD.commit({
+        type: 'lineHover',
+        id: id,
+        isHover: false
+      })
+    }
   }
 }
 </script>
@@ -64,5 +89,9 @@ export default {
     width: 5000px;
     height: 5000px;
     position: absolute;
+
+    .relation_active {
+      stroke: #ffc107;
+    }
   }
 </style>

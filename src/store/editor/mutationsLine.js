@@ -1,5 +1,6 @@
 import JSLog from '@/js/JSLog'
 import * as util from '@/js/editor/util'
+import ERD from '@/js/editor/ERD'
 
 JSLog('store loaded', 'mutationsLine')
 
@@ -97,6 +98,32 @@ export default {
           column.ui.pfk = false
         } else if (column.ui.fk) {
           column.ui.fk = false
+        }
+      }
+    }
+  },
+  // 관계 컬럼 hover 처리
+  hover (state, data) {
+    JSLog('mutations', 'line', 'hover')
+    if (!ERD.core.event.isDraw) {
+      const line = util.getData(state.lines, data.id)
+      const startTable = util.getData(state.tables, line.points[0].id)
+      const endTable = util.getData(state.tables, line.points[1].id)
+      for (let columnId of line.points[0].columnIds) {
+        for (let column of startTable.columns) {
+          if (column.id === columnId) {
+            column.ui.isHover = data.isHover
+            break
+          }
+        }
+      }
+
+      for (let columnId of line.points[1].columnIds) {
+        for (let column of endTable.columns) {
+          if (column.id === columnId) {
+            column.ui.isHover = data.isHover
+            break
+          }
         }
       }
     }

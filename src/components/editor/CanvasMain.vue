@@ -17,7 +17,7 @@
       draggable(v-model="table.columns" :options="{group:'table'}" @end="draggableEnd")
         transition-group(name="slide-fade" tag="div")
           // 컬럼
-          .erd_column(v-for="column in table.columns" :key="column.id" :class="{ selected: column.ui.selected}" @mousedown="columnSelected(table.id, column.id)" :column_id="column.id")
+          .erd_column(v-for="column in table.columns" :key="column.id" :class="{ selected: column.ui.selected, relation_active: column.ui.isHover}" @mousedown="columnSelected(table.id, column.id)" :column_id="column.id")
 
             // 컬럼 key
             .erd_column_key(:class="{ pk: column.ui.pk, fk: column.ui.fk, pfk: column.ui.pfk }")
@@ -320,6 +320,11 @@ export default {
         /* 컬럼 선택시 */
         &.selected {
           border: solid #383d41 1px;
+        }
+
+        /* 컬럼 관계 */
+        &.relation_active {
+          border: solid #ffc107 1px;
         }
       }
 

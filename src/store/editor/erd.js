@@ -64,6 +64,8 @@ export default new Vuex.Store({
     // 관계 식별, 비식별 변경
     lineChangeIdentification: line.changeIdentification,
     // 관계 컬럼 이동 유효성
-    lineValidColumn: line.validColumn
+    lineValidColumn: line.validColumn,
+    // 관계 컬럼 hover 처리
+    lineHover: line.hover
   }
 })

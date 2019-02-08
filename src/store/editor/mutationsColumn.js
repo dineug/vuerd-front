@@ -30,7 +30,8 @@ export default {
             fk: false,
             pfk: false,
             isDataTypeHint: false,
-            dataTypes: dataType[state.DBType]
+            dataTypes: dataType[state.DBType],
+            isHover: false
           }
         }
         if (data.isInit) {
