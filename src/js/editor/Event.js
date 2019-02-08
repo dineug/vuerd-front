@@ -52,7 +52,7 @@ class Event {
       this.core.event.onRightClick(e)
     }).on('mousemove', e => {
       // 마우스 이동 이벤트
-      if (this.move.x === 0 && this.move.y) {
+      if (this.move.x === 0 && this.move.y === 0) {
         this.move.x = e.clientX + document.documentElement.scrollLeft
         this.move.y = e.clientY + document.documentElement.scrollTop
       }
