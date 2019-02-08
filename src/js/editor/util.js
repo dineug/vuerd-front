@@ -142,7 +142,6 @@ export const changeIdentification = (state, table) => {
         id: line.id,
         isIdentification: isPk
       })
-      break
     }
   }
 }

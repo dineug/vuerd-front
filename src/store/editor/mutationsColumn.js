@@ -131,7 +131,6 @@ export default {
             column.ui[data.key] = !column.ui[data.key]
           }
           check = true
-          break
         }
       }
       if (check) {
