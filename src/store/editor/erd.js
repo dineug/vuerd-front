@@ -17,7 +17,7 @@ export default new Vuex.Store({
     lines: [],
     TABLE_WIDTH: 630,
     TABLE_HEIGHT: 88,
-    COLUMN_HEIGHT: 25
+    COLUMN_HEIGHT: 26.5
   },
   mutations: {
     // DB 변경

@@ -160,6 +160,7 @@ export const convertLine = v => {
     id: v.id,
     type: v.type,
     isIdentification: v.isIdentification,
+    key: key,
     path: path,
     line: line.line,
     circle: line.circle,
@@ -170,6 +171,10 @@ export const convertLine = v => {
 // 좌표 데이터 정제
 function getPoint (ui) {
   return {
+    width: ui.width,
+    height: ui.height,
+    x: ui.left,
+    y: ui.top,
     top: {
       x: ui.left + (ui.width / 2),
       y: ui.top
@@ -209,11 +214,13 @@ function getPoint (ui) {
 function convertPoints (v) {
   const startTable = getData(storeERD.state.tables, v.points[0].id)
   const endTable = getData(storeERD.state.tables, v.points[1].id)
+  const startPoint = getPoint(startTable.ui)
   const key = {
     start: 'left',
-    end: null
+    end: null,
+    startPoint: startPoint,
+    endPoint: null
   }
-  const startPoint = getPoint(startTable.ui)
 
   const filter = it => {
     return it === 'left' || it === 'right' || it === 'top' || it === 'bottom'
@@ -222,7 +229,7 @@ function convertPoints (v) {
   // 연결좌표 처리
   if (endTable && v.points[0].id === v.points[1].id) {
     // self
-    const endPoint = getPoint(endTable.ui)
+    const endPoint = key.endPoint = getPoint(endTable.ui)
     key.start = 'top'
     key.end = 'right'
     v.points[0].x = startPoint.rt.x - 20
@@ -230,7 +237,7 @@ function convertPoints (v) {
     v.points[1].x = endPoint.rt.x
     v.points[1].y = endPoint.rt.y + 20
   } else if (endTable) {
-    const endPoint = getPoint(endTable.ui)
+    const endPoint = key.endPoint = getPoint(endTable.ui)
     let minXY = Math.abs(startPoint.left.x - endPoint.left.x) + Math.abs(startPoint.left.y - endPoint.left.y)
     v.points[0].x = startPoint.left.x
     v.points[0].y = startPoint.left.y
@@ -290,25 +297,23 @@ function getPath (v, key) {
       y2: v.points[1].y
     }
   }
-  const path = []
+  const path = {
+    M: { x: 0, y: 0 },
+    L: { x: 0, y: 0 },
+    Q: { x: 0, y: 0 }
+  }
   let change = 1
 
   if (key.start === 'left' || key.start === 'right') {
     if (key.start === 'left') change *= -1
     line.start.x2 = v.points[0].x + (change * PATH_HEIGHT)
-    path.push(`M${line.start.x2} ${v.points[0].y}`)
+    path.M.x = line.start.x2
+    path.M.y = v.points[0].y
   } else if (key.start === 'top' || key.start === 'bottom') {
     if (key.start === 'top') change *= -1
     line.start.y2 = v.points[0].y + (change * PATH_HEIGHT)
-    path.push(`M${v.points[0].x} ${line.start.y2}`)
-  }
-
-  if (v.points[0].id === v.points[1].id) {
-    path.push(`Q ${v.points[0].x + PATH_END_HEIGHT} ${v.points[0].y - PATH_HEIGHT}`)
-  } else if (key.start === 'left' || key.start === 'right') {
-    path.push(`Q ${(v.points[0].x + v.points[1].x) / 2} ${v.points[0].y}`)
-  } else {
-    path.push(`Q ${v.points[0].x} ${(v.points[0].y + v.points[1].y) / 2}`)
+    path.M.x = v.points[0].x
+    path.M.y = line.start.y2
   }
 
   if (key.end) {
@@ -317,19 +322,25 @@ function getPath (v, key) {
       if (key.end === 'left') change *= -1
       line.end.x2 = v.points[1].x + (change * PATH_END_HEIGHT)
       line.end.x1 += (change * PATH_LINE_HEIGHT)
-      path.push(`${line.end.x2} ${v.points[1].y}`)
+      path.L.x = line.end.x2
+      path.L.y = v.points[1].y
     } else if (key.end === 'top' || key.end === 'bottom') {
       if (key.end === 'top') change *= -1
       line.end.y2 = v.points[1].y + (change * PATH_END_HEIGHT)
       line.end.y1 += (change * PATH_LINE_HEIGHT)
-      path.push(`${v.points[1].x} ${line.end.y2}`)
+      path.L.x = v.points[1].x
+      path.L.y = line.end.y2
     }
   } else {
-    path.push(`${v.points[1].x} ${v.points[1].y}`)
+    path.L.x = v.points[1].x
+    path.L.y = v.points[1].y
   }
 
   return {
-    path: path.join(' '),
+    path: path,
+    d: () => {
+      return `M ${path.M.x} ${path.M.y} L ${path.L.x} ${path.L.y}`
+    },
     line: line
   }
 }
@@ -419,5 +430,101 @@ function getLine (v, key) {
   return {
     line: line,
     circle: circle
+  }
+}
+
+// 위치 중첩 재가공
+export const convertPointOverlay = arr => {
+  const count = arr.length
+  const point = pointOverlay(arr[0], count)
+
+  for (let i in arr) {
+    if (arr[i].type === 'start') {
+      let key = 'x'
+      if (arr[i].data.key.start === 'left' || arr[i].data.key.start === 'right') {
+        key = 'y'
+      }
+      const key1 = key + '1'
+      const key2 = key + '2'
+      const keyArr = key + 'Arr'
+
+      arr[i].data.path.line.start[key1] = point[keyArr][i]
+      arr[i].data.path.line.start[key2] = point[keyArr][i]
+      arr[i].data.line.start[key1] = point[keyArr][i] - LINE_SIZE
+      arr[i].data.line.start[key2] = point[keyArr][i] + LINE_SIZE
+      arr[i].data.path.path.M[key] = point[keyArr][i]
+    } else if (arr[i].type === 'end') {
+      let key = 'x'
+      if (arr[i].data.key.end === 'left' || arr[i].data.key.end === 'right') {
+        key = 'y'
+      }
+      const key1 = key + '1'
+      const key2 = key + '2'
+      const keyArr = key + 'Arr'
+      const keyc = 'c' + key
+
+      arr[i].data.path.line.end[key1] = point[keyArr][i]
+      arr[i].data.path.line.end[key2] = point[keyArr][i]
+      arr[i].data.circle[keyc] = point[keyArr][i]
+      arr[i].data.line.end.base[key1] = point[keyArr][i] - LINE_SIZE
+      arr[i].data.line.end.base[key2] = point[keyArr][i] + LINE_SIZE
+      arr[i].data.line.end.left[key1] = point[keyArr][i]
+      arr[i].data.line.end.left[key2] = point[keyArr][i] + LINE_SIZE
+      arr[i].data.line.end.center[key1] = point[keyArr][i]
+      arr[i].data.line.end.center[key2] = point[keyArr][i]
+      arr[i].data.line.end.right[key1] = point[keyArr][i]
+      arr[i].data.line.end.right[key2] = point[keyArr][i] - LINE_SIZE
+      arr[i].data.path.path.L[key] = point[keyArr][i]
+    }
+  }
+}
+
+function pointOverlay (v, count) {
+  const point = v.type === 'start' ? v.data.key.startPoint : v.data.key.endPoint
+  const margin = {
+    x: point.width / count,
+    y: point.height / count
+  }
+  const padding = {
+    x: margin.x / 2,
+    y: margin.y / 2
+  }
+
+  const xArr = []
+  const yArr = []
+
+  if (v.type === 'start') {
+    if (v.data.key.start === 'left' || v.data.key.start === 'right') {
+      let sum = point.y - padding.y
+      for (let i = 0; i < count; i++) {
+        sum += margin.y
+        yArr.push(sum)
+      }
+    } else if (v.data.key.start === 'top' || v.data.key.start === 'bottom') {
+      let sum = point.x - padding.x
+      for (let i = 0; i < count; i++) {
+        sum += margin.x
+        xArr.push(sum)
+      }
+    }
+  } else if (v.type === 'end') {
+    if (v.data.key.end === 'left' || v.data.key.end === 'right') {
+      let sum = point.y - padding.y
+      for (let i = 0; i < count; i++) {
+        sum += margin.y
+        yArr.push(sum)
+      }
+    } else if (v.data.key.end === 'top' || v.data.key.end === 'bottom') {
+      let sum = point.x - padding.x
+      for (let i = 0; i < count; i++) {
+        sum += margin.x
+        xArr.push(sum)
+      }
+    }
+  }
+
+  return {
+    xArr: xArr,
+    yArr: yArr
   }
 }

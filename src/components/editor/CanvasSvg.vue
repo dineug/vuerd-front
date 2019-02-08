@@ -3,7 +3,7 @@
     g(v-for="data in toLines" :key="data.id")
       // start draw
       line(:x1="data.path.line.start.x1" :y1="data.path.line.start.y1" :x2="data.path.line.start.x2" :y2="data.path.line.start.y2" :stroke="data.isIdentification ? '#60b9c4' : '#dda8b1'" stroke-width="3")
-      path(:d="data.path.path" :stroke="data.isIdentification ? '#60b9c4' : '#dda8b1'" :stroke-dasharray="data.isIdentification ? 0 : 10" stroke-width="3" fill="transparent")
+      path(:d="data.path.d()" :stroke="data.isIdentification ? '#60b9c4' : '#dda8b1'" :stroke-dasharray="data.isIdentification ? 0 : 10" stroke-width="3" fill="transparent")
       line(:x1="data.line.start.x1" :y1="data.line.start.y1" :x2="data.line.start.x2" :y2="data.line.start.y2" :stroke="data.isIdentification ? '#60b9c4' : '#dda8b1'" stroke-width="3")
       // end draw
       line(v-if="data.isDraw" :x1="data.path.line.end.x1" :y1="data.path.line.end.y1" :x2="data.path.line.end.x2" :y2="data.path.line.end.y2" :stroke="data.isIdentification ? '#60b9c4' : '#dda8b1'" stroke-width="3")
@@ -15,6 +15,8 @@
 </template>
 
 <script>
+import JSLog from '@/js/JSLog'
+import $ from 'jquery'
 import storeERD from '@/store/editor/erd'
 import * as util from '@/js/editor/util'
 
@@ -27,13 +29,32 @@ export default {
   },
   computed: {
     toLines () {
-      const data = []
+      const convertLines = []
       this.lines.forEach(v => {
-        data.push(util.convertLine(v))
+        convertLines.push(util.convertLine(v))
       })
-      // 중첩 path 재가공 필요
-      return data
+      // 위치 중첩 재가공
+      const target = {}
+      convertLines.forEach(v => {
+        let key = v.path.line.start.x1 + '' + v.path.line.start.y1
+        if (target[key]) target[key].push({ type: 'start', data: v })
+        else target[key] = [{ type: 'start', data: v }]
+        key = v.line.end.center.x2 + '' + v.line.end.center.y2
+        if (target[key]) target[key].push({ type: 'end', data: v })
+        else target[key] = [{ type: 'end', data: v }]
+      })
+      Object.keys(target).forEach(key => {
+        if (target[key].length > 1) {
+          util.convertPointOverlay(target[key])
+        }
+      })
+      return convertLines
     }
+  },
+  updated () {
+    $('g').off('click').click(e => {
+      JSLog('g', 'click')
+    })
   }
 }
 </script>

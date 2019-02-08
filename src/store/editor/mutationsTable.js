@@ -45,16 +45,18 @@ export default {
         // fk시 해제처리
         if (data.id === state.lines[i].points[0].id) {
           const endTable = util.getData(state.tables, state.lines[i].points[1].id)
-          for (let column of endTable.columns) {
-            for (let columnId of state.lines[i].points[1].columnIds) {
-              if (columnId === column.id) {
-                if (column.ui.pfk) {
-                  column.ui.pk = true
-                  column.ui.pfk = false
-                } else if (column.ui.fk) {
-                  column.ui.fk = false
+          if (endTable) {
+            for (let column of endTable.columns) {
+              for (let columnId of state.lines[i].points[1].columnIds) {
+                if (columnId === column.id) {
+                  if (column.ui.pfk) {
+                    column.ui.pk = true
+                    column.ui.pfk = false
+                  } else if (column.ui.fk) {
+                    column.ui.fk = false
+                  }
+                  break
                 }
-                break
               }
             }
           }

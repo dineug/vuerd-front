@@ -197,7 +197,7 @@ export default {
   updated () {
     // table 이동 이벤트
     $('.erd_table').draggable({
-      handle: '.erd_table_top',
+      // handle: '.erd_table_top',
       drag (e, ui) {
         storeERD.commit({
           type: 'tableTracker',
@@ -232,10 +232,11 @@ export default {
       opacity: 0.9;
       padding: 10px;
       z-index: 1;
+      cursor: move;
 
       .erd_table_top {
         height: 15px;
-        cursor: move;
+        /*cursor: move;*/
       }
 
       .erd_table_header {
