@@ -38,7 +38,7 @@ export default new Vuex.Store({
     // 테이블 선택
     tableSelected: table.selected,
     // 테이블 top, left 변경
-    tableTracker: table.tracker,
+    tableDraggable: table.draggable,
     // 컬럼 추가
     columnAdd: column.add,
     // 컬럼 삭제

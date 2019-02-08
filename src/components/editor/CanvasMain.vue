@@ -46,7 +46,6 @@
 
 <script>
 import $ from 'jquery'
-import 'jquery-ui-bundle'
 import storeERD from '@/store/editor/erd'
 import draggable from 'vuedraggable'
 
@@ -189,23 +188,9 @@ export default {
       })
       storeERD.commit({
         type: 'lineValidColumn',
-        id: $(e.item).attr('column_id')
+        id: e.item.getAttribute('column_id')
       })
     }
-  },
-  updated () {
-    // table 이동 이벤트
-    $('.erd_table').draggable({
-      // handle: '.erd_table_top',
-      drag (e, ui) {
-        storeERD.commit({
-          type: 'tableTracker',
-          id: $(this).attr('table_id'),
-          top: ui.offset.top,
-          left: ui.offset.left
-        })
-      }
-    })
   }
 }
 </script>
@@ -233,7 +218,6 @@ export default {
 
       .erd_table_top {
         height: 15px;
-        /*cursor: move;*/
       }
 
       .erd_table_header {

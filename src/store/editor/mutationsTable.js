@@ -106,6 +106,8 @@ export default {
     // column 선택 제거
     if (data.onlyTableSelected) {
       util.columnSelectedNone(state)
+      ERD.core.event.isTableMove = true
+      ERD.core.event.onDraggable('start', data.id)
     }
     // 관계 drawing 시작
     if (ERD.core.event.isCursor && !ERD.core.event.isDraw) {
@@ -155,17 +157,17 @@ export default {
     }
   },
   // 테이블 top, left 변경
-  tracker (state, data) {
-    JSLog('mutations', 'table', 'tracker')
+  draggable (state, data) {
+    JSLog('mutations', 'table', 'draggable')
     const table = util.getData(state.tables, data.id)
-    table.ui.top = data.top
-    table.ui.left = data.left
+    table.ui.top += data.y
+    table.ui.left += data.x
     // 관계 업데이트
     state.lines.forEach(line => {
       line.points.forEach(v => {
         if (v.id === data.id) {
-          v.x = data.left
-          v.y = data.top
+          v.x = table.ui.left
+          v.y = table.ui.top
         }
       })
     })

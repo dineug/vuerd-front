@@ -12,12 +12,20 @@ class Event {
 
     this.core = null
     this.rightClickListener = []
+    this.components = {
+      TableMenu: null
+    }
+
     this.isCursor = false
     this.isDraw = false
     this.lineId = null
     this.cursor = null
-    this.components = {
-      TableMenu: null
+
+    this.isDrag = false
+    this.tableId = null
+    this.move = {
+      x: 0,
+      y: 0
     }
 
     this.setEvent()
@@ -37,22 +45,42 @@ class Event {
     //   return dialogText;
     // }
     // 전역 이벤트
-    $(document).on('contextmenu', function (e) {
+    this.on('contextmenu', e => {
       // 오른쪽 클릭 이벤트
       JSLog('event', 'contextmenu')
       e.preventDefault()
       this.core.event.onRightClick(e)
-    }.bind(this)).on('mousemove', function (e) {
+    }).on('mousemove', e => {
       // 마우스 이동 이벤트
+      if (this.move.x === 0 && this.move.y) {
+        this.move.x = e.clientX + document.documentElement.scrollLeft
+        this.move.y = e.clientY + document.documentElement.scrollTop
+      }
+      // 관계 draw
       if (this.isDraw) {
         storeERD.commit({
           type: 'lineDraw',
           id: this.lineId,
-          x: e.clientX + document.documentElement.scrollLeft,
-          y: e.clientY + document.documentElement.scrollTop
+          x: e.clientX,
+          y: e.clientY
         })
       }
-    }.bind(this)).on('mousedown', function (e) {
+
+      // 테이블 draggable
+      const x = e.clientX + document.documentElement.scrollLeft - this.move.x
+      const y = e.clientY + document.documentElement.scrollTop - this.move.y
+      if (this.isDrag) {
+        storeERD.commit({
+          type: 'tableDraggable',
+          id: this.tableId,
+          x: x,
+          y: y
+        })
+      }
+
+      this.move.x = e.clientX + document.documentElement.scrollLeft
+      this.move.y = e.clientY + document.documentElement.scrollTop
+    }).on('mousedown', e => {
       // 마우스 다운 이벤트
       JSLog('event', 'mousedown')
       // 테이블 메뉴 hide
@@ -66,11 +94,17 @@ class Event {
           isDataTypeHint: false
         })
       }
-    }.bind(this)).on('mouseup', function (e) {
+    }).on('mouseup', e => {
       // 마우스 업 이벤트
       JSLog('event', 'mouseup')
+      this.onDraggable('stop')
+    })
+  }
 
-    }.bind(this))
+  // 전역 이벤트 연
+  on (type, fn) {
+    window.addEventListener(type, fn)
+    return this
   }
 
   // 오른쪽 클릭 이벤트 추가
@@ -102,12 +136,12 @@ class Event {
   onCursor (type, cursor) {
     switch (type) {
       case 'start':
-        $('body').css('cursor', `url("/img/erd/${cursor}.png") 16 16, auto`)
+        document.querySelector('body').setAttribute('style', `cursor: url("/img/erd/${cursor}.png") 16 16, auto;`)
         this.isCursor = true
         this.cursor = cursor
         break
       case 'stop':
-        $('body').removeAttr('style')
+        document.querySelector('body').removeAttribute('style')
         this.isCursor = false
         this.cursor = null
         if (this.isDraw) {
@@ -176,6 +210,20 @@ class Event {
           })
         }
         this.lineId = null
+        break
+    }
+  }
+
+  // 드래그 이벤트
+  onDraggable (type, id) {
+    switch (type) {
+      case 'start':
+        this.isDrag = true
+        this.tableId = id
+        break
+      case 'stop':
+        this.isDrag = false
+        this.tableId = null
         break
     }
   }
