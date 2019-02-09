@@ -1,9 +1,18 @@
 <template lang="pug">
-  ul#menu_table(v-if="isShow" :style="`top: ${top}px; left: ${left}px; z-index: ${zIndex};`")
-    li(v-for="menu in menus" :key="menu.id" @click="menuAction(menu.type)")
+  ul#menu_table(v-if="isShow"
+  :style="`top: ${top}px; left: ${left}px; z-index: ${zIndex};`")
+
+    li(v-for="menu in menus" :key="menu.id"
+    @click="menuAction(menu.type)")
+
       span
-        img(:src="menu.icon" v-if="menu.icon !== '' && menu.icon !== 'key'")
-        font-awesome-icon(icon="key" style="color: #B4B400;" v-else-if="menu.icon === 'key'")
+        img(v-if="menu.icon !== '' && menu.isImg"
+        :src="menu.icon")
+
+        font-awesome-icon(v-else-if="!menu.isImg"
+        :icon="menu.icon"
+        :class="{ pk: menu.icon === 'key' }")
+
         span(v-else)
       span {{ menu.name }}
       span {{ menu.keymap }}
@@ -24,20 +33,30 @@ export default {
       isShow: false,
       menus: [
         {
+          type: 'tableAdd',
+          icon: 'table',
+          isImg: false,
+          name: '테이블 생성',
+          keymap: 'Alt + T'
+        },
+        {
           type: 'pk',
           icon: 'key',
+          isImg: false,
           name: 'PK',
           keymap: 'Alt + P'
         },
         {
           type: 'erd-0-1',
           icon: '/img/erd/erd-0-1.png',
+          isImg: true,
           name: '1:1',
           keymap: 'Alt + 1'
         },
         {
           type: 'erd-0-1-N',
           icon: '/img/erd/erd-0-1-N.png',
+          isImg: true,
           name: '1:N',
           keymap: 'Alt + 2'
         }
@@ -48,6 +67,9 @@ export default {
     // menu 동작
     menuAction (type) {
       switch (type) {
+        case 'tableAdd':
+          storeERD.commit({ type: 'tableAdd' })
+          break
         case 'pk':
           storeERD.commit({
             type: 'columnKey',
@@ -100,7 +122,7 @@ export default {
 
       & > span {
         padding: 5px;
-        width: 35px;
+        width: 100px;
         display: inline-flex;
         vertical-align: middle;
         align-items: center;
@@ -121,6 +143,10 @@ export default {
           height: 20px;
         }
       }
+    }
+
+    .pk {
+      color: #B4B400;
     }
   }
 </style>

@@ -7,8 +7,8 @@
   /*reset css*/
   /*모든 태그요소들의 여백을 초기화*/
   * {
-    margin: 0px;
-    padding: 0px;
+    margin: 0;
+    padding: 0;
   }
 
   /*제목태그의 크기를 body에서 맞춘 크기와 동일하게 변경*/
@@ -36,8 +36,6 @@
     border-collapse: collapse;
     border-spacing: 0;
   }
-
-  /*body 태그안에서 쓰는 기본 글꼴을 초기화 - 본인이 사용하는 시스템 폰트중에서 아래 나와있는 폰트중 하나를 보여줌 윈도우는 돋움 맥은 헬베티카 애플고딕 그리고 앞에 폰트들이 없을 경우에는 sans-serif로 보여줌*/
 
   /*줄간격(행간은)글씨크기와 똑같은 비율로 맞춤 1배율 = 즉 12px*/
   body {

@@ -1,10 +1,10 @@
 <template lang="pug">
   div.menuCanvas
     canvas#menu_canvas(@click="menu")
-    select.dbType(@change="selectDB" v-if="menuCheck")
+
+    select.dbType(v-if="menuCheck"
+    @change="selectDB")
       option(v-for="DBType in DBTypes" :value="DBType") {{ DBType }}
-    button.tableAdd(class="btn btn-primary" @click="tableAdd" v-if="menuCheck" title="Alt + T")
-      font-awesome-icon(icon="table")
 </template>
 
 <script>
