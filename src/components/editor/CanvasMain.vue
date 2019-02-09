@@ -57,7 +57,7 @@ export default {
   directives: {
     focus: {
       // 디렉티브 정의
-      inserted: function (el) {
+      inserted (el) {
         el.focus()
       }
     }
@@ -138,6 +138,13 @@ export default {
           })
         }
       }
+
+      // 컬럼 데이터타입 관계 동기화
+      storeERD.commit({
+        type: 'columnRelationSync',
+        tableId: tableId,
+        columnId: columnId
+      })
     },
     // 데이터 타입 힌트 포커스
     dataTypeHintFocus (e, tableId, columnId) {

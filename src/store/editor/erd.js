@@ -57,6 +57,8 @@ export default new Vuex.Store({
     dataTypeHintVisibleAll: column.dataTypeHintVisibleAll,
     // 컬럼 데이터타입 검색
     changeDataTypeHint: column.changeDataTypeHint,
+    // 컬럼 데이터타입 관계 동기화
+    columnRelationSync: column.relationSync,
     // 관계 drawing
     lineDraw: line.draw,
     // 관계 삭제

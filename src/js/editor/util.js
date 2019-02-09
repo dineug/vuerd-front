@@ -29,6 +29,7 @@ export const getDataTypeSearch = key => {
 
   for (let i = 0; i < dataTypes.length; i++) {
     let check = true
+
     if (dataTypes[i].name.toLowerCase().indexOf(key.toLowerCase()) !== -1) {
       check = false
     }
@@ -43,6 +44,7 @@ export const getDataTypeSearch = key => {
 // max z-index 반환
 export const getZIndex = () => {
   let max = 0
+
   storeERD.state.tables.forEach(v => {
     if (v.ui.zIndex > max) {
       max = v.ui.zIndex
@@ -66,6 +68,7 @@ export const autoName = (list, name, num) => {
 export const getPKColumns = id => {
   const table = getData(storeERD.state.tables, id)
   const columns = []
+
   for (let column of table.columns) {
     if (column.options.primaryKey) {
       columns.push(column)
@@ -97,6 +100,7 @@ export const columnSelectedNone = state => {
 // PrimaryKey check
 export const tableIsPrimaryKey = columns => {
   let isPK = false
+
   for (let column of columns) {
     if (column.options.primaryKey) {
       isPK = true
@@ -104,6 +108,116 @@ export const tableIsPrimaryKey = columns => {
     }
   }
   return isPK
+}
+
+// 컬럼 데이터타입 동기체크
+export const columnIsRelationSync = (state, tableId, column) => {
+  let isSync = false
+
+  for (let line of state.lines) {
+    let isTarget = false
+
+    if (line.points[0].id === tableId) {
+      for (let i in line.points[0].columnIds) {
+        if (column.id === line.points[0].columnIds[i]) {
+          const targetTable = getData(state.tables, line.points[1].id)
+          const targetColumn = getData(targetTable.columns, line.points[1].columnIds[i])
+          isSync = column.dataType !== targetColumn.dataType
+          isTarget = true
+          break
+        }
+      }
+    }
+    if (line.points[1].id === tableId) {
+      for (let i in line.points[1].columnIds) {
+        if (column.id === line.points[1].columnIds[i]) {
+          const targetTable = getData(state.tables, line.points[0].id)
+          const targetColumn = getData(targetTable.columns, line.points[0].columnIds[i])
+          isSync = column.dataType !== targetColumn.dataType
+          isTarget = true
+          break
+        }
+      }
+    }
+    if (isTarget) break
+  }
+  return isSync
+}
+
+// 동기화할 관계 컬럼 탐색
+export const getSyncColumns = (columns, lines, state, tableId, column) => {
+  let targetTable = null
+  let targetColumn = null
+  let targetIndex = null
+
+  for (let i in lines) {
+    let isTarget = false
+
+    if (lines[i].points[0].id === tableId) {
+      for (let j in lines[i].points[0].columnIds) {
+        if (column.id === lines[i].points[0].columnIds[j]) {
+          targetTable = getData(state.tables, lines[i].points[1].id)
+          targetColumn = getData(targetTable.columns, lines[i].points[1].columnIds[j])
+          isTarget = true
+          break
+        }
+      }
+      targetIndex = i
+    }
+    if (lines[i].points[1].id === tableId) {
+      for (let j in lines[i].points[1].columnIds) {
+        if (column.id === lines[i].points[1].columnIds[j]) {
+          targetTable = getData(state.tables, lines[i].points[0].id)
+          targetColumn = getData(targetTable.columns, lines[i].points[0].columnIds[j])
+          isTarget = true
+          break
+        }
+      }
+      targetIndex = i
+    }
+    if (isTarget) break
+  }
+  // 탐색 완료 관계 목록 제거
+  lines.splice(targetIndex, 1)
+
+  if (isLineSync(columns, lines, state, tableId, column)) {
+    // 탐색한 컬럼 중첩 검색
+    getSyncColumns(columns, lines, state, tableId, column)
+  }
+
+  // 관계 상대방 탐색
+  if (targetTable !== null) {
+    columns.push(targetColumn)
+    getSyncColumns(columns, lines, state, targetTable.id, targetColumn)
+  }
+}
+
+// 탐색할 관계 있는지 확인
+function isLineSync (columns, lines, state, tableId, column) {
+  let isRelation = false
+
+  for (let i in lines) {
+    if (lines[i].points[0].id === tableId) {
+      for (let j in lines[i].points[0].columnIds) {
+        if (column.id === lines[i].points[0].columnIds[j]) {
+          isRelation = true
+          break
+        }
+      }
+      break
+    }
+    if (lines[i].points[1].id === tableId) {
+      for (let j in lines[i].points[1].columnIds) {
+        if (column.id === lines[i].points[1].columnIds[j]) {
+          isRelation = true
+          break
+        }
+      }
+      break
+    }
+  }
+
+  return isRelation
 }
 
 // 관계 식별, 비식별 변경

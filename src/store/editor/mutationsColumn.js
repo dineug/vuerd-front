@@ -173,5 +173,21 @@ export default {
     const table = util.getData(state.tables, data.tableId)
     const column = util.getData(table.columns, data.columnId)
     column.ui.dataTypes = util.getDataTypeSearch(data.key)
+  },
+  // 컬럼 데이터타입 관계 동기화
+  relationSync (state, data) {
+    JSLog('mutations', 'column', 'relationSync')
+    const table = util.getData(state.tables, data.tableId)
+    const column = util.getData(table.columns, data.columnId)
+    if (util.columnIsRelationSync(state, data.tableId, column)) {
+      // 동기화 컬럼 탐색
+      const columns = []
+      const lines = state.lines.slice()
+      util.getSyncColumns(columns, lines, state, data.tableId, column)
+      // 컬럼 데이터 동기화
+      columns.forEach(v => {
+        v.dataType = column.dataType
+      })
+    }
   }
 }
