@@ -7,7 +7,7 @@
       // 테이블 해더
       .erd_table_top
       .erd_table_header
-        input(type="text" placeholder="table" v-model="table.name")
+        input(type="text" placeholder="table" v-model="table.name" v-focus)
         input(type="text" placeholder="comment" v-model="table.comment")
         button(class="btn btn-outline-primary" @click="columnAdd(table.id)" title="Alt + Enter")
           font-awesome-icon(icon="plus")
@@ -24,7 +24,7 @@
               font-awesome-icon(icon="key")
 
             // 컬럼 이름
-            input(type="text" placeholder="column" v-model="column.name")
+            input(type="text" placeholder="column" v-model="column.name" v-focus)
 
             // 컬럼 데이터타입
             div
@@ -53,6 +53,14 @@ export default {
   name: 'CanvasMain',
   components: {
     draggable
+  },
+  directives: {
+    focus: {
+      // 디렉티브 정의
+      inserted: function (el) {
+        el.focus()
+      }
+    }
   },
   data () {
     return {
