@@ -2,7 +2,8 @@
   ul#menu_table(v-if="isShow" :style="`top: ${top}px; left: ${left}px; z-index: ${zIndex};`")
     li(v-for="menu in menus" :key="menu.id" @click="menuAction(menu.type)")
       span
-        img(:src="menu.icon" v-if="menu.icon !== ''")
+        img(:src="menu.icon" v-if="menu.icon !== '' && menu.icon !== 'key'")
+        font-awesome-icon(icon="key" style="color: #B4B400;" v-else-if="menu.icon === 'key'")
         span(v-else)
       span {{ menu.name }}
       span {{ menu.keymap }}
@@ -24,7 +25,7 @@ export default {
       menus: [
         {
           type: 'pk',
-          icon: '',
+          icon: 'key',
           name: 'PK',
           keymap: ''
         },
@@ -99,6 +100,11 @@ export default {
 
       & > span {
         padding: 5px;
+        width: 30px;
+        height: 30px;
+        display: inline-flex;
+        vertical-align: middle;
+        align-items: center;
 
         img, span {
           display: inline-block;

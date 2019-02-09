@@ -28,7 +28,7 @@
 
             // 컬럼 데이터타입
             div
-              input.erd_data_type(type="text" placeholder="dataType" v-model="column.dataType" @keyup="dataTypeHintVisible($event, table.id, column.id, true)")
+              input.erd_data_type(type="text" placeholder="dataType" v-model="column.dataType" @keyup="dataTypeHintVisible($event, table.id, column.id, true)" @keydown="dataTypeHintFocus($event, table.id, column.id)")
               ul.erd_data_type_list(v-if="column.ui.isDataTypeHint")
                 li(v-for="dataType in column.ui.dataTypes" @click="columnChangeDataType($event, table.id, column.id, dataType.name)" @mouseover="dataTypeHintAddClass") {{ dataType.name }}
 
@@ -118,10 +118,25 @@ export default {
         columnId: columnId,
         isDataTypeHint: isDataTypeHint
       })
+
+      if (e.keyCode !== 38 && e.keyCode !== 40 && e.keyCode !== 13 && e.keyCode !== 9) {
+        // 데이터타입 검색 정렬
+        if (isDataTypeHint) {
+          storeERD.commit({
+            type: 'changeDataTypeHint',
+            tableId: tableId,
+            columnId: columnId,
+            key: e.target.value
+          })
+        }
+      }
+    },
+    // 데이터 타입 힌트 포커스
+    dataTypeHintFocus (e, tableId, columnId) {
       // 힌트 포커스 이동
-      let $li = $(e.target).parent('div').find('li')
-      let index = $li.filter('.selected').index()
-      let len = $li.length
+      const $li = $(e.target).parent('div').find('li')
+      const index = $li.filter('.selected').index()
+      const len = $li.length
       // key: Arrow up
       if (e.keyCode === 38) {
         if (index === -1) {
@@ -154,16 +169,6 @@ export default {
           type: 'dataTypeHintVisibleAll',
           isDataTypeHint: false
         })
-      } else {
-        // 데이터타입 검색 정렬
-        if (isDataTypeHint) {
-          storeERD.commit({
-            type: 'changeDataTypeHint',
-            tableId: tableId,
-            columnId: columnId,
-            key: e.target.value
-          })
-        }
       }
     },
     // 데이터변경

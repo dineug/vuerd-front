@@ -51,7 +51,6 @@ class Event {
       e.preventDefault()
       this.core.event.onRightClick(e)
     }).on('mousemove', e => {
-      // 마우스 이동 이벤트
       if (this.move.x === 0 && this.move.y === 0) {
         this.move.x = e.clientX + document.documentElement.scrollLeft
         this.move.y = e.clientY + document.documentElement.scrollTop
@@ -81,7 +80,6 @@ class Event {
       this.move.x = e.clientX + document.documentElement.scrollLeft
       this.move.y = e.clientY + document.documentElement.scrollTop
     }).on('mousedown', e => {
-      // 마우스 다운 이벤트
       JSLog('event', 'mousedown')
       // 테이블 메뉴 hide
       if (!$(e.target).closest('#menu_table').length) {
@@ -95,13 +93,16 @@ class Event {
         })
       }
     }).on('mouseup', e => {
-      // 마우스 업 이벤트
       JSLog('event', 'mouseup')
       this.onDraggable('stop')
+    }).on('keydown', e => {
+      JSLog('event', 'keydown')
+    }).on('keyup', e => {
+      JSLog('event', 'keyup')
     })
   }
 
-  // 전역 이벤트 연
+  // 전역 이벤트 연결
   on (type, fn) {
     window.addEventListener(type, fn)
     return this
