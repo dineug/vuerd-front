@@ -38,6 +38,11 @@ export default {
           util.initColumn(column, data.column)
         }
         table.columns.push(column)
+        this.commit({
+          type: 'columnSelected',
+          tableId: data.id,
+          columnId: column.id
+        })
         break
       }
     }
