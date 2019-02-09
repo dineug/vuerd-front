@@ -9,7 +9,7 @@
       .erd_table_header
         input(type="text" placeholder="table" v-model="table.name")
         input(type="text" placeholder="comment" v-model="table.comment")
-        button(class="btn btn-outline-primary" @click="columnAdd(table.id)")
+        button(class="btn btn-outline-primary" @click="columnAdd(table.id)" title="Alt + Enter")
           font-awesome-icon(icon="plus")
         button(class="btn btn-outline-danger" @click="tableDelete(table.id)")
           font-awesome-icon(icon="times")
@@ -137,38 +137,39 @@ export default {
       const $li = $(e.target).parent('div').find('li')
       const index = $li.filter('.selected').index()
       const len = $li.length
-      // key: Arrow up
-      if (e.keyCode === 38) {
-        if (index === -1) {
-          $li.eq(len - 1).addClass('selected')
-        } else {
-          $li.eq(index).removeClass('selected')
-          $li.eq(index - 1).addClass('selected')
-        }
-        // key: Arrow down
-      } else if (e.keyCode === 40) {
-        if (index === -1) {
-          $li.eq(0).addClass('selected')
-        } else {
-          $li.eq(index).removeClass('selected')
-          $li.eq(index + 1 === len ? 0 : index + 1).addClass('selected')
-        }
-        // key: Enter
-      } else if (e.keyCode === 13) {
-        if (index !== -1) {
+      switch (e.keyCode) {
+        case 38: // key: Arrow up
+          if (index === -1) {
+            $li.eq(len - 1).addClass('selected')
+          } else {
+            $li.eq(index).removeClass('selected')
+            $li.eq(index - 1).addClass('selected')
+          }
+          break
+        case 40: // key: Arrow down
+          if (index === -1) {
+            $li.eq(0).addClass('selected')
+          } else {
+            $li.eq(index).removeClass('selected')
+            $li.eq(index + 1 === len ? 0 : index + 1).addClass('selected')
+          }
+          break
+        case 13: // key: Enter
+          if (index !== -1) {
+            storeERD.commit({
+              type: 'columnChangeDataType',
+              tableId: tableId,
+              columnId: columnId,
+              dataType: $li.filter('.selected').text()
+            })
+          }
+          break
+        case 9: // key: Tab
           storeERD.commit({
-            type: 'columnChangeDataType',
-            tableId: tableId,
-            columnId: columnId,
-            dataType: $li.filter('.selected').text()
+            type: 'dataTypeHintVisibleAll',
+            isDataTypeHint: false
           })
-        }
-        // key: Tab
-      } else if (e.keyCode === 9) {
-        storeERD.commit({
-          type: 'dataTypeHintVisibleAll',
-          isDataTypeHint: false
-        })
+          break
       }
     },
     // 데이터변경

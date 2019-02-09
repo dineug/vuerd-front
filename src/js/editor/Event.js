@@ -96,9 +96,60 @@ class Event {
       JSLog('event', 'mouseup')
       this.onDraggable('stop')
     }).on('keydown', e => {
-      JSLog('event', 'keydown')
+      JSLog('event', 'keydown', e.keyCode)
+      switch (e.keyCode) {
+        case 13: // key: Enter
+          if (e.altKey) {
+            // 컬럼 생성
+            for (let table of storeERD.state.tables) {
+              if (table.ui.selected) {
+                storeERD.commit({
+                  type: 'columnAdd',
+                  id: table.id
+                })
+                break
+              }
+            }
+          }
+          break
+        case 80: // key: P
+          if (e.altKey) {
+            // 컬럼 PK 부여
+            storeERD.commit({
+              type: 'columnKey',
+              key: 'pk'
+            })
+          }
+          break
+        case 84: // key: T
+          if (e.altKey) {
+            // 테이블 생성
+            storeERD.commit({ type: 'tableAdd' })
+          }
+          break
+        case 49: // key: 1
+          if (e.altKey) {
+            // 관계 1:1
+            if (this.isCursor) {
+              this.onCursor('stop')
+            } else {
+              this.onCursor('start', 'erd-0-1')
+            }
+          }
+          break
+        case 50: // key: 2
+          if (e.altKey) {
+            // 관계 1:N
+            if (this.isCursor) {
+              this.onCursor('stop')
+            } else {
+              this.onCursor('start', 'erd-0-1-N')
+            }
+          }
+          break
+      }
     }).on('keyup', e => {
-      JSLog('event', 'keyup')
+      JSLog('event', 'keyup', e.keyCode)
     })
   }
 

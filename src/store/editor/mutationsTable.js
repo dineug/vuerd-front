@@ -36,6 +36,12 @@ export default {
       }
     }
     state.tables.push(newTable)
+    this.commit({
+      type: 'tableSelected',
+      id: newTable.id,
+      onlyTableSelected: false,
+      isTableAdd: true
+    })
   },
   // 테이블 삭제
   delete (state, data) {
@@ -106,54 +112,58 @@ export default {
     // column 선택 제거
     if (data.onlyTableSelected) {
       util.columnSelectedNone(state)
-      ERD.core.event.isTableMove = true
       ERD.core.event.onDraggable('start', data.id)
     }
-    // 관계 drawing 시작
-    if (ERD.core.event.isCursor && !ERD.core.event.isDraw) {
-      // table pk 컬럼이 있는지 체크 없으면 자동생성
-      if (!util.tableIsPrimaryKey(table.columns)) {
-        this.commit({
-          type: 'columnAdd',
-          id: table.id,
-          isInit: true,
-          column: {
-            name: util.autoName(table.columns, 'column_name'),
-            options: {
-              primaryKey: true,
-              notNull: true
-            },
-            ui: {
-              pk: true
+    // 테이블추가에서 호출시 처리
+    if (data.isTableAdd) {
+      util.columnSelectedNone(state)
+    } else {
+      // 관계 drawing 시작
+      if (ERD.core.event.isCursor && !ERD.core.event.isDraw) {
+        // table pk 컬럼이 있는지 체크 없으면 자동생성
+        if (!util.tableIsPrimaryKey(table.columns)) {
+          this.commit({
+            type: 'columnAdd',
+            id: table.id,
+            isInit: true,
+            column: {
+              name: util.autoName(table.columns, 'column_name'),
+              options: {
+                primaryKey: true,
+                notNull: true
+              },
+              ui: {
+                pk: true
+              }
             }
-          }
+          })
+        }
+        const id = util.guid()
+        state.lines.push({
+          id: id,
+          type: ERD.core.event.cursor,
+          isIdentification: false,
+          points: [
+            {
+              id: data.id,
+              x: table.ui.left,
+              y: table.ui.top,
+              columnIds: []
+            },
+            {
+              id: null,
+              x: table.ui.left,
+              y: table.ui.top,
+              columnIds: []
+            }
+          ]
         })
-      }
-      const id = util.guid()
-      state.lines.push({
-        id: id,
-        type: ERD.core.event.cursor,
-        isIdentification: false,
-        points: [
-          {
-            id: data.id,
-            x: table.ui.left,
-            y: table.ui.top,
-            columnIds: []
-          },
-          {
-            id: null,
-            x: table.ui.left,
-            y: table.ui.top,
-            columnIds: []
-          }
-        ]
-      })
-      ERD.core.event.onDraw('start', id)
+        ERD.core.event.onDraw('start', id)
 
-      // 관계 drawing 종료
-    } else if (ERD.core.event.isDraw) {
-      ERD.core.event.onDraw('stop', data.id)
+        // 관계 drawing 종료
+      } else if (ERD.core.event.isDraw) {
+        ERD.core.event.onDraw('stop', data.id)
+      }
     }
   },
   // 테이블 top, left 변경

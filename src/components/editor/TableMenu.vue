@@ -27,19 +27,19 @@ export default {
           type: 'pk',
           icon: 'key',
           name: 'PK',
-          keymap: ''
+          keymap: 'Alt + P'
         },
         {
           type: 'erd-0-1',
           icon: '/img/erd/erd-0-1.png',
           name: '1:1',
-          keymap: ''
+          keymap: 'Alt + 1'
         },
         {
           type: 'erd-0-1-N',
           icon: '/img/erd/erd-0-1-N.png',
           name: '1:N',
-          keymap: ''
+          keymap: 'Alt + 2'
         }
       ]
     }
@@ -100,11 +100,20 @@ export default {
 
       & > span {
         padding: 5px;
-        width: 30px;
-        height: 30px;
+        width: 35px;
         display: inline-flex;
         vertical-align: middle;
         align-items: center;
+
+        &:first-child {
+          width: 30px;
+          height: 30px;
+        }
+
+        &:last-child {
+          width: 100%;
+          display: inline;
+        }
 
         img, span {
           display: inline-block;
