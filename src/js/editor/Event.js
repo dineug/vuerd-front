@@ -75,7 +75,8 @@ class Event {
         })
       }
       // 테이블 및 컬럼 selected 해제
-      if (!$(e.target).closest('.erd_table').length && !$(e.target).closest('.quick_menu_pk').length) {
+      if (!$(e.target).closest('.erd_table').length &&
+        !$(e.target).closest('.quick_menu_pk').length) {
         this.core.erd.store().commit({
           type: 'tableSelectedAllNone',
           isTable: true,
@@ -84,7 +85,8 @@ class Event {
         this.isSelectedColumn = false
       }
       // 마우스 drag
-      if (!this.isDraggable && !this.isSelectedColumn) {
+      if (!this.isDraggable && !this.isSelectedColumn &&
+        !$(e.target).closest('.menu_top').length) {
         this.onDrag('start', e)
       }
     }).on('mouseup', e => {

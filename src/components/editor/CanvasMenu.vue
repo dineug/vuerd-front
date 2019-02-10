@@ -1,23 +1,28 @@
 <template lang="pug">
   .menu_canvas
-    ul.menu_top
-      li(v-for="(tab, i) in tabs" :key="tab.id")
-        input(v-model="tab.name" v-focus
-        :class="{ tab_active: tab.active }"
-        type="text" :title="i < 9 ? `Ctrl + ${i+1}` : ''"
-        @click="modelActive(tab.id)")
+    draggable.menu_top(element="ul" v-model="model.tabs" :options="{group:'tab', ghostClass: 'ghost'}")
+      transition-group(type="transition" name="flip-list")
+        li(v-for="(tab, i) in model.tabs" :key="tab.id")
+          input(v-model="tab.name" v-focus
+          :class="{ tab_active: tab.active }"
+          type="text" :title="i < 9 ? `Ctrl + ${i+1}` : ''"
+          @click="modelActive(tab.id)")
 
-        button(:class="{ tab_active: tab.active }"
-        @click="modelDelete(tab.id)")
-          font-awesome-icon(icon="times")
+          button(:class="{ tab_active: tab.active }"
+          @click="modelDelete(tab.id)")
+            font-awesome-icon(icon="times")
 </template>
 
 <script>
 import $ from 'jquery'
 import model from '@/store/editor/model'
+import draggable from 'vuedraggable'
 
 export default {
   name: 'CanvasMenu',
+  components: {
+    draggable
+  },
   directives: {
     // focus 정의
     focus: {
@@ -27,8 +32,8 @@ export default {
     }
   },
   computed: {
-    tabs () {
-      return model.state.tabs
+    model () {
+      return model.state
     }
   },
   methods: {
@@ -97,6 +102,13 @@ export default {
         padding: 10px;
         background-color: #424242;
       }
+    }
+
+    .ghost {
+      opacity: 0.5;
+    }
+    .flip-list-move {
+      transition: transform 0.5s;
     }
   }
 </style>

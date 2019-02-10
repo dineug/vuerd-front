@@ -32,48 +32,49 @@
 
       draggable(v-model="table.columns" :options="{group:'table'}"
       @end="draggableEnd")
+        transition-group(type="transition" name="flip-list")
 
-        // 컬럼
-        .erd_column(v-for="column in table.columns" :key="column.id" :column_id="column.id"
-        :class="{ selected: column.ui.selected, relation_active: column.ui.isHover}"
-        :style="`height: ${COLUMN_HEIGHT}px;`"
-        @mousedown="columnSelected(table.id, column.id)")
+          // 컬럼
+          .erd_column(v-for="column in table.columns" :key="column.id" :column_id="column.id"
+          :class="{ selected: column.ui.selected, relation_active: column.ui.isHover}"
+          :style="`height: ${COLUMN_HEIGHT}px;`"
+          @mousedown="columnSelected(table.id, column.id)")
 
-          // 컬럼 key
-          .erd_column_key(:class="{ pk: column.ui.pk, fk: column.ui.fk, pfk: column.ui.pfk }")
-            font-awesome-icon(icon="key")
+            // 컬럼 key
+            .erd_column_key(:class="{ pk: column.ui.pk, fk: column.ui.fk, pfk: column.ui.pfk }")
+              font-awesome-icon(icon="key")
 
-          // 컬럼 이름
-          input(v-model="column.name" v-focus
-          type="text" placeholder="column")
+            // 컬럼 이름
+            input(v-model="column.name" v-focus
+            type="text" placeholder="column")
 
-          // 컬럼 데이터타입
-          div
-            input.erd_data_type(v-model="column.dataType"
-            type="text" placeholder="dataType"
-            @keyup="dataTypeHintVisible($event, table.id, column.id, true)"
-            @keydown="dataTypeHintFocus($event, table.id, column.id)")
+            // 컬럼 데이터타입
+            div
+              input.erd_data_type(v-model="column.dataType"
+              type="text" placeholder="dataType"
+              @keyup="dataTypeHintVisible($event, table.id, column.id, true)"
+              @keydown="dataTypeHintFocus($event, table.id, column.id)")
 
-            ul.erd_data_type_list(v-if="column.ui.isDataTypeHint")
-              li(v-for="dataType in dataTypes"
-              @click="columnChangeDataType($event, table.id, column.id, dataType.name)"
-              @mouseover="dataTypeHintAddClass") {{ dataType.name }}
+              ul.erd_data_type_list(v-if="column.ui.isDataTypeHint")
+                li(v-for="dataType in dataTypes"
+                @click="columnChangeDataType($event, table.id, column.id, dataType.name)"
+                @mouseover="dataTypeHintAddClass") {{ dataType.name }}
 
-          // 컬럼 not-null
-          input.erd_column_not_null(v-if="column.options.notNull"
-          type="text" readonly value="N-N"
-          @click="columnChangeNull(table.id, column.id)")
-          input.erd_column_not_null(v-else
-          type="text" readonly value="NULL"
-          @click="columnChangeNull(table.id, column.id)")
+            // 컬럼 not-null
+            input.erd_column_not_null(v-if="column.options.notNull"
+            type="text" readonly value="N-N"
+            @click="columnChangeNull(table.id, column.id)")
+            input.erd_column_not_null(v-else
+            type="text" readonly value="NULL"
+            @click="columnChangeNull(table.id, column.id)")
 
-          // 컬럼 comment
-          input(v-model="column.comment"
-          type="text" placeholder="comment")
+            // 컬럼 comment
+            input(v-model="column.comment"
+            type="text" placeholder="comment")
 
-          // 컬럼 삭제 버튼
-          button(@click="columnDelete(table.id, column.id)")
-            font-awesome-icon(icon="times")
+            // 컬럼 삭제 버튼
+            button(@click="columnDelete(table.id, column.id)")
+              font-awesome-icon(icon="times")
 </template>
 
 <script>
@@ -406,19 +407,9 @@ export default {
         box-shadow: 0 1px 6px $table_selected;
       }
     }
-  }
 
-  /* table,column 추가,삭제 animation */
-  .slide-fade-enter-active {
-    transition: all .3s ease;
-  }
-
-  .slide-fade-leave-active {
-    transition: all .4s ease-out;
-  }
-
-  .slide-fade-enter, .slide-fade-leave-to {
-    transform: translateX(10px);
-    opacity: 0;
+    .flip-list-move {
+      transition: transform 0.5s;
+    }
   }
 </style>
