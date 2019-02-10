@@ -191,6 +191,7 @@ export default {
       const len = $li.length
       switch (e.keyCode) {
         case 38: // key: Arrow up
+          e.preventDefault()
           if (index === -1) {
             $li.eq(len - 1).addClass('selected')
           } else {
