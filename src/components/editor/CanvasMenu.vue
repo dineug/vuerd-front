@@ -100,6 +100,7 @@ export default {
 
       input {
         padding: 10px;
+        width: 150px;
         background-color: #424242;
       }
     }
