@@ -341,11 +341,15 @@ export default {
           padding: 0;
           width: 25px;
           height: 25px;
-          color: #dc3545;
+          color: #672627;
           border: none;
           outline: none;
           background-color: $table_background;
           cursor: pointer;
+
+          &:hover {
+            color: #dc3545;
+          }
         }
 
         /* 데이터 타입 힌트 */

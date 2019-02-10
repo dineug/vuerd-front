@@ -72,13 +72,16 @@ export default new Vuex.Store({
       for (let i in state.tabs) {
         if (data.id === state.tabs[i].id) {
           state.tabs.splice(i, 1)
+          if (state.tabs.length === 0) {
+            this.commit({ type: 'modelAdd' })
+          }
           break
         }
       }
       if (tab.active) {
         this.commit({
           type: 'modelActive',
-          id: state.tabs[state.tabs.length-1].id
+          id: state.tabs[state.tabs.length - 1].id
         })
       }
     }

@@ -82,11 +82,15 @@ export default {
         padding: 0;
         width: 25px;
         height: 33px;
-        color: #dc3545;
+        color: #a2a2a2;
         border: none;
         outline: none;
         cursor: pointer;
         background-color: #424242;
+
+        &:hover {
+          color: white;
+        }
       }
 
       input {

@@ -3,6 +3,7 @@
   :style="`top: ${top}px; left: ${left}px; z-index: ${zIndex};`")
 
     li(v-for="menu in menus" :key="menu.id"
+    :class="{ quick_menu_pk: menu.type === 'pk' }"
     @click="menuAction(menu.type)")
 
       span
@@ -95,6 +96,7 @@ export default {
           }
           break
       }
+      this.isShow = false
     }
   },
   mounted () {
@@ -118,6 +120,7 @@ export default {
     background-color: $mbg;
     position: fixed;
     opacity: 0.9;
+    width: 211.3px;
 
     li {
       width: 100%;
