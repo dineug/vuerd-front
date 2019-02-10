@@ -13,7 +13,7 @@ class Event {
     this.core = null
     this.rightClickListener = []
     this.components = {
-      TableMenu: null
+      QuickMenu: null
     }
 
     this.isCursor = false
@@ -82,8 +82,8 @@ class Event {
     }).on('mousedown', e => {
       JSLog('event', 'mousedown')
       // 테이블 메뉴 hide
-      if (!$(e.target).closest('#menu_table').length) {
-        this.components.TableMenu.isShow = false
+      if (!$(e.target).closest('#quick_menu').length) {
+        this.components.QuickMenu.isShow = false
       }
       // 데이터 타입 힌트 hide
       if (!$(e.target).closest('.erd_data_type_list').length) {
@@ -112,7 +112,7 @@ class Event {
             }
           }
           break
-        case 80: // key: P
+        case 75: // key: K
           if (e.altKey) {
             // 컬럼 PK 부여
             storeERD.commit({

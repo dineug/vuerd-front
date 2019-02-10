@@ -1,5 +1,5 @@
 <template lang="pug">
-  ul#menu_table(v-if="isShow"
+  ul#quick_menu(v-if="isShow"
   :style="`top: ${top}px; left: ${left}px; z-index: ${zIndex};`")
 
     li(v-for="menu in menus" :key="menu.id"
@@ -24,7 +24,7 @@ import storeERD from '@/store/editor/erd'
 import * as util from '@/js/editor/util'
 
 export default {
-  name: 'TableMenu',
+  name: 'QuickMenu',
   data () {
     return {
       top: 0,
@@ -44,7 +44,7 @@ export default {
           icon: 'key',
           isImg: false,
           name: 'Primary Key',
-          keymap: 'Alt + P'
+          keymap: 'Alt + K'
         },
         {
           type: 'erd-0-1',
@@ -96,14 +96,14 @@ export default {
       this.isShow = true
     }.bind(this))
     // 이벤트 핸들러에 컴포넌트 등록
-    ERD.core.event.components.TableMenu = this
+    ERD.core.event.components.QuickMenu = this
   }
 }
 </script>
 
 <style lang="scss" scoped>
   $mbg: #191919;
-  #menu_table {
+  #quick_menu {
     color: #a2a2a2;
     background-color: $mbg;
     position: fixed;
