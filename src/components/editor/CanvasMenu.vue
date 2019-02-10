@@ -54,14 +54,12 @@ export default {
   },
   updated () {
     // 단축키 활성화 포커스처리
-    let index = 0
-    for (let i in this.tabs) {
-      if (this.tabs[i].active) {
-        index = i
+    for (let i in this.model.tabs) {
+      if (this.model.tabs[i].active) {
+        $(this.$el).find('.menu_top input').eq(i).focus()
         break
       }
     }
-    $(this.$el).find('.menu_top input').eq(index).focus()
   }
 }
 </script>
