@@ -5,6 +5,30 @@ import ERD from '@/js/editor/ERD'
 JSLog('store loaded', 'mutationsLine')
 
 export default {
+  // 관계 생성
+  add (state, data) {
+    const line = {
+      id: util.guid(),
+      type: ERD.core.event.cursor,
+      isIdentification: false,
+      points: [
+        {
+          id: data.tableId,
+          x: data.x,
+          y: data.y,
+          columnIds: []
+        },
+        {
+          id: null,
+          x: data.x,
+          y: data.y,
+          columnIds: []
+        }
+      ]
+    }
+    state.lines.push(line)
+    ERD.core.event.onDraw('start', line.id)
+  },
   // 관계 drawing
   draw (state, data) {
     JSLog('mutations', 'line', 'draw')

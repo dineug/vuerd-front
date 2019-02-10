@@ -15,6 +15,7 @@ export default {
           name: '',
           comment: '',
           dataType: '',
+          domainId: '',
           options: {
             autoIncrement: false,
             primaryKey: false,

@@ -156,28 +156,12 @@ export default {
             }
           })
         }
-        const id = util.guid()
-        state.lines.push({
-          id: id,
-          type: ERD.core.event.cursor,
-          isIdentification: false,
-          points: [
-            {
-              id: data.id,
-              x: table.ui.left,
-              y: table.ui.top,
-              columnIds: []
-            },
-            {
-              id: null,
-              x: table.ui.left,
-              y: table.ui.top,
-              columnIds: []
-            }
-          ]
+        this.commit({
+          type: 'lineAdd',
+          tableId: data.id,
+          x: table.ui.left,
+          y: table.ui.top
         })
-        ERD.core.event.onDraw('start', id)
-
         // 관계 drawing 종료
       } else if (ERD.core.event.isDraw) {
         ERD.core.event.onDraw('stop', data.id)

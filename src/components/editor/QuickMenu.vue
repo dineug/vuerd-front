@@ -37,14 +37,14 @@ export default {
           type: 'modelAdd',
           icon: 'file',
           isImg: false,
-          name: 'Model Add',
+          name: 'New Model',
           keymap: 'Alt + N'
         },
         {
           type: 'tableAdd',
           icon: 'table',
           isImg: false,
-          name: 'Table Add',
+          name: 'New Table',
           keymap: 'Alt + T'
         },
         {
