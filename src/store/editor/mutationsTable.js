@@ -106,13 +106,24 @@ export default {
     if (table.ui.zIndex !== zIndex - 1) {
       table.ui.zIndex = zIndex
     }
-    state.tables.forEach(v => {
-      v.ui.selected = data.id === v.id
-    })
+    // multi select
+    if (data.ctrlKey) {
+      table.ui.selected = true
+    } else {
+      state.tables.forEach(v => {
+        v.ui.selected = data.id === v.id
+      })
+    }
     // column 선택 제거
     if (data.onlyTableSelected) {
       util.columnSelectedNone(state)
-      ERD.core.event.onDraggable('start', data.id)
+      const tableIds = []
+      for (let targetTable of state.tables) {
+        if (targetTable.ui.selected) {
+          tableIds.push(targetTable.id)
+        }
+      }
+      ERD.core.event.onDraggable('start', tableIds)
     }
     // 테이블추가에서 호출시 처리
     if (data.isTableAdd) {

@@ -22,7 +22,7 @@ class Event {
     this.cursor = null
 
     this.isDrag = false
-    this.tableId = null
+    this.tableIds = []
     this.move = {
       x: 0,
       y: 0
@@ -69,11 +69,13 @@ class Event {
       const x = e.clientX + document.documentElement.scrollLeft - this.move.x
       const y = e.clientY + document.documentElement.scrollTop - this.move.y
       if (this.isDrag) {
-        storeERD.commit({
-          type: 'tableDraggable',
-          id: this.tableId,
-          x: x,
-          y: y
+        this.tableIds.forEach(tableId => {
+          storeERD.commit({
+            type: 'tableDraggable',
+            id: tableId,
+            x: x,
+            y: y
+          })
         })
       }
 
@@ -107,7 +109,6 @@ class Event {
                   type: 'columnAdd',
                   id: table.id
                 })
-                break
               }
             }
           }
@@ -267,15 +268,15 @@ class Event {
   }
 
   // 드래그 이벤트
-  onDraggable (type, id) {
+  onDraggable (type, ids) {
     switch (type) {
       case 'start':
         this.isDrag = true
-        this.tableId = id
+        this.tableIds = ids
         break
       case 'stop':
         this.isDrag = false
-        this.tableId = null
+        this.tableIds = []
         break
     }
   }

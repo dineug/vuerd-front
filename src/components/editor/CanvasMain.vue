@@ -4,7 +4,7 @@
     .erd_table(v-for="table in tables" :key="table.id" :table_id="table.id"
     :class="{ selected: table.ui.selected}"
     :style="`width: ${TABLE_WIDTH}px; top: ${table.ui.top}px; left: ${table.ui.left}px; z-index: ${table.ui.zIndex};`"
-    @mousedown="tableSelected(table.id)")
+    @mousedown="tableSelected($event, table.id)")
 
       // 테이블 해더
       .erd_table_top
@@ -140,10 +140,11 @@ export default {
       })
     },
     // 테이블 선택
-    tableSelected (id) {
+    tableSelected (e, id) {
       storeERD.commit({
         type: 'tableSelected',
         id: id,
+        ctrlKey: e.ctrlKey,
         onlyTableSelected: this.onlyTableSelected
       })
       this.onlyTableSelected = true
