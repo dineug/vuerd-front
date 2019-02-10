@@ -60,8 +60,8 @@ class Event {
         storeERD.commit({
           type: 'lineDraw',
           id: this.lineId,
-          x: e.clientX,
-          y: e.clientY
+          x: e.clientX + document.documentElement.scrollLeft,
+          y: e.clientY + document.documentElement.scrollTop
         })
       }
 
