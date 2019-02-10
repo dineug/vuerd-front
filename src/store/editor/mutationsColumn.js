@@ -105,7 +105,7 @@ export default {
   // 컬럼 선택
   selected (state, data) {
     JSLog('mutations', 'column', 'selected')
-    util.columnSelectedNone(state)
+    util.selectedNone(false, true)
     const table = util.getData(state.tables, data.tableId)
     const column = util.getData(table.columns, data.columnId)
     if (column) column.ui.selected = true

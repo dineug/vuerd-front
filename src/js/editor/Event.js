@@ -94,6 +94,10 @@ class Event {
           isDataTypeHint: false
         })
       }
+      // 테이블 및 컬럼 selected 해제
+      if (!$(e.target).closest('.erd_table').length) {
+        util.selectedNone(true, true)
+      }
     }).on('mouseup', e => {
       JSLog('event', 'mouseup')
       this.onDraggable('stop')

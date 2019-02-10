@@ -88,11 +88,12 @@ export const initColumn = (column, dColumn) => {
   })
 }
 
-// column 선택 초기화
-export const columnSelectedNone = state => {
-  state.tables.forEach(table => {
-    table.columns.forEach(v => {
-      v.ui.selected = false
+// 테이블 및 컬럼 selected 해제
+export const selectedNone = (isTable, isColumn) => {
+  storeERD.state.tables.forEach(table => {
+    if (isTable) table.ui.selected = false
+    table.columns.forEach(column => {
+      if (isColumn) column.ui.selected = false
     })
   })
 }

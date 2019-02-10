@@ -116,7 +116,7 @@ export default {
     }
     // column 선택 제거
     if (data.onlyTableSelected) {
-      util.columnSelectedNone(state)
+      util.selectedNone(false, true)
       const tableIds = []
       for (let targetTable of state.tables) {
         if (targetTable.ui.selected) {
@@ -127,7 +127,7 @@ export default {
     }
     // 테이블추가에서 호출시 처리
     if (data.isTableAdd) {
-      util.columnSelectedNone(state)
+      util.selectedNone(false, true)
     } else {
       // 관계 drawing 시작
       if (ERD.core.event.isCursor && !ERD.core.event.isDraw) {
