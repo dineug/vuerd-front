@@ -20,10 +20,6 @@ export default {
     }
   },
   methods: {
-    // 테이블 추가
-    tableAdd () {
-      storeERD.commit({ type: 'tableAdd' })
-    },
     // DB 선택
     selectDB (e) {
       storeERD.commit({

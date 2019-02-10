@@ -1,7 +1,6 @@
 import JSLog from '@/js/JSLog'
 import * as util from '@/js/editor/util'
 import storeERD from './erd'
-import dataType from './dataType'
 
 JSLog('store loaded', 'mutationsColumn')
 
@@ -30,7 +29,6 @@ export default {
             fk: false,
             pfk: false,
             isDataTypeHint: false,
-            dataTypes: dataType[state.DBType],
             isHover: false
           }
         }
@@ -166,13 +164,6 @@ export default {
         column.ui.isDataTypeHint = data.isDataTypeHint
       }
     }
-  },
-  // 컬럼 데이터타입 검색
-  changeDataTypeHint (state, data) {
-    JSLog('mutations', 'column', 'changeDataTypeHint')
-    const table = util.getData(state.tables, data.tableId)
-    const column = util.getData(table.columns, data.columnId)
-    column.ui.dataTypes = util.getDataTypeSearch(data.key)
   },
   // 컬럼 데이터타입 관계 동기화
   relationSync (state, data) {

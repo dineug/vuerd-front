@@ -65,12 +65,10 @@ import * as util from '@/js/editor/util'
 
 export default {
   name: 'CanvasSvg',
-  data () {
-    return {
-      lines: storeERD.state.lines
-    }
-  },
   computed: {
+    lines () {
+      return storeERD.state.lines
+    },
     toLines () {
       const convertLines = []
       this.lines.forEach(v => {

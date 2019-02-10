@@ -43,21 +43,21 @@ export default {
           type: 'pk',
           icon: 'key',
           isImg: false,
-          name: 'PK',
+          name: 'Primary Key',
           keymap: 'Alt + P'
         },
         {
           type: 'erd-0-1',
           icon: '/img/erd/erd-0-1.png',
           isImg: true,
-          name: '1:1',
+          name: '1 : 1',
           keymap: 'Alt + 1'
         },
         {
           type: 'erd-0-1-N',
           icon: '/img/erd/erd-0-1-N.png',
           isImg: true,
-          name: '1:N',
+          name: '1 : N',
           keymap: 'Alt + 2'
         }
       ]

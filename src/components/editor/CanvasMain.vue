@@ -50,7 +50,7 @@
               @keydown="dataTypeHintFocus($event, table.id, column.id)")
 
               ul.erd_data_type_list(v-if="column.ui.isDataTypeHint")
-                li(v-for="dataType in column.ui.dataTypes"
+                li(v-for="dataType in dataTypes"
                 @click="columnChangeDataType($event, table.id, column.id, dataType.name)"
                 @mouseover="dataTypeHintAddClass") {{ dataType.name }}
 
@@ -91,10 +91,21 @@ export default {
   },
   data () {
     return {
-      tables: storeERD.state.tables,
-      TABLE_WIDTH: storeERD.state.TABLE_WIDTH,
-      COLUMN_HEIGHT: storeERD.state.COLUMN_HEIGHT,
       onlyTableSelected: true
+    }
+  },
+  computed: {
+    tables () {
+      return storeERD.state.tables
+    },
+    TABLE_WIDTH () {
+      return storeERD.state.TABLE_WIDTH
+    },
+    COLUMN_HEIGHT () {
+      return storeERD.state.COLUMN_HEIGHT
+    },
+    dataTypes () {
+      return storeERD.state.dataTypes
     }
   },
   methods: {
@@ -149,7 +160,7 @@ export default {
     // 데이터타입 힌트 show/hide
     dataTypeHintVisible (e, tableId, columnId, isDataTypeHint) {
       storeERD.commit({
-        type: 'dataTypeHintVisible',
+        type: 'columnDataTypeHintVisible',
         tableId: tableId,
         columnId: columnId,
         isDataTypeHint: isDataTypeHint
@@ -160,8 +171,6 @@ export default {
         if (isDataTypeHint) {
           storeERD.commit({
             type: 'changeDataTypeHint',
-            tableId: tableId,
-            columnId: columnId,
             key: e.target.value
           })
         }
@@ -209,7 +218,7 @@ export default {
           break
         case 9: // key: Tab
           storeERD.commit({
-            type: 'dataTypeHintVisibleAll',
+            type: 'columnDataTypeHintVisibleAll',
             isDataTypeHint: false
           })
           break

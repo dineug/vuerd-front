@@ -88,7 +88,7 @@ class Event {
       // 데이터 타입 힌트 hide
       if (!$(e.target).closest('.erd_data_type_list').length) {
         storeERD.commit({
-          type: 'dataTypeHintVisibleAll',
+          type: 'columnDataTypeHintVisibleAll',
           isDataTypeHint: false
         })
       }

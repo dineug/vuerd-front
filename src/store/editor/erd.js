@@ -5,6 +5,7 @@ import dataType from './dataType'
 import table from './mutationsTable'
 import column from './mutationsColumn'
 import line from './mutationsLine'
+import * as util from '@/js/editor/util'
 
 JSLog('store loaded', 'erd')
 Vue.use(Vuex)
@@ -13,6 +14,7 @@ Vue.use(Vuex)
 export default new Vuex.Store({
   state: {
     DBType: 'MySQL',
+    dataTypes: dataType['MySQL'],
     tables: [],
     lines: [],
     TABLE_WIDTH: 630,
@@ -22,12 +24,14 @@ export default new Vuex.Store({
   mutations: {
     // DB 변경
     changeDB (state, data) {
+      JSLog('mutations', 'erd', 'changeDB')
       state.DBType = data.DBType
-      for (let table of state.tables) {
-        for (let column of table.columns) {
-          column.ui.dataTypes = dataType[data.DBType]
-        }
-      }
+      state.dataTypes = dataType[data.DBType]
+    },
+    // 데이터타입 검색
+    changeDataTypeHint (state, data) {
+      JSLog('mutations', 'erd', 'changeDataTypeHint')
+      state.dataTypes = util.getDataTypeSearch(data.key)
     },
     // 테이블 추가
     tableAdd: table.add,
@@ -52,11 +56,9 @@ export default new Vuex.Store({
     // 컬럼 데이터변경
     columnChangeDataType: column.changeDataType,
     // 컬럼 데이터타입 힌트 show/hide
-    dataTypeHintVisible: column.dataTypeHintVisible,
+    columnDataTypeHintVisible: column.dataTypeHintVisible,
     // 컬럼 데이터타입 힌트 show/hide ALL
-    dataTypeHintVisibleAll: column.dataTypeHintVisibleAll,
-    // 컬럼 데이터타입 검색
-    changeDataTypeHint: column.changeDataTypeHint,
+    columnDataTypeHintVisibleAll: column.dataTypeHintVisibleAll,
     // 컬럼 데이터타입 관계 동기화
     columnRelationSync: column.relationSync,
     // 관계 drawing
