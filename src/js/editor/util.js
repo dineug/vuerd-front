@@ -324,6 +324,7 @@ function convertPoints (v) {
     v.points[1].x = endPoint.rt.x
     v.points[1].y = endPoint.rt.y + 20
   } else if (endTable) {
+    key.end = 'left'
     const endPoint = key.endPoint = getPoint(endTable.ui)
     let minXY = Math.abs(startPoint.left.x - endPoint.left.x) + Math.abs(startPoint.left.y - endPoint.left.y)
     v.points[0].x = startPoint.left.x
