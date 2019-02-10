@@ -88,16 +88,6 @@ export const initColumn = (column, dColumn) => {
   })
 }
 
-// 테이블 및 컬럼 selected 해제
-export const selectedNone = (isTable, isColumn) => {
-  storeERD.state.tables.forEach(table => {
-    if (isTable) table.ui.selected = false
-    table.columns.forEach(column => {
-      if (isColumn) column.ui.selected = false
-    })
-  })
-}
-
 // PrimaryKey check
 export const tableIsPrimaryKey = columns => {
   let isPK = false
@@ -266,7 +256,7 @@ export const convertLine = v => {
 }
 
 // 좌표 데이터 정제
-function getPoint (ui) {
+export const getPoint = (ui) => {
   return {
     width: ui.width,
     height: ui.height,

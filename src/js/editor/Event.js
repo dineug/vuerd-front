@@ -76,7 +76,11 @@ class Event {
       }
       // 테이블 및 컬럼 selected 해제
       if (!$(e.target).closest('.erd_table').length) {
-        util.selectedNone(true, true)
+        storeERD.commit({
+          type: 'tableSelectedAllNone',
+          isTable: true,
+          isColumn: true
+        })
         this.isSelectedColumn = false
       }
       // 마우스 drag
@@ -318,6 +322,8 @@ class Event {
     switch (type) {
       case 'start':
         this.isDrag = true
+        this.components.CanvasMain.svg.top = 0
+        this.components.CanvasMain.svg.left = 0
         this.components.CanvasMain.svg.width = 0
         this.components.CanvasMain.svg.height = 0
         this.components.CanvasMain.svg.isDarg = true
@@ -329,16 +335,23 @@ class Event {
           e.preventDefault()
           const currentX = e.clientX + document.documentElement.scrollLeft
           const currentY = e.clientY + document.documentElement.scrollTop
-          const min = {}
-          const max = {}
-          min.x = this.drag.x < currentX ? this.drag.x : currentX
-          min.y = this.drag.y < currentY ? this.drag.y : currentY
-          max.x = this.drag.x > currentX ? this.drag.x : currentX
-          max.y = this.drag.y > currentY ? this.drag.y : currentY
+          const min = {
+            x: this.drag.x < currentX ? this.drag.x : currentX,
+            y: this.drag.y < currentY ? this.drag.y : currentY
+          }
+          const max = {
+            x: this.drag.x > currentX ? this.drag.x : currentX,
+            y: this.drag.y > currentY ? this.drag.y : currentY
+          }
           this.components.CanvasMain.svg.top = min.y
           this.components.CanvasMain.svg.left = min.x
           this.components.CanvasMain.svg.width = max.x - min.x
           this.components.CanvasMain.svg.height = max.y - min.y
+          storeERD.commit({
+            type: 'tableMultiSelected',
+            min: min,
+            max: max
+          })
         }
         break
       case 'stop':

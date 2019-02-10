@@ -43,6 +43,10 @@ export default new Vuex.Store({
     tableSelected: table.selected,
     // 테이블 top, left 변경
     tableDraggable: table.draggable,
+    // 테이블 및 컬럼 selected All 해제
+    tableSelectedAllNone: table.selectedAllNone,
+    // 테이블 드래그 multi selected
+    tableMultiSelected: table.multiSelected,
     // 컬럼 추가
     columnAdd: column.add,
     // 컬럼 삭제

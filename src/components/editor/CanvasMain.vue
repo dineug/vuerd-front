@@ -4,7 +4,7 @@
     svg#svg_drag(v-if="svg.isDarg"
     :style="`top: ${svg.top}px; left: ${svg.left}px; width: ${svg.width}px; height: ${svg.height}px;`")
       rect(:width="svg.width" :height="svg.height"
-      stroke="#0098ff" stroke-width="1" stroke-opacity="0.9"
+      stroke="#0098ff" stroke-width="1" stroke-opacity="0.9" stroke-dasharray="3"
       fill-opacity="0.3")
 
     // 테이블
@@ -181,7 +181,10 @@ export default {
         isDataTypeHint: isDataTypeHint
       })
 
-      if (e.keyCode !== 38 && e.keyCode !== 40 && e.keyCode !== 13 && e.keyCode !== 9) {
+      if (e.keyCode !== 38 &&
+        e.keyCode !== 40 &&
+        e.keyCode !== 13 &&
+        e.keyCode !== 9) {
         // 데이터타입 검색 정렬
         if (isDataTypeHint) {
           storeERD.commit({

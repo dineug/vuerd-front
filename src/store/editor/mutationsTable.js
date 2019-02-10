@@ -116,7 +116,11 @@ export default {
     }
     // column 선택 제거
     if (data.onlyTableSelected) {
-      util.selectedNone(false, true)
+      storeERD.commit({
+        type: 'tableSelectedAllNone',
+        isTable: false,
+        isColumn: true
+      })
       const tableIds = []
       for (let targetTable of state.tables) {
         if (targetTable.ui.selected) {
@@ -127,7 +131,11 @@ export default {
     }
     // 테이블추가에서 호출시 처리
     if (data.isTableAdd) {
-      util.selectedNone(false, true)
+      storeERD.commit({
+        type: 'tableSelectedAllNone',
+        isTable: false,
+        isColumn: true
+      })
     } else {
       // 관계 drawing 시작
       if (ERD.core.event.isCursor && !ERD.core.event.isDraw) {
@@ -191,6 +199,29 @@ export default {
           v.y = table.ui.top
         }
       })
+    })
+  },
+  // 테이블 및 컬럼 selected All 해제
+  selectedAllNone (state, data) {
+    state.tables.forEach(table => {
+      if (data.isTable) table.ui.selected = false
+      table.columns.forEach(column => {
+        if (data.isColumn) column.ui.selected = false
+      })
+    })
+  },
+  // 테이블 드래그 selected
+  multiSelected (state, data) {
+    state.tables.forEach(table => {
+      const point = util.getPoint(table.ui)
+      if (data.min.x <= point.top.x &&
+        data.min.y <= point.left.y &&
+        data.max.x >= point.top.x &&
+        data.max.y >= point.left.y) {
+        table.ui.selected = true
+      } else {
+        table.ui.selected = false
+      }
     })
   }
 }
