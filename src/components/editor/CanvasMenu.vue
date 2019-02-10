@@ -55,11 +55,5 @@ export default {
       z-index: 2147483647;
       left: 110px;
     }
-    .tableAdd {
-      position: fixed;
-      z-index: 2147483647;
-      top: 40px;
-      left: 110px;
-    }
   }
 </style>

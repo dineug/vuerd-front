@@ -13,17 +13,28 @@ class Event {
     this.core = null
     this.rightClickListener = []
     this.components = {
-      QuickMenu: null
+      QuickMenu: null,
+      CanvasMain: null
     }
 
+    // relation Draw
     this.isCursor = false
     this.isDraw = false
     this.lineId = null
     this.cursor = null
 
-    this.isDrag = false
+    // table Draggable
+    this.isDraggable = false
     this.tableIds = []
     this.move = {
+      x: 0,
+      y: 0
+    }
+
+    // mouse Drag
+    this.isSelectedColumn = false
+    this.isDrag = false
+    this.drag = {
       x: 0,
       y: 0
     }
@@ -50,37 +61,6 @@ class Event {
       JSLog('event', 'contextmenu')
       e.preventDefault()
       this.core.event.onRightClick(e)
-    }).on('mousemove', e => {
-      if (this.move.x === 0 && this.move.y === 0) {
-        this.move.x = e.clientX + document.documentElement.scrollLeft
-        this.move.y = e.clientY + document.documentElement.scrollTop
-      }
-      // 관계 draw
-      if (this.isDraw) {
-        storeERD.commit({
-          type: 'lineDraw',
-          id: this.lineId,
-          x: e.clientX + document.documentElement.scrollLeft,
-          y: e.clientY + document.documentElement.scrollTop
-        })
-      }
-
-      // 테이블 draggable
-      const x = e.clientX + document.documentElement.scrollLeft - this.move.x
-      const y = e.clientY + document.documentElement.scrollTop - this.move.y
-      if (this.isDrag) {
-        this.tableIds.forEach(tableId => {
-          storeERD.commit({
-            type: 'tableDraggable',
-            id: tableId,
-            x: x,
-            y: y
-          })
-        })
-      }
-
-      this.move.x = e.clientX + document.documentElement.scrollLeft
-      this.move.y = e.clientY + document.documentElement.scrollTop
     }).on('mousedown', e => {
       JSLog('event', 'mousedown')
       // 테이블 메뉴 hide
@@ -97,10 +77,33 @@ class Event {
       // 테이블 및 컬럼 selected 해제
       if (!$(e.target).closest('.erd_table').length) {
         util.selectedNone(true, true)
+        this.isSelectedColumn = false
+      }
+      // 마우스 drag
+      if (!this.isDraggable && !this.isSelectedColumn) {
+        this.onDrag('start', e)
       }
     }).on('mouseup', e => {
       JSLog('event', 'mouseup')
       this.onDraggable('stop')
+      this.onDrag('stop', e)
+    }).on('mousemove', e => {
+      if (this.move.x === 0 && this.move.y === 0) {
+        this.move.x = e.clientX + document.documentElement.scrollLeft
+        this.move.y = e.clientY + document.documentElement.scrollTop
+      }
+
+      // 관계 draw
+      this.onDraw('update', null, e)
+      // 테이블 draggable
+      this.onDraggable('update', null, e)
+      // 마우스 drag
+      if (!this.isDraggable && !this.isSelectedColumn) {
+        this.onDrag('update', e)
+      }
+
+      this.move.x = e.clientX + document.documentElement.scrollLeft
+      this.move.y = e.clientY + document.documentElement.scrollTop
     }).on('keydown', e => {
       JSLog('event', 'keydown', e.keyCode)
       switch (e.keyCode) {
@@ -201,86 +204,148 @@ class Event {
         document.querySelector('body').removeAttribute('style')
         this.isCursor = false
         this.cursor = null
-        if (this.isDraw) {
-          this.onDraw('stop')
-        }
+        this.onDraw('stop')
         break
     }
   }
 
   // 관계 draw
-  onDraw (type, id) {
+  onDraw (type, id, e) {
     switch (type) {
       case 'start':
         this.lineId = id
         this.isDraw = true
         break
-      case 'stop':
-        this.isDraw = false
-        if (id) {
-          const table = util.getData(storeERD.state.tables, id)
-
-          // fk 컬럼 생성
-          const startColumnIds = []
-          const endColumnIds = []
-          const line = util.getData(storeERD.state.lines, this.lineId)
-          const columns = util.getPKColumns(line.points[0].id)
-          columns.forEach(v => {
-            const columnId = util.guid()
-            startColumnIds.push(v.id)
-            endColumnIds.push(columnId)
-            storeERD.commit({
-              type: 'columnAdd',
-              id: id,
-              isInit: true,
-              column: {
-                id: columnId,
-                name: util.autoName(table.columns, v.name),
-                comment: v.comment,
-                dataType: v.dataType,
-                options: {
-                  notNull: true
-                },
-                ui: {
-                  fk: true
-                }
-              }
-            })
-          })
-
-          // line drawing
+      case 'update':
+        if (this.isDraw) {
           storeERD.commit({
             type: 'lineDraw',
             id: this.lineId,
-            x: table.ui.left,
-            y: table.ui.top,
-            tableId: id,
-            startColumnIds: startColumnIds,
-            endColumnIds: endColumnIds
-          })
-
-          this.onCursor('stop')
-        } else {
-          storeERD.commit({
-            type: 'lineDelete',
-            id: this.lineId
+            x: e.clientX + document.documentElement.scrollLeft,
+            y: e.clientY + document.documentElement.scrollTop
           })
         }
-        this.lineId = null
+        break
+      case 'stop':
+        if (this.isDraw) {
+          this.isDraw = false
+          if (id) {
+            const table = util.getData(storeERD.state.tables, id)
+
+            // fk 컬럼 생성
+            const startColumnIds = []
+            const endColumnIds = []
+            const line = util.getData(storeERD.state.lines, this.lineId)
+            const columns = util.getPKColumns(line.points[0].id)
+            columns.forEach(v => {
+              const columnId = util.guid()
+              startColumnIds.push(v.id)
+              endColumnIds.push(columnId)
+              storeERD.commit({
+                type: 'columnAdd',
+                id: id,
+                isInit: true,
+                column: {
+                  id: columnId,
+                  name: util.autoName(table.columns, v.name),
+                  comment: v.comment,
+                  dataType: v.dataType,
+                  options: {
+                    notNull: true
+                  },
+                  ui: {
+                    fk: true
+                  }
+                }
+              })
+            })
+
+            // line drawing
+            storeERD.commit({
+              type: 'lineDraw',
+              id: this.lineId,
+              x: table.ui.left,
+              y: table.ui.top,
+              tableId: id,
+              startColumnIds: startColumnIds,
+              endColumnIds: endColumnIds
+            })
+
+            this.onCursor('stop')
+          } else {
+            storeERD.commit({
+              type: 'lineDelete',
+              id: this.lineId
+            })
+          }
+          this.lineId = null
+        }
         break
     }
   }
 
-  // 드래그 이벤트
-  onDraggable (type, ids) {
+  // 테이블 드래그 이벤트
+  onDraggable (type, ids, e) {
+    switch (type) {
+      case 'start':
+        this.isDraggable = true
+        this.tableIds = ids
+        break
+      case 'update':
+        if (this.isDraggable) {
+          e.preventDefault()
+          this.tableIds.forEach(tableId => {
+            storeERD.commit({
+              type: 'tableDraggable',
+              id: tableId,
+              x: e.clientX + document.documentElement.scrollLeft - this.move.x,
+              y: e.clientY + document.documentElement.scrollTop - this.move.y
+            })
+          })
+        }
+        break
+      case 'stop':
+        if (this.isDraggable) {
+          this.isDraggable = false
+          this.tableIds = []
+        }
+        break
+    }
+  }
+  
+  // 마우스 드래그 이벤트
+  onDrag (type, e) {
     switch (type) {
       case 'start':
         this.isDrag = true
-        this.tableIds = ids
+        this.components.CanvasMain.svg.width = 0
+        this.components.CanvasMain.svg.height = 0
+        this.components.CanvasMain.svg.isDarg = true
+        this.drag.x = e.clientX + document.documentElement.scrollLeft
+        this.drag.y = e.clientY + document.documentElement.scrollTop
+        break
+      case 'update':
+        if (this.isDrag) {
+          e.preventDefault()
+          const currentX = e.clientX + document.documentElement.scrollLeft
+          const currentY = e.clientY + document.documentElement.scrollTop
+          const min = {}
+          const max = {}
+          min.x = this.drag.x < currentX ? this.drag.x : currentX
+          min.y = this.drag.y < currentY ? this.drag.y : currentY
+          max.x = this.drag.x > currentX ? this.drag.x : currentX
+          max.y = this.drag.y > currentY ? this.drag.y : currentY
+          this.components.CanvasMain.svg.top = min.y
+          this.components.CanvasMain.svg.left = min.x
+          this.components.CanvasMain.svg.width = max.x - min.x
+          this.components.CanvasMain.svg.height = max.y - min.y
+        }
         break
       case 'stop':
-        this.isDrag = false
-        this.tableIds = []
+        if (this.isDrag) {
+          this.isDrag = false
+          this.components.CanvasMain.svg.isDarg = false
+        }
         break
     }
   }

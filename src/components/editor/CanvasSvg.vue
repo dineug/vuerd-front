@@ -1,5 +1,6 @@
 <template lang="pug">
   svg#svg_canvas
+    // relation
     g(v-for="data in toLines" :key="data.id"
     @mouseover="hover($event, data.id)"
     @mouseleave="hoverOff(data.id)")
