@@ -206,5 +206,11 @@ export default {
         table.ui.selected = false
       }
     })
+  },
+  // 테이블 전체 선택
+  selectedAll (state) {
+    state.tables.forEach(table => {
+      table.ui.selected = true
+    })
   }
 }

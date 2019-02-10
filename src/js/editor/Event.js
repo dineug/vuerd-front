@@ -146,6 +146,13 @@ class Event {
             model.commit({ type: 'modelAdd' })
           }
           break
+        case 65: // key: A
+          if (e.ctrlKey) {
+            e.preventDefault()
+            // 테이블 전체 선택
+            this.core.erd.store().commit({ type: 'tableSelectedAll' })
+          }
+          break
         case 49: // key: 1
           if (e.altKey) {
             // 관계 1:1

@@ -48,6 +48,8 @@ export default () => {
       tableSelectedAllNone: table.selectedAllNone,
       // 테이블 드래그 multi selected
       tableMultiSelected: table.multiSelected,
+      // 테이블 전체 선택
+      tableSelectedAll: table.selectedAll,
       // 컬럼 추가
       columnAdd: column.add,
       // 컬럼 삭제
