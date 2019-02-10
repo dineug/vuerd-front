@@ -61,14 +61,14 @@
 
 <script>
 import $ from 'jquery'
-import storeERD from '@/store/editor/erd'
+import ERD from '@/js/editor/ERD'
 import * as util from '@/js/editor/util'
 
 export default {
   name: 'CanvasSvg',
   computed: {
     lines () {
-      return storeERD.state.lines
+      return ERD.store().state.lines
     },
     toLines () {
       const convertLines = []
@@ -100,7 +100,7 @@ export default {
       $g.find('line').addClass('relation_active')
       $g.find('path').addClass('relation_active')
       $g.find('circle').addClass('relation_active')
-      storeERD.commit({
+      ERD.store().commit({
         type: 'lineHover',
         id: id,
         isHover: true
@@ -117,7 +117,7 @@ export default {
           return false
         }
       })
-      storeERD.commit({
+      ERD.store().commit({
         type: 'lineHover',
         id: id,
         isHover: false

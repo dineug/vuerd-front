@@ -79,7 +79,6 @@
 <script>
 import $ from 'jquery'
 import ERD from '@/js/editor/ERD'
-import storeERD from '@/store/editor/erd'
 import draggable from 'vuedraggable'
 
 export default {
@@ -88,8 +87,8 @@ export default {
     draggable
   },
   directives: {
+    // focus 정의
     focus: {
-      // 디렉티브 정의
       inserted (el) {
         el.focus()
       }
@@ -109,29 +108,29 @@ export default {
   },
   computed: {
     tables () {
-      return storeERD.state.tables
+      return ERD.store().state.tables
     },
     TABLE_WIDTH () {
-      return storeERD.state.TABLE_WIDTH
+      return ERD.store().state.TABLE_WIDTH
     },
     COLUMN_HEIGHT () {
-      return storeERD.state.COLUMN_HEIGHT
+      return ERD.store().state.COLUMN_HEIGHT
     },
     dataTypes () {
-      return storeERD.state.dataTypes
+      return ERD.store().state.dataTypes
     }
   },
   methods: {
     // 컬럼 추가
     columnAdd (id) {
-      storeERD.commit({
+      ERD.store().commit({
         type: 'columnAdd',
         id: id
       })
     },
     // 컬럼 삭제
     columnDelete (tableId, columnId) {
-      storeERD.commit({
+      ERD.store().commit({
         type: 'columnDelete',
         tableId: tableId,
         columnId: columnId
@@ -139,7 +138,7 @@ export default {
     },
     // NULL 조건 변경
     columnChangeNull (tableId, columnId) {
-      storeERD.commit({
+      ERD.store().commit({
         type: 'columnChangeNull',
         tableId: tableId,
         columnId: columnId
@@ -147,14 +146,14 @@ export default {
     },
     // 테이블 삭제
     tableDelete (id) {
-      storeERD.commit({
+      ERD.store().commit({
         type: 'tableDelete',
         id: id
       })
     },
     // 테이블 선택
     tableSelected (e, id) {
-      storeERD.commit({
+      ERD.store().commit({
         type: 'tableSelected',
         id: id,
         ctrlKey: e.ctrlKey,
@@ -164,7 +163,7 @@ export default {
     },
     // 컬럼 선택
     columnSelected (tableId, columnId) {
-      storeERD.commit({
+      ERD.store().commit({
         type: 'columnSelected',
         tableId: tableId,
         columnId: columnId
@@ -174,7 +173,7 @@ export default {
     },
     // 데이터타입 힌트 show/hide
     dataTypeHintVisible (e, tableId, columnId, isDataTypeHint) {
-      storeERD.commit({
+      ERD.store().commit({
         type: 'columnDataTypeHintVisible',
         tableId: tableId,
         columnId: columnId,
@@ -187,7 +186,7 @@ export default {
         e.keyCode !== 9) {
         // 데이터타입 검색 정렬
         if (isDataTypeHint) {
-          storeERD.commit({
+          ERD.store().commit({
             type: 'changeDataTypeHint',
             key: e.target.value
           })
@@ -195,7 +194,7 @@ export default {
       }
 
       // 컬럼 데이터타입 관계 동기화
-      storeERD.commit({
+      ERD.store().commit({
         type: 'columnRelationSync',
         tableId: tableId,
         columnId: columnId
@@ -227,7 +226,7 @@ export default {
           break
         case 13: // key: Enter
           if (index !== -1) {
-            storeERD.commit({
+            ERD.store().commit({
               type: 'columnChangeDataType',
               tableId: tableId,
               columnId: columnId,
@@ -236,7 +235,7 @@ export default {
           }
           break
         case 9: // key: Tab
-          storeERD.commit({
+          ERD.store().commit({
             type: 'columnDataTypeHintVisibleAll',
             isDataTypeHint: false
           })
@@ -245,7 +244,7 @@ export default {
     },
     // 데이터변경
     columnChangeDataType (e, tableId, columnId, dataType) {
-      storeERD.commit({
+      ERD.store().commit({
         type: 'columnChangeDataType',
         tableId: tableId,
         columnId: columnId,
@@ -260,10 +259,10 @@ export default {
     },
     // draggableEnd event
     draggableEnd (e) {
-      storeERD.commit({
+      ERD.store().commit({
         type: 'tableHeightReset'
       })
-      storeERD.commit({
+      ERD.store().commit({
         type: 'lineValidColumn',
         id: e.item.getAttribute('column_id')
       })
@@ -300,7 +299,7 @@ export default {
       opacity: 0.9;
       padding: 10px;
       z-index: 1;
-      cursor: move;
+      /*cursor: move;*/
 
       .erd_table_top {
         height: 15px;
@@ -342,7 +341,6 @@ export default {
           padding: 0;
           width: 25px;
           height: 25px;
-          /*border-radius: 50px;*/
           color: #dc3545;
           border: none;
           outline: none;

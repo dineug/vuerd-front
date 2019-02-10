@@ -1,5 +1,5 @@
 import JSLog from '../JSLog'
-import storeERD from '@/store/editor/erd'
+import ERD from './ERD'
 import dataType from '@/store/editor/dataType'
 
 JSLog('module loaded', 'util')
@@ -24,7 +24,7 @@ export const getData = (list, id) => {
 
 // option 검색
 export const getDataTypeSearch = key => {
-  const DBType = storeERD.state.DBType
+  const DBType = ERD.store().state.DBType
   const dataTypes = dataType[DBType].slice()
 
   for (let i = 0; i < dataTypes.length; i++) {
@@ -45,7 +45,7 @@ export const getDataTypeSearch = key => {
 export const getZIndex = () => {
   let max = 0
 
-  storeERD.state.tables.forEach(v => {
+  ERD.store().state.tables.forEach(v => {
     if (v.ui.zIndex > max) {
       max = v.ui.zIndex
     }
@@ -58,7 +58,7 @@ export const autoName = (list, name, num) => {
   if (!num) num = 1
   for (let v of list) {
     if (name === v.name) {
-      return autoName(list, name + num, num + 1)
+      return autoName(list, name.replace(/[0-9]/g, '') + num, num + 1)
     }
   }
   return name
@@ -66,7 +66,7 @@ export const autoName = (list, name, num) => {
 
 // 테이블 pk 컬럼 리스트 반환
 export const getPKColumns = id => {
-  const table = getData(storeERD.state.tables, id)
+  const table = getData(ERD.store().state.tables, id)
   const columns = []
 
   for (let column of table.columns) {
@@ -225,7 +225,7 @@ export const changeIdentification = (state, table) => {
         }
         if (!isPk) break
       }
-      storeERD.commit({
+      ERD.store().commit({
         type: 'lineChangeIdentification',
         id: line.id,
         isIdentification: isPk
@@ -299,8 +299,8 @@ export const getPoint = (ui) => {
 
 // convert points
 function convertPoints (v) {
-  const startTable = getData(storeERD.state.tables, v.points[0].id)
-  const endTable = getData(storeERD.state.tables, v.points[1].id)
+  const startTable = getData(ERD.store().state.tables, v.points[0].id)
+  const endTable = getData(ERD.store().state.tables, v.points[1].id)
   const startPoint = getPoint(startTable.ui)
   const key = {
     start: 'left',

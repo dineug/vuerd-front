@@ -1,6 +1,5 @@
 import JSLog from '@/js/JSLog'
 import * as util from '@/js/editor/util'
-import storeERD from './erd'
 import ERD from '@/js/editor/ERD'
 
 JSLog('store loaded', 'mutationsTable')
@@ -18,8 +17,8 @@ export default {
         selected: false,
         top: document.documentElement.scrollTop + 100,
         left: document.documentElement.scrollLeft + 200,
-        width: storeERD.state.TABLE_WIDTH,
-        height: storeERD.state.TABLE_HEIGHT,
+        width: state.TABLE_WIDTH,
+        height: state.TABLE_HEIGHT,
         zIndex: util.getZIndex()
       }
     }
@@ -94,7 +93,7 @@ export default {
   heightReset (state) {
     JSLog('mutations', 'table', 'heightReset')
     for (let table of state.tables) {
-      table.ui.height = table.columns.length * storeERD.state.COLUMN_HEIGHT + storeERD.state.TABLE_HEIGHT
+      table.ui.height = table.columns.length * state.COLUMN_HEIGHT + state.TABLE_HEIGHT
     }
   },
   // 테이블 선택
@@ -116,7 +115,7 @@ export default {
     }
     // column 선택 제거
     if (data.onlyTableSelected) {
-      storeERD.commit({
+      this.commit({
         type: 'tableSelectedAllNone',
         isTable: false,
         isColumn: true
@@ -131,7 +130,7 @@ export default {
     }
     // 테이블추가에서 호출시 처리
     if (data.isTableAdd) {
-      storeERD.commit({
+      this.commit({
         type: 'tableSelectedAllNone',
         isTable: false,
         isColumn: true
@@ -146,7 +145,7 @@ export default {
             id: table.id,
             isInit: true,
             column: {
-              name: util.autoName(table.columns, 'column_name'),
+              name: util.autoName(table.columns, 'unnamed'),
               options: {
                 primaryKey: true,
                 notNull: true

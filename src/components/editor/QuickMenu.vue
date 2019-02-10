@@ -20,7 +20,7 @@
 
 <script>
 import ERD from '@/js/editor/ERD'
-import storeERD from '@/store/editor/erd'
+import model from '@/store/editor/model'
 import * as util from '@/js/editor/util'
 
 export default {
@@ -32,6 +32,13 @@ export default {
       zIndex: 0,
       isShow: false,
       menus: [
+        {
+          type: 'modelAdd',
+          icon: 'file',
+          isImg: false,
+          name: '모델 생성',
+          keymap: 'Alt + N'
+        },
         {
           type: 'tableAdd',
           icon: 'table',
@@ -67,11 +74,14 @@ export default {
     // menu 동작
     menuAction (type) {
       switch (type) {
+        case 'modelAdd':
+          model.commit({ type: 'modelAdd' })
+          break
         case 'tableAdd':
-          storeERD.commit({ type: 'tableAdd' })
+          ERD.store().commit({ type: 'tableAdd' })
           break
         case 'pk':
-          storeERD.commit({
+          ERD.store().commit({
             type: 'columnKey',
             key: type
           })

@@ -1,7 +1,7 @@
 import JSLog from '../JSLog'
 import $ from 'jquery'
 import * as util from './util'
-import storeERD from '@/store/editor/erd'
+import model from '@/store/editor/model'
 
 /**
  * 이벤트 클래스
@@ -69,14 +69,14 @@ class Event {
       }
       // 데이터 타입 힌트 hide
       if (!$(e.target).closest('.erd_data_type_list').length) {
-        storeERD.commit({
+        this.core.erd.store().commit({
           type: 'columnDataTypeHintVisibleAll',
           isDataTypeHint: false
         })
       }
       // 테이블 및 컬럼 selected 해제
       if (!$(e.target).closest('.erd_table').length) {
-        storeERD.commit({
+        this.core.erd.store().commit({
           type: 'tableSelectedAllNone',
           isTable: true,
           isColumn: true
@@ -114,9 +114,9 @@ class Event {
         case 13: // key: Enter
           if (e.altKey) {
             // 컬럼 생성
-            for (let table of storeERD.state.tables) {
+            for (let table of this.core.erd.store().state.tables) {
               if (table.ui.selected) {
-                storeERD.commit({
+                this.core.erd.store().commit({
                   type: 'columnAdd',
                   id: table.id
                 })
@@ -127,7 +127,7 @@ class Event {
         case 75: // key: K
           if (e.altKey) {
             // 컬럼 PK 부여
-            storeERD.commit({
+            this.core.erd.store().commit({
               type: 'columnKey',
               key: 'pk'
             })
@@ -136,7 +136,12 @@ class Event {
         case 84: // key: T
           if (e.altKey) {
             // 테이블 생성
-            storeERD.commit({ type: 'tableAdd' })
+            this.core.erd.store().commit({ type: 'tableAdd' })
+          }
+          break
+        case 78: // key: N
+          if (e.altKey) {
+            model.commit({ type: 'modelAdd' })
           }
           break
         case 49: // key: 1
@@ -148,6 +153,12 @@ class Event {
               this.onCursor('start', 'erd-0-1')
             }
           }
+          if (e.ctrlKey) {
+            model.commit({
+              type: 'modelActiveKeyMap',
+              index: 1
+            })
+          }
           break
         case 50: // key: 2
           if (e.altKey) {
@@ -157,6 +168,68 @@ class Event {
             } else {
               this.onCursor('start', 'erd-0-1-N')
             }
+          }
+          if (e.ctrlKey) {
+            model.commit({
+              type: 'modelActiveKeyMap',
+              index: 2
+            })
+          }
+          break
+        case 51: // key: 3
+          if (e.ctrlKey) {
+            model.commit({
+              type: 'modelActiveKeyMap',
+              index: 3
+            })
+          }
+          break
+        case 52: // key: 4
+          if (e.ctrlKey) {
+            model.commit({
+              type: 'modelActiveKeyMap',
+              index: 4
+            })
+          }
+          break
+        case 53: // key: 5
+          if (e.ctrlKey) {
+            model.commit({
+              type: 'modelActiveKeyMap',
+              index: 5
+            })
+          }
+          break
+        case 54: // key: 6
+          if (e.ctrlKey) {
+            model.commit({
+              type: 'modelActiveKeyMap',
+              index: 6
+            })
+          }
+          break
+        case 55: // key: 7
+          if (e.ctrlKey) {
+            model.commit({
+              type: 'modelActiveKeyMap',
+              index: 7
+            })
+          }
+          break
+        case 56: // key: 8
+          if (e.ctrlKey) {
+            model.commit({
+              type: 'modelActiveKeyMap',
+              index: 8
+            })
+          }
+          break
+        case 57: // key: 9
+          if (e.ctrlKey) {
+            model.commit({
+              type: 'modelActiveKeyMap',
+              index: 9
+            })
           }
           break
       }
@@ -222,7 +295,7 @@ class Event {
         break
       case 'update':
         if (this.isDraw) {
-          storeERD.commit({
+          this.core.erd.store().commit({
             type: 'lineDraw',
             id: this.lineId,
             x: e.clientX + document.documentElement.scrollLeft,
@@ -234,18 +307,18 @@ class Event {
         if (this.isDraw) {
           this.isDraw = false
           if (id) {
-            const table = util.getData(storeERD.state.tables, id)
+            const table = util.getData(this.core.erd.store().state.tables, id)
 
             // fk 컬럼 생성
             const startColumnIds = []
             const endColumnIds = []
-            const line = util.getData(storeERD.state.lines, this.lineId)
+            const line = util.getData(this.core.erd.store().state.lines, this.lineId)
             const columns = util.getPKColumns(line.points[0].id)
             columns.forEach(v => {
               const columnId = util.guid()
               startColumnIds.push(v.id)
               endColumnIds.push(columnId)
-              storeERD.commit({
+              this.core.erd.store().commit({
                 type: 'columnAdd',
                 id: id,
                 isInit: true,
@@ -265,7 +338,7 @@ class Event {
             })
 
             // line drawing
-            storeERD.commit({
+            this.core.erd.store().commit({
               type: 'lineDraw',
               id: this.lineId,
               x: table.ui.left,
@@ -277,7 +350,7 @@ class Event {
 
             this.onCursor('stop')
           } else {
-            storeERD.commit({
+            this.core.erd.store().commit({
               type: 'lineDelete',
               id: this.lineId
             })
@@ -299,7 +372,7 @@ class Event {
         if (this.isDraggable) {
           e.preventDefault()
           this.tableIds.forEach(tableId => {
-            storeERD.commit({
+            this.core.erd.store().commit({
               type: 'tableDraggable',
               id: tableId,
               x: e.clientX + document.documentElement.scrollLeft - this.move.x,
@@ -316,7 +389,7 @@ class Event {
         break
     }
   }
-  
+
   // 마우스 드래그 이벤트
   onDrag (type, e) {
     switch (type) {
@@ -347,7 +420,7 @@ class Event {
           this.components.CanvasMain.svg.left = min.x
           this.components.CanvasMain.svg.width = max.x - min.x
           this.components.CanvasMain.svg.height = max.y - min.y
-          storeERD.commit({
+          this.core.erd.store().commit({
             type: 'tableMultiSelected',
             min: min,
             max: max

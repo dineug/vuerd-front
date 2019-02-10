@@ -1,5 +1,6 @@
 import JSLog from '../JSLog'
 import event from './Event'
+import model from '@/store/editor/model'
 
 /**
  * core 클래스
@@ -10,6 +11,7 @@ class ERD {
 
     // 모듈 객체
     this.core = {
+      erd: this,
       event: event
     }
 
@@ -20,8 +22,17 @@ class ERD {
   setInit (core) {
     JSLog('module dependency init', 'ERD')
     Object.keys(core).forEach(function (v) {
-      core[v].init(core)
+      if (typeof core[v].init === 'function') core[v].init(core)
     })
+  }
+
+  // 할성화 된 탭 모델 데이터
+  store () {
+    for (let tab of model.state.tabs) {
+      if (tab.active) {
+        return tab.store
+      }
+    }
   }
 }
 

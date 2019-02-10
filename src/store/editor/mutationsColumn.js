@@ -1,6 +1,5 @@
 import JSLog from '@/js/JSLog'
 import * as util from '@/js/editor/util'
-import storeERD from './erd'
 
 JSLog('store loaded', 'mutationsColumn')
 
@@ -10,7 +9,7 @@ export default {
     JSLog('mutations', 'column', 'add')
     for (let table of state.tables) {
       if (data.id === table.id) {
-        table.ui.height += storeERD.state.COLUMN_HEIGHT
+        table.ui.height += state.COLUMN_HEIGHT
         const column = {
           id: util.guid(),
           name: '',
@@ -52,7 +51,7 @@ export default {
     for (let i in table.columns) {
       if (data.columnId === table.columns[i].id) {
         table.columns.splice(i, 1)
-        table.ui.height -= storeERD.state.COLUMN_HEIGHT
+        table.ui.height -= state.COLUMN_HEIGHT
         break
       }
     }
@@ -105,7 +104,7 @@ export default {
   // 컬럼 선택
   selected (state, data) {
     JSLog('mutations', 'column', 'selected')
-    storeERD.commit({
+    this.commit({
       type: 'tableSelectedAllNone',
       isTable: false,
       isColumn: true
