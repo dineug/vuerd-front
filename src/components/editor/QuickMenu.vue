@@ -35,7 +35,7 @@ export default {
       menus: [
         {
           type: 'modelAdd',
-          icon: 'file',
+          icon: 'database',
           isImg: false,
           name: 'New Model',
           keymap: 'Alt + N'
