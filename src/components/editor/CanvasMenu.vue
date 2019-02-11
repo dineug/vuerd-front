@@ -14,12 +14,14 @@
             font-awesome-icon(icon="times")
 
     ul.menu_sidebar
-      li(v-for="menu in menus" :key="menu.id" :title="menu.name")
+      li(v-for="menu in menus" :key="menu.id" :title="menu.name"
+      @click="menuAction(menu.type)")
         font-awesome-icon(:icon="menu.icon")
 </template>
 
 <script>
 import $ from 'jquery'
+import ERD from '@/js/editor/ERD'
 import model from '@/store/editor/model'
 import draggable from 'vuedraggable'
 
@@ -91,6 +93,20 @@ export default {
         type: 'modelDelete',
         id: id
       })
+    },
+    // sidebar action
+    menuAction (type) {
+      switch (type) {
+        case 'export-sql':
+          ERD.core.file.exportData('sql')
+          break
+        case 'import-json':
+          ERD.core.file.click('json')
+          break
+        case 'export-json':
+          ERD.core.file.exportData('json')
+          break
+      }
     }
   },
   updated () {
@@ -109,10 +125,12 @@ export default {
   .menu_canvas {
 
     .menu_top {
+      width: 100%;
       height: 33px;
       position: fixed;
       left: 40px;
       z-index: 2147483647;
+      background-color: #797979;
 
       li {
         height: 33px;

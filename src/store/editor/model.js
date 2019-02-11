@@ -21,19 +21,23 @@ export default new Vuex.Store({
   },
   mutations: {
     // 모델 추가
-    modelAdd (state) {
+    modelAdd (state, data) {
       JSLog('mutations', 'modelAdd')
-      const tab = {
-        id: util.guid(),
-        name: util.autoName(state.tabs, 'untitled'),
-        active: false,
-        store: storeERD()
+      if (data.isImport) {
+        state.tabs.push(data.tab)
+      } else {
+        const tab = {
+          id: util.guid(),
+          name: util.autoName(state.tabs, 'untitled'),
+          active: false,
+          store: storeERD()
+        }
+        state.tabs.push(tab)
+        this.commit({
+          type: 'modelActive',
+          id: tab.id
+        })
       }
-      state.tabs.push(tab)
-      this.commit({
-        type: 'modelActive',
-        id: tab.id
-      })
     },
     // 모델 변경
     modelActive (state, data) {
@@ -90,6 +94,12 @@ export default new Vuex.Store({
       }
       // 모든 이벤트 중지
       ERD.core.event.destroy()
+    },
+    // 전체 import
+    importData (state, data) {
+      Object.keys(state).forEach(key => {
+        state[key] = data.state[key]
+      })
     }
   }
 })

@@ -34,6 +34,12 @@ export default () => {
         JSLog('mutations', 'erd', 'changeDataTypeHint')
         state.dataTypes = util.getDataTypeSearch(data.key)
       },
+      // 전체 import
+      importData (state, data) {
+        Object.keys(state).forEach(key => {
+          state[key] = data.state[key]
+        })
+      },
       // 테이블 추가
       tableAdd: table.add,
       // 테이블 삭제

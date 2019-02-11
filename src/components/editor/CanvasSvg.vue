@@ -21,7 +21,6 @@
       :stroke="data.isIdentification ? '#60b9c4' : '#dda8b1'"
       stroke-width="3")
 
-
       // end draw
       line(v-if="data.isDraw"
       :x1="data.path.line.end.x1" :y1="data.path.line.end.y1"
@@ -30,7 +29,7 @@
       stroke-width="3")
 
       circle(v-if="data.isDraw"
-      :cx="data.circle.cx" :cy="data.circle.cy" r="10"
+      :cx="data.circle.cx" :cy="data.circle.cy" r="8"
       :stroke="data.isIdentification ? '#60b9c4' : '#dda8b1'"
       fill-opacity="0.0" stroke-width="3")
 

@@ -1,5 +1,6 @@
 import JSLog from '../JSLog'
 import event from './Event'
+import file from './File'
 import model from '@/store/editor/model'
 
 /**
@@ -12,7 +13,8 @@ class ERD {
     // 모듈 객체
     this.core = {
       erd: this,
-      event: event
+      event: event,
+      file: file
     }
 
     this.setInit(this.core)

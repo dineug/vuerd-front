@@ -38,14 +38,13 @@ class Event {
       x: 0,
       y: 0
     }
-
-    this.setEvent()
   }
 
   // 종속성 초기화
   init (core) {
     JSLog('module dependency init', 'Event')
     this.core = core
+    this.setEvent()
   }
 
   setEvent () {
