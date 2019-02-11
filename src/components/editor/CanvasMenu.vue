@@ -150,7 +150,8 @@ export default {
       height: 100%;
       position: fixed;
       z-index: 2147483647;
-      background-color: white;
+      color: white;
+      background-color: black;
 
       li {
         text-align: center;
