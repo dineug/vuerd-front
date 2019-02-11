@@ -38,14 +38,14 @@ export default {
           icon: 'database',
           isImg: false,
           name: 'New Model',
-          keymap: 'Alt + N'
+          keymap: 'Alt + Shift + N'
         },
         {
           type: 'tableAdd',
           icon: 'table',
           isImg: false,
           name: 'New Table',
-          keymap: 'Alt + T'
+          keymap: 'Alt + N'
         },
         {
           type: 'pk',
@@ -120,7 +120,7 @@ export default {
     background-color: $mbg;
     position: fixed;
     opacity: 0.9;
-    width: 211.3px;
+    width: 263px;
 
     li {
       width: 100%;

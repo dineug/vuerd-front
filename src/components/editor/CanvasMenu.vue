@@ -11,6 +11,8 @@
           button(:class="{ tab_active: tab.active }"
           @click="modelDelete(tab.id)")
             font-awesome-icon(icon="times")
+    ul.menu_sidebar
+      li(v-for="menu in menus" :key="menu.id") {{ menu.name }}
 </template>
 
 <script>
@@ -29,6 +31,18 @@ export default {
       inserted (el) {
         el.focus()
       }
+    }
+  },
+  data () {
+    return {
+      menus: [
+        {
+          type: '',
+          icon: '',
+          isImg: '',
+          name: '1'
+        }
+      ]
     }
   },
   computed: {
@@ -70,6 +84,7 @@ export default {
     .menu_top {
       height: 33px;
       position: fixed;
+      left: 40px;
       z-index: 2147483647;
 
       li {
@@ -101,6 +116,14 @@ export default {
         width: 150px;
         background-color: #424242;
       }
+    }
+
+    .menu_sidebar {
+      width: 40px;
+      height: 100%;
+      position: fixed;
+      z-index: 2147483647;
+      background-color: white;
     }
 
     .ghost {

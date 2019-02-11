@@ -135,14 +135,13 @@ class Event {
             })
           }
           break
-        case 84: // key: T
+        case 78: // key: N
           if (e.altKey) {
             // 테이블 생성
             this.core.erd.store().commit({ type: 'tableAdd' })
           }
-          break
-        case 78: // key: N
-          if (e.altKey) {
+          if (e.altKey && e.shiftKey) {
+            // 모델 생성
             model.commit({ type: 'modelAdd' })
           }
           break
