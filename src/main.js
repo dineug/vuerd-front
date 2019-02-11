@@ -5,15 +5,43 @@ import store from './store'
 import axios from 'axios'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { faTable, faPlus, faTimes, faKey, faDatabase } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import {
+  faTable,
+  faPlus,
+  faTimes,
+  faKey,
+  faSave,
+  faDatabase,
+  faFile,
+  faFileCode,
+  faFileMedical,
+  faFileImport,
+  faFileExport,
+  faFileUpload,
+  faFileDownload
+} from '@fortawesome/free-solid-svg-icons'
+
+library.add(
+  faTable,
+  faPlus,
+  faTimes,
+  faKey,
+  faSave,
+  faDatabase,
+  faFile,
+  faFileCode,
+  faFileMedical,
+  faFileImport,
+  faFileExport,
+  faFileUpload,
+  faFileDownload
+)
+Vue.component('font-awesome-icon', FontAwesomeIcon)
 
 Vue.config.productionTip = false
 Vue.prototype.$http = axios
 Vue.prototype.$event = new Vue()
-
-library.add(faTable, faPlus, faTimes, faKey, faDatabase)
-Vue.component('font-awesome-icon', FontAwesomeIcon)
 
 new Vue({
   router,

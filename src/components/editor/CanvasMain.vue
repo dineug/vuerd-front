@@ -26,7 +26,7 @@
         @click="columnAdd(table.id)")
           font-awesome-icon(icon="plus")
 
-        button(class="btn btn-outline-danger"
+        button(class="btn btn-outline-danger" title="Delete"
         @click="tableDelete(table.id)")
           font-awesome-icon(icon="times")
 

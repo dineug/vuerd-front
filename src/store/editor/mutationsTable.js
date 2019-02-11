@@ -88,6 +88,12 @@ export default {
         i--
       }
     }
+    for (let i in ERD.core.event.tableIds) {
+      if (ERD.core.event.tableIds[i] === data.id) {
+        ERD.core.event.tableIds.splice(i, 1)
+        break
+      }
+    }
   },
   // 테이블 높이 리셋
   heightReset (state) {

@@ -3,6 +3,7 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import * as util from '@/js/editor/util'
 import storeERD from '@/store/editor/erd'
+import ERD from '@/js/editor/ERD'
 
 JSLog('store loaded', 'model')
 Vue.use(Vuex)
@@ -47,6 +48,8 @@ export default new Vuex.Store({
           }
         })
       }
+      // 모든 이벤트 중지
+      ERD.core.event.destroy()
     },
     // 모델 변경 단축키
     modelActiveKeyMap (state, data) {
@@ -67,6 +70,8 @@ export default new Vuex.Store({
           }
         })
       }
+      // 모든 이벤트 중지
+      ERD.core.event.destroy()
     },
     // 모델 삭제
     modelDelete (state, data) {
@@ -83,6 +88,8 @@ export default new Vuex.Store({
           break
         }
       }
+      // 모든 이벤트 중지
+      ERD.core.event.destroy()
     }
   }
 })

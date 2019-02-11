@@ -2,17 +2,20 @@
   .menu_canvas
     draggable.menu_top(element="ul" v-model="model.tabs" :options="{group:'tab', ghostClass: 'ghost'}")
       transition-group(type="transition" name="flip-list")
+
         li(v-for="(tab, i) in model.tabs" :key="tab.id")
           input(v-model="tab.name" v-focus
           :class="{ tab_active: tab.active }"
           type="text" :title="i < 9 ? `Ctrl + ${i+1}` : ''"
           @click="modelActive(tab.id)")
 
-          button(:class="{ tab_active: tab.active }"
+          button(:class="{ tab_active: tab.active }" title="Ctrl + Delete"
           @click="modelDelete(tab.id)")
             font-awesome-icon(icon="times")
+
     ul.menu_sidebar
-      li(v-for="menu in menus" :key="menu.id") {{ menu.name }}
+      li(v-for="menu in menus" :key="menu.id" :title="menu.name")
+        font-awesome-icon(:icon="menu.icon")
 </template>
 
 <script>
@@ -37,10 +40,34 @@ export default {
     return {
       menus: [
         {
-          type: '',
-          icon: '',
-          isImg: '',
-          name: '1'
+          type: 'DBType',
+          icon: 'database',
+          name: 'DB'
+        },
+        {
+          type: 'save',
+          icon: 'save',
+          name: 'save'
+        },
+        {
+          type: 'import-sql',
+          icon: 'file-upload',
+          name: 'import-sql'
+        },
+        {
+          type: 'export-sql',
+          icon: 'file-download',
+          name: 'export-sql'
+        },
+        {
+          type: 'import-json',
+          icon: 'file-import',
+          name: 'import-json'
+        },
+        {
+          type: 'export-json',
+          icon: 'file-export',
+          name: 'export-json'
         }
       ]
     }
@@ -124,6 +151,12 @@ export default {
       position: fixed;
       z-index: 2147483647;
       background-color: white;
+
+      li {
+        text-align: center;
+        margin-top: 20px;
+        cursor: pointer;
+      }
     }
 
     .ghost {

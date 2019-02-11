@@ -38,7 +38,7 @@ export default {
           icon: 'database',
           isImg: false,
           name: 'New Model',
-          keymap: 'Alt + Shift + N'
+          keymap: 'Ctrl + Alt + N'
         },
         {
           type: 'tableAdd',

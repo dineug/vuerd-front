@@ -140,7 +140,7 @@ class Event {
             // 테이블 생성
             this.core.erd.store().commit({ type: 'tableAdd' })
           }
-          if (e.altKey && e.shiftKey) {
+          if (e.ctrlKey && e.altKey) {
             // 모델 생성
             model.commit({ type: 'modelAdd' })
           }
@@ -150,6 +150,42 @@ class Event {
             e.preventDefault()
             // 테이블 전체 선택
             this.core.erd.store().commit({ type: 'tableSelectedAll' })
+          }
+          break
+        case 27: // key: ESC
+          // 모든 이벤트 중지
+          this.destroy()
+          // 모든 selected 해제
+          this.core.erd.store().commit({
+            type: 'tableSelectedAllNone',
+            isTable: true,
+            isColumn: true
+          })
+          this.isSelectedColumn = false
+          break
+        case 46: // key: Delete
+          e.preventDefault()
+          // 테이블 삭제
+          const store = this.core.erd.store()
+          for (let i = 0; i < store.state.tables.length; i++) {
+            if (store.state.tables[i].ui.selected) {
+              store.commit({
+                type: 'tableDelete',
+                id: store.state.tables[i].id
+              })
+              i--
+            }
+          }
+          if (e.ctrlKey) {
+            // 모델 삭제
+            for (let tab of model.state.tabs) {
+              if (tab.active) {
+                model.commit({
+                  type: 'modelDelete',
+                  id: tab.id
+                })
+              }
+            }
           }
           break
         case 49: // key: 1
@@ -162,6 +198,7 @@ class Event {
             }
           }
           if (e.ctrlKey) {
+            e.preventDefault()
             model.commit({
               type: 'modelActiveKeyMap',
               index: 1
@@ -178,6 +215,7 @@ class Event {
             }
           }
           if (e.ctrlKey) {
+            e.preventDefault()
             model.commit({
               type: 'modelActiveKeyMap',
               index: 2
@@ -186,6 +224,7 @@ class Event {
           break
         case 51: // key: 3
           if (e.ctrlKey) {
+            e.preventDefault()
             model.commit({
               type: 'modelActiveKeyMap',
               index: 3
@@ -194,6 +233,7 @@ class Event {
           break
         case 52: // key: 4
           if (e.ctrlKey) {
+            e.preventDefault()
             model.commit({
               type: 'modelActiveKeyMap',
               index: 4
@@ -202,6 +242,7 @@ class Event {
           break
         case 53: // key: 5
           if (e.ctrlKey) {
+            e.preventDefault()
             model.commit({
               type: 'modelActiveKeyMap',
               index: 5
@@ -210,6 +251,7 @@ class Event {
           break
         case 54: // key: 6
           if (e.ctrlKey) {
+            e.preventDefault()
             model.commit({
               type: 'modelActiveKeyMap',
               index: 6
@@ -218,6 +260,7 @@ class Event {
           break
         case 55: // key: 7
           if (e.ctrlKey) {
+            e.preventDefault()
             model.commit({
               type: 'modelActiveKeyMap',
               index: 7
@@ -226,6 +269,7 @@ class Event {
           break
         case 56: // key: 8
           if (e.ctrlKey) {
+            e.preventDefault()
             model.commit({
               type: 'modelActiveKeyMap',
               index: 8
@@ -234,6 +278,7 @@ class Event {
           break
         case 57: // key: 9
           if (e.ctrlKey) {
+            e.preventDefault()
             model.commit({
               type: 'modelActiveKeyMap',
               index: 9
@@ -442,6 +487,15 @@ class Event {
         }
         break
     }
+  }
+
+  // 모든 이벤트 중지
+  destroy () {
+    this.onCursor('stop')
+    this.onDraw('stop')
+    this.onDraggable('stop')
+    this.onDrag('stop')
+    this.components.QuickMenu.isShow = false
   }
 }
 
