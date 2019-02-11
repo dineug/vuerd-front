@@ -23,21 +23,17 @@ export default new Vuex.Store({
     // 모델 추가
     modelAdd (state, data) {
       JSLog('mutations', 'modelAdd')
-      if (data.isImport) {
-        state.tabs.push(data.tab)
-      } else {
-        const tab = {
-          id: util.guid(),
-          name: util.autoName(state.tabs, 'untitled'),
-          active: false,
-          store: storeERD()
-        }
-        state.tabs.push(tab)
-        this.commit({
-          type: 'modelActive',
-          id: tab.id
-        })
+      const tab = {
+        id: util.guid(),
+        name: util.autoName(state.tabs, 'untitled'),
+        active: false,
+        store: storeERD()
       }
+      state.tabs.push(tab)
+      this.commit({
+        type: 'modelActive',
+        id: tab.id
+      })
     },
     // 모델 변경
     modelActive (state, data) {

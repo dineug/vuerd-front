@@ -64,47 +64,62 @@ class File {
     switch (type) {
       case 'json':
         const json = JSON.parse(data)
+        const models = {
+          tabs: []
+        }
         for (let tab of json.tabs) {
           const newTab = {
             id: tab.id,
             name: tab.name,
-            active: false,
+            active: tab.active,
             store: storeERD()
           }
           newTab.store.commit({
             type: 'importData',
             state: tab.store
           })
-          model.commit({
-            type: 'modelAdd',
-            isImport: true,
-            tab: newTab
-          })
+          models.tabs.push(newTab)
         }
+        model.commit({
+          type: 'importData',
+          state: models
+        })
         break
     }
   }
 
   // export
   exportData (type) {
+    let tab = null
+    for (let t of model.state.tabs) {
+      if (t.active) {
+        tab = t
+        break
+      }
+    }
+    const filename = `vuerd-${tab.name}-${new Date().getTime()}.${type}`
     switch (type) {
       case 'json':
-        const filename = `vuerd-${model.state.tabs.name}-${new Date().getTime()}.json`
         const json = this.toJSON()
         const blob = new Blob([json], { type: 'application/json' })
-        if (window.navigator.msSaveOrOpenBlob) {
-          window.navigator.msSaveBlob(blob, filename)
-        } else {
-          const elem = window.document.createElement('a')
-          elem.href = window.URL.createObjectURL(blob)
-          elem.download = filename
-          document.body.appendChild(elem)
-          elem.click()
-          document.body.removeChild(elem)
-        }
+        this.execute(blob, filename)
         break
       case 'sql':
         break
+    }
+  }
+
+  // download
+  execute (blob, filename) {
+    if (window.navigator.msSaveOrOpenBlob) {
+      window.navigator.msSaveBlob(blob, filename)
+    } else {
+      const elem = window.document.createElement('a')
+      elem.href = window.URL.createObjectURL(blob)
+      elem.download = filename
+      document.body.appendChild(elem)
+      elem.click()
+      document.body.removeChild(elem)
     }
   }
 
