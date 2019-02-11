@@ -37,13 +37,16 @@ export default new Vuex.Store({
     // 모델 변경
     modelActive (state, data) {
       JSLog('mutations', 'modelActive')
-      state.tabs.forEach(tab => {
-        if (tab.id === data.id) {
-          tab.active = true
-        } else {
-          tab.active = false
-        }
-      })
+      const isTab = util.getData(state.tabs, data.id)
+      if (isTab) {
+        state.tabs.forEach(tab => {
+          if (tab.id === data.id) {
+            tab.active = true
+          } else {
+            tab.active = false
+          }
+        })
+      }
     },
     // 모델 변경 단축키
     modelActiveKeyMap (state, data) {

@@ -106,8 +106,20 @@ export default {
     .ghost {
       opacity: 0.5;
     }
+    /* 이동 animation */
     .flip-list-move {
       transition: transform 0.5s;
+    }
+    /* 추가,삭제 animation */
+    .flip-list-enter-active {
+      transition: all .3s ease;
+    }
+    .flip-list-leave-active {
+      transition: all .4s ease-out;
+    }
+    .flip-list-enter, .flip-list-leave-to {
+      transform: translateX(10px);
+      opacity: 0;
     }
   }
 </style>
