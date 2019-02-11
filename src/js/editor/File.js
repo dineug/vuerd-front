@@ -21,7 +21,7 @@ class File {
 
   // import ready
   setImport () {
-    this.importJSONTag = $('<input type="file">').change(e => {
+    this.importJSONTag = $('<input type="file" accept=".json">').change(e => {
       const f = e.target.files[0]
       if (/\.(json)$/i.test(f.name)) {
         const reader = new FileReader()
@@ -33,7 +33,7 @@ class File {
         alert('json 파일만 올려주세요')
       }
     })
-    this.importSQLTag = $('<input type="file">').change(e => {
+    this.importSQLTag = $('<input type="file" accept=".sql">').change(e => {
       const f = e.target.files[0]
       if (/\.(sql)$/i.test(f.name)) {
         const reader = new FileReader()
