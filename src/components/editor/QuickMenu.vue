@@ -1,5 +1,5 @@
 <template lang="pug">
-  ul#quick_menu(v-if="isShow"
+  ul.quick_menu(v-if="isShow"
   :style="`top: ${top}px; left: ${left}px; z-index: ${zIndex};`")
 
     li(v-for="menu in menus" :key="menu.id"
@@ -115,7 +115,7 @@ export default {
 
 <style lang="scss" scoped>
   $mbg: #191919;
-  #quick_menu {
+  .quick_menu {
     color: #a2a2a2;
     background-color: $mbg;
     position: fixed;

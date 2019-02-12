@@ -3,6 +3,9 @@ import $ from 'jquery'
 import * as util from './util'
 import model from '@/store/editor/model'
 
+const CANVAS_SIZE = 5000
+const PREVIEW_SIZE = 150
+
 /**
  * 이벤트 클래스
  */
@@ -14,7 +17,8 @@ class Event {
     this.rightClickListener = []
     this.components = {
       QuickMenu: null,
-      CanvasMain: null
+      CanvasMain: null,
+      CanvasMenu: null
     }
 
     // relation Draw
@@ -38,6 +42,14 @@ class Event {
       x: 0,
       y: 0
     }
+
+    // preview
+    this.isPreview = false
+    this.preview = {
+      left: (-1 * CANVAS_SIZE / 2) + (PREVIEW_SIZE / 2) - PREVIEW_SIZE - 20,
+      x: 150 + 20,
+      ratio: CANVAS_SIZE / PREVIEW_SIZE
+    }
   }
 
   // 종속성 초기화
@@ -54,16 +66,29 @@ class Event {
     //   e.returnValue = dialogText;
     //   return dialogText;
     // }
+
     // 전역 이벤트
     this.on('contextmenu', e => {
       // 오른쪽 클릭 이벤트
       JSLog('event', 'contextmenu')
       e.preventDefault()
       this.core.event.onRightClick(e)
+    }).on('resize', e => {
+      // 미리보기 창크기 동적 위치
+      const width = $(window).width()
+      const height = $(window).height()
+      this.components.CanvasMenu.preview.left = this.preview.left + width
+      this.components.CanvasMenu.preview.x = width - this.preview.x
+      this.components.CanvasMenu.preview.target.width = width * 0.03
+      this.components.CanvasMenu.preview.target.height = height * 0.03
+    }).on('scroll', e => {
+      // 스크롤 위치에 따라 미리보기 target 수정
+      this.components.CanvasMenu.preview.target.x = window.scrollX / this.preview.ratio
+      this.components.CanvasMenu.preview.target.y = window.scrollY / this.preview.ratio
     }).on('mousedown', e => {
       JSLog('event', 'mousedown')
       // 테이블 메뉴 hide
-      if (!$(e.target).closest('#quick_menu').length) {
+      if (!$(e.target).closest('.quick_menu').length) {
         this.components.QuickMenu.isShow = false
       }
       // 데이터 타입 힌트 hide
@@ -84,7 +109,9 @@ class Event {
         this.isSelectedColumn = false
       }
       // 마우스 drag
-      if (!this.isDraggable && !this.isSelectedColumn &&
+      if (!this.isDraggable &&
+        !this.isSelectedColumn &&
+        !this.isPreview &&
         !$(e.target).closest('.menu_top').length) {
         this.onDrag('start', e)
       }
@@ -92,6 +119,7 @@ class Event {
       JSLog('event', 'mouseup')
       this.onDraggable('stop')
       this.onDrag('stop', e)
+      this.onPreview('stop')
     }).on('mousemove', e => {
       if (this.move.x === 0 && this.move.y === 0) {
         this.move.x = e.clientX + document.documentElement.scrollLeft
@@ -102,6 +130,7 @@ class Event {
       this.onDraw('update', null, e)
       // 테이블 draggable
       this.onDraggable('update', null, e)
+      this.onPreview('update', e)
       // 마우스 drag
       if (!this.isDraggable && !this.isSelectedColumn) {
         this.onDrag('update', e)
@@ -483,6 +512,40 @@ class Event {
         if (this.isDrag) {
           this.isDrag = false
           this.components.CanvasMain.svg.isDarg = false
+        }
+        break
+    }
+  }
+
+  // 미리보기 네비게이션
+  onPreview (type, e) {
+    switch (type) {
+      case 'start':
+        this.isPreview = true
+        break
+      case 'update':
+        if (this.isPreview) {
+          const moveX = e.clientX + document.documentElement.scrollLeft - this.move.x
+          const moveY = e.clientY + document.documentElement.scrollTop - this.move.y
+          const x = this.components.CanvasMenu.preview.target.x + moveX
+          const y = this.components.CanvasMenu.preview.target.y + moveY
+          const width = $(window).width()
+          const height = $(window).height()
+          const targetWidth = width * 0.03
+          const targetHeight = height * 0.03
+          if (x >= 0 && targetWidth + x <= 150) {
+            this.components.CanvasMenu.preview.target.x = x
+            window.scrollTo(x * this.preview.ratio, window.scrollY)
+          }
+          if (y >= 0 && targetHeight + y <= 150) {
+            this.components.CanvasMenu.preview.target.y = y
+            window.scrollTo(window.scrollX, y * this.preview.ratio)
+          }
+        }
+        break
+      case 'stop':
+        if (this.isPreview) {
+          this.isPreview = false
         }
         break
     }

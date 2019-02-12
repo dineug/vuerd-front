@@ -1,5 +1,5 @@
 <template lang="pug">
-  svg#svg_canvas
+  svg.svg_canvas
     // relation
     g(v-for="data in toLines" :key="data.id"
     @mouseover="hover($event, data.id)"
@@ -127,7 +127,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-  #svg_canvas {
+  .svg_canvas {
     width: 5000px;
     height: 5000px;
     position: absolute;

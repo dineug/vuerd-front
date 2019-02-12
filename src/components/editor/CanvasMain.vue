@@ -1,5 +1,5 @@
 <template lang="pug">
-  #main_canvas(name="slide-fade" tag="div")
+  .main_canvas(name="slide-fade" tag="div")
     // mouse drag
     svg#svg_drag(v-if="svg.isDarg"
     :style="`top: ${svg.top}px; left: ${svg.left}px; width: ${svg.width}px; height: ${svg.height}px;`")
@@ -283,9 +283,10 @@ export default {
   $key_fk: #dda8b1;
   $key_pfk: #60b9c4;
 
-  #main_canvas {
+  .main_canvas {
     width: 5000px;
     height: 5000px;
+    background-color: #282828;
 
     #svg_drag {
       position: absolute;
@@ -299,7 +300,6 @@ export default {
       opacity: 0.9;
       padding: 10px;
       z-index: 1;
-      /*cursor: move;*/
 
       .erd_table_top {
         height: 15px;

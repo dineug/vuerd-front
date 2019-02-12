@@ -17,6 +17,11 @@
       li(v-for="menu in menus" :key="menu.id" :title="menu.name"
       @click="menuAction(menu.type)")
         font-awesome-icon(:icon="menu.icon")
+
+    canvas-main.preview(:style="`top: ${preview.top}px; left: ${preview.left}px;`")
+    .preview_border(:style="`top: ${preview.y}px; left: ${preview.x}px;`")
+      .preview_target(:style="`top: ${preview.target.y}px; left: ${preview.target.x}px; width: ${preview.target.width}px; height: ${preview.target.height}px;`"
+      @mousedown="onPreview")
 </template>
 
 <script>
@@ -24,11 +29,15 @@ import $ from 'jquery'
 import ERD from '@/js/editor/ERD'
 import model from '@/store/editor/model'
 import draggable from 'vuedraggable'
+import CanvasMain from './CanvasMain'
+import CanvasSvg from './CanvasSvg'
 
 export default {
   name: 'CanvasMenu',
   components: {
-    draggable
+    draggable,
+    CanvasMain,
+    CanvasSvg
   },
   directives: {
     // focus 정의
@@ -40,6 +49,18 @@ export default {
   },
   data () {
     return {
+      preview: {
+        top: (-1 * 5000 / 2) + (150 / 2) + 53,
+        left: 0,
+        x: 0,
+        y: 53,
+        target: {
+          x: 0,
+          y: 0,
+          width: 0,
+          height: 0
+        }
+      },
       menus: [
         {
           type: 'DBType',
@@ -107,7 +128,23 @@ export default {
           ERD.core.file.exportData('json')
           break
       }
+    },
+    // 미리보기 네비게이션 이벤트 시작
+    onPreview () {
+      ERD.core.event.onPreview('start')
     }
+  },
+  mounted () {
+    // 이벤트 핸들러에 컴포넌트 등록
+    ERD.core.event.components.CanvasMenu = this
+    const width = $(window).width()
+    const height = $(window).height()
+    this.preview.left = (-1 * 5000 / 2) + (150 / 2) + width - 150 - 20
+    this.preview.x = width - 150 - 20
+    this.preview.target.width = width * 0.03
+    this.preview.target.height = height * 0.03
+    this.preview.target.x = window.scrollX / ERD.core.event.preview.ratio
+    this.preview.target.y = window.scrollY / ERD.core.event.preview.ratio
   },
   updated () {
     // 단축키 활성화 포커스처리
@@ -176,6 +213,24 @@ export default {
         margin-top: 20px;
         cursor: pointer;
       }
+    }
+
+    .preview {
+      position: fixed;
+      z-index: 2147483647;
+      transform: scale(0.03, 0.03);
+      overflow: hidden;
+    }
+    .preview_border {
+      width: 150px;
+      height: 150px;
+      position: fixed;
+      z-index: 2147483647;
+      box-shadow: 1px 1px 6px 2px #171717;
+    }
+    .preview_target {
+      position: absolute;
+      border: solid red 1px;
     }
 
     .ghost {
