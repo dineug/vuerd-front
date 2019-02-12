@@ -1,14 +1,13 @@
 <template lang="pug">
   #erd
-    table-menu
     canvas-menu
+    quick-menu
     canvas-main
     canvas-svg
 </template>
 
 <script>
-import '@/js/editor/ERD'
-import TableMenu from '@/components/editor/TableMenu'
+import QuickMenu from '@/components/editor/QuickMenu'
 import CanvasMenu from '@/components/editor/CanvasMenu'
 import CanvasMain from '@/components/editor/CanvasMain'
 import CanvasSvg from '@/components/editor/CanvasSvg'
@@ -16,7 +15,7 @@ import CanvasSvg from '@/components/editor/CanvasSvg'
 export default {
   name: 'ERD',
   components: {
-    TableMenu,
+    QuickMenu,
     CanvasMenu,
     CanvasMain,
     CanvasSvg

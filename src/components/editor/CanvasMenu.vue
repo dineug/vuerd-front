@@ -1,72 +1,200 @@
 <template lang="pug">
-  div.menuCanvas
-    canvas#menu_canvas(@click="menu")
-    select.dbType(@change="selectDB" v-if="menuCheck")
-      option(v-for="DBType in DBTypes" :value="DBType") {{ DBType }}
-    button.addTable(class="btn btn-primary" @click="addTable" v-if="menuCheck")
-      font-awesome-icon(icon="table")
+  .menu_canvas
+    draggable.menu_top(element="ul" v-model="model.tabs" :options="{group:'tab', ghostClass: 'ghost'}")
+      transition-group(type="transition" name="flip-list")
+
+        li(v-for="(tab, i) in model.tabs" :key="tab.id")
+          input(v-model="tab.name" v-focus
+          :class="{ tab_active: tab.active }"
+          type="text" :title="i < 9 ? `Ctrl + ${i+1}` : ''"
+          @click="modelActive(tab.id)")
+
+          button(:class="{ tab_active: tab.active }" title="Ctrl + Delete"
+          @click="modelDelete(tab.id)")
+            font-awesome-icon(icon="times")
+
+    ul.menu_sidebar
+      li(v-for="menu in menus" :key="menu.id" :title="menu.name"
+      @click="menuAction(menu.type)")
+        font-awesome-icon(:icon="menu.icon")
 </template>
 
 <script>
-import JSLog from '@/js/JSLog'
-import storeERD from '@/store/editor/erd'
-import menu from '@/js/editor/THREE_menu'
+import $ from 'jquery'
+import ERD from '@/js/editor/ERD'
+import model from '@/store/editor/model'
+import draggable from 'vuedraggable'
 
 export default {
   name: 'CanvasMenu',
+  components: {
+    draggable
+  },
+  directives: {
+    // focus 정의
+    focus: {
+      inserted (el) {
+        el.focus()
+      }
+    }
+  },
   data () {
     return {
-      DBTypes: ['MySQL', 'Oracle'],
-      menuCheck: false
+      menus: [
+        {
+          type: 'DBType',
+          icon: 'database',
+          name: 'DB'
+        },
+        {
+          type: 'save',
+          icon: 'save',
+          name: 'save'
+        },
+        // {
+        //   type: 'import-sql',
+        //   icon: 'file-upload',
+        //   name: 'import-sql'
+        // },
+        {
+          type: 'export-sql',
+          icon: 'file-download',
+          name: 'export-sql'
+        },
+        {
+          type: 'import-json',
+          icon: 'file-import',
+          name: 'import-json'
+        },
+        {
+          type: 'export-json',
+          icon: 'file-export',
+          name: 'export-json'
+        }
+      ]
+    }
+  },
+  computed: {
+    model () {
+      return model.state
     }
   },
   methods: {
-    // 테이블 추가
-    addTable () {
-      JSLog('CanvasMenu', 'addTable')
-      storeERD.commit({type: 'addTable'})
-    },
-    // DB 선택
-    selectDB (e) {
-      JSLog('CanvasMenu', 'selectDB')
-      storeERD.commit({
-        type: 'changeDB',
-        DBType: e.target.value
+    // 모델 활성화
+    modelActive (id) {
+      model.commit({
+        type: 'modelActive',
+        id: id
       })
     },
-    // 메뉴 show, hide
-    menu () {
-      this.menuCheck = !this.menuCheck
+    // 모델 삭제
+    modelDelete (id) {
+      model.commit({
+        type: 'modelDelete',
+        id: id
+      })
+    },
+    // sidebar action
+    menuAction (type) {
+      switch (type) {
+        case 'export-sql':
+          ERD.core.file.exportData('sql')
+          break
+        case 'import-json':
+          ERD.core.file.click('json')
+          break
+        case 'export-json':
+          ERD.core.file.exportData('json')
+          break
+      }
     }
   },
-  mounted () {
-    menu()
+  updated () {
+    // 단축키 활성화 포커스처리
+    for (let i in this.model.tabs) {
+      if (this.model.tabs[i].active) {
+        $(this.$el).find('.menu_top input').eq(i).focus()
+        break
+      }
+    }
   }
 }
 </script>
 
 <style lang="scss" scoped>
-  .menuCanvas {
-    padding: 10px;
+  .menu_canvas {
 
-    #menu_canvas {
-      width: 100px;
-      height: 100px;
+    .menu_top {
+      width: 100%;
+      height: 33px;
       position: fixed;
+      left: 40px;
       z-index: 2147483647;
-      border-radius: 50px;
-      cursor: pointer;
+      background-color: #797979;
+
+      li {
+        height: 33px;
+        display: inline-flex;
+      }
+
+      .tab_active {
+        background-color: #282828;
+      }
+
+      button {
+        padding: 0;
+        width: 25px;
+        height: 33px;
+        color: #a2a2a2;
+        border: none;
+        outline: none;
+        cursor: pointer;
+        background-color: #424242;
+
+        &:hover {
+          color: white;
+        }
+      }
+
+      input {
+        padding: 10px;
+        width: 150px;
+        background-color: #424242;
+      }
     }
-    .dbType {
+
+    .menu_sidebar {
+      width: 40px;
+      height: 100%;
       position: fixed;
       z-index: 2147483647;
-      left: 110px;
+      color: white;
+      background-color: black;
+
+      li {
+        text-align: center;
+        margin-top: 20px;
+        cursor: pointer;
+      }
     }
-    .addTable {
-      position: fixed;
-      z-index: 2147483647;
-      top: 40px;
-      left: 110px;
+
+    .ghost {
+      opacity: 0.5;
+    }
+    /* 이동 animation */
+    .flip-list-move {
+      transition: transform 0.5s;
+    }
+    /* 추가,삭제 animation */
+    .flip-list-enter-active {
+      transition: all .3s ease;
+    }
+    .flip-list-leave-active {
+      transition: all .4s ease-out;
+    }
+    .flip-list-enter, .flip-list-leave-to {
+      transform: translateX(10px);
+      opacity: 0;
     }
   }
 </style>

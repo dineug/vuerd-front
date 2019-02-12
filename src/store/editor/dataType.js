@@ -1,3 +1,7 @@
+import JSLog from '@/js/JSLog'
+
+JSLog('store loaded', 'dataType')
+
 // mysql5.7 dataType
 const MySQL = {
   dataTypes: [
@@ -137,7 +141,66 @@ const MySQL = {
   ]
 }
 
+const Oracle = {
+  dataTypes: [
+    {
+      name: 'CHAR',
+      type: 'String'
+    },
+    {
+      name: 'VARCHAR2',
+      type: 'String'
+    },
+    {
+      name: 'NCHAR',
+      type: 'String'
+    },
+    {
+      name: 'NVARCHAR2',
+      type: 'String'
+    },
+    {
+      name: 'CLOB',
+      type: 'String'
+    },
+    {
+      name: 'NCLOB',
+      type: 'String'
+    },
+    {
+      name: 'LONG',
+      type: 'String'
+    },
+    {
+      name: 'BLOB',
+      type: 'String'
+    },
+    {
+      name: 'BFILE',
+      type: 'String'
+    },
+    {
+      name: 'RAW',
+      type: 'String'
+    },
+    {
+      name: 'LONG RAW',
+      type: 'String'
+    },
+
+    {
+      name: 'NUMBER',
+      type: 'Number'
+    },
+
+    {
+      name: 'DATE',
+      type: 'Date'
+    }
+  ]
+}
+
 export default {
   MySQL: MySQL.dataTypes,
-  Oracle: []
+  Oracle: Oracle.dataTypes
 }

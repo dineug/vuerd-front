@@ -1,3 +1,5 @@
+JSLog('module loaded', 'JSLog')
+
 /**
  * 전역 로그
  * @param option 옵션 'to' -> toString
