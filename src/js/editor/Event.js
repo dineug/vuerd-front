@@ -153,7 +153,7 @@ class Event {
           break
         case 27: // key: ESC
           // 모든 이벤트 중지
-          this.destroy()
+          this.stop()
           // 모든 selected 해제
           this.core.erd.store().commit({
             type: 'tableSelectedAllNone',
@@ -489,7 +489,7 @@ class Event {
   }
 
   // 모든 이벤트 중지
-  destroy () {
+  stop () {
     this.onCursor('stop')
     this.onDraw('stop')
     this.onDraggable('stop')

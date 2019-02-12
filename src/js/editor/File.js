@@ -90,21 +90,24 @@ class File {
 
   // export
   exportData (type) {
-    let tab = null
-    for (let t of model.state.tabs) {
-      if (t.active) {
-        tab = t
+    let database = null
+    for (let tab of model.state.tabs) {
+      if (tab.active) {
+        database = tab
         break
       }
     }
-    const filename = `vuerd-${tab.name}-${new Date().getTime()}.${type}`
+    const filename = `vuerd-${database.name}-${new Date().getTime()}.${type}`
     switch (type) {
       case 'json':
         const json = this.toJSON()
-        const blob = new Blob([json], { type: 'application/json' })
-        this.execute(blob, filename)
+        const blobJson = new Blob([json], { type: 'application/json' })
+        this.execute(blobJson, filename)
         break
       case 'sql':
+        const sql = this.core.sql.toDDL()
+        const blobSQL = new Blob([sql], { type: 'text' })
+        this.execute(blobSQL, filename)
         break
     }
   }

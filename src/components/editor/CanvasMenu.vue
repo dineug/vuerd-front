@@ -51,11 +51,11 @@ export default {
           icon: 'save',
           name: 'save'
         },
-        {
-          type: 'import-sql',
-          icon: 'file-upload',
-          name: 'import-sql'
-        },
+        // {
+        //   type: 'import-sql',
+        //   icon: 'file-upload',
+        //   name: 'import-sql'
+        // },
         {
           type: 'export-sql',
           icon: 'file-download',

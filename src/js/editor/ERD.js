@@ -1,6 +1,7 @@
 import JSLog from '../JSLog'
 import event from './Event'
 import file from './File'
+import sql from './SQL'
 import model from '@/store/editor/model'
 
 /**
@@ -14,7 +15,8 @@ class ERD {
     this.core = {
       erd: this,
       event: event,
-      file: file
+      file: file,
+      sql: sql
     }
 
     this.setInit(this.core)
