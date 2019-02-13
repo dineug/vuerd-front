@@ -2,6 +2,7 @@ import JSLog from '../JSLog'
 import storeERD from '@/store/editor/erd'
 import model from '@/store/editor/model'
 import $ from 'jquery'
+import domtoimage from 'dom-to-image'
 
 /**
  * 파일 클래스
@@ -97,29 +98,34 @@ class File {
         break
       }
     }
-    const filename = `vuerd-${database.name}-${new Date().getTime()}.${type}`
+    const fileName = `vuerd-${database.name}-${new Date().getTime()}.${type}`
     switch (type) {
       case 'json':
         const json = this.toJSON()
         const blobJson = new Blob([json], { type: 'application/json' })
-        this.execute(blobJson, filename)
+        this.execute(blobJson, fileName)
         break
       case 'sql':
         const sql = this.core.sql.toDDL()
         const blobSQL = new Blob([sql], { type: 'text' })
-        this.execute(blobSQL, filename)
+        this.execute(blobSQL, fileName)
+        break
+      case 'png':
+        domtoimage.toBlob(document.querySelector('#erd')).then(blob => {
+          this.execute(blob, fileName)
+        })
         break
     }
   }
 
   // download
-  execute (blob, filename) {
+  execute (blob, fileName) {
     if (window.navigator.msSaveOrOpenBlob) {
-      window.navigator.msSaveBlob(blob, filename)
+      window.navigator.msSaveBlob(blob, fileName)
     } else {
       const elem = window.document.createElement('a')
       elem.href = window.URL.createObjectURL(blob)
-      elem.download = filename
+      elem.download = fileName
       document.body.appendChild(elem)
       elem.click()
       document.body.removeChild(elem)

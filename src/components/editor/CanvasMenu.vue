@@ -73,6 +73,11 @@ export default {
           icon: 'save',
           name: 'save'
         },
+        {
+          type: 'export-png',
+          icon: 'file-image',
+          name: 'export-png'
+        },
         // {
         //   type: 'import-sql',
         //   icon: 'file-upload',
@@ -119,6 +124,9 @@ export default {
     // sidebar action
     menuAction (type) {
       switch (type) {
+        case 'export-png':
+          ERD.core.file.exportData('png')
+          break
         case 'export-sql':
           ERD.core.file.exportData('sql')
           break
