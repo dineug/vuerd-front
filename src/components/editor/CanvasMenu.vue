@@ -217,7 +217,7 @@ export default {
         &:hover {
           color: white;
           font-size: .875em;
-          margin-top: 5px;
+          margin-top: 7px;
         }
       }
 
