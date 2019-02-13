@@ -1,6 +1,8 @@
 import JSLog from '../JSLog'
 import model from '@/store/editor/model'
 import * as util from './util'
+// import mysql from './sql/MySQL'
+// import oracle from './sql/Oracle'
 
 /**
  * SQL 클래스
