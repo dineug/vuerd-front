@@ -98,7 +98,7 @@ class File {
         break
       }
     }
-    const fileName = `vuerd-${database.name}-${new Date().getTime()}.${type}`
+    const fileName = `vuerd-${database.name}-${this.formatDate('yyyyMMdd_hhmmss', new Date())}.${type}`
     switch (type) {
       case 'json':
         const json = this.toJSON()
@@ -146,6 +146,34 @@ class File {
       })
     }
     return JSON.stringify(models)
+  }
+
+  // 날짜 포맷 yyyy, MM, dd, hh, mm, ss
+  formatDate (format, date) {
+    const d = new Date(date)
+    let year = d.getFullYear()
+    let month = (d.getMonth() + 1)
+    let day = d.getDate()
+    let hh = d.getHours().toString()
+    let mm = d.getMinutes().toString()
+    let ss = d.getSeconds().toString()
+
+    if (month < 10) month = '0' + month
+    if (day < 10) day = '0' + day
+    if (hh < 10) hh = '0' + hh
+    if (mm < 10) mm = '0' + mm
+    if (ss < 10) ss = '0' + ss
+    hh = hh === '0' ? '00' : hh
+    mm = mm === '0' ? '00' : mm
+    ss = ss === '0' ? '00' : ss
+
+    format = format.replace('yyyy', year)
+    format = format.replace('MM', month)
+    format = format.replace('dd', day)
+    format = format.replace('hh', hh)
+    format = format.replace('mm', mm)
+    format = format.replace('ss', ss)
+    return format
   }
 }
 
