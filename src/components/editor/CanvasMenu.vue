@@ -18,6 +18,11 @@
       li(v-for="menu in menus" :key="menu.id" :title="menu.name"
       @click="menuAction(menu.type)")
         font-awesome-icon(:icon="menu.icon")
+        ol(v-if="menu.type === 'DBType'")
+          li(:class="{ db_active: DBType === 'MySQL' }"
+          @click="changeDB('MySQL')") MySQL
+          li(:class="{ db_active: DBType === 'Oracle' }"
+          @click="changeDB('Oracle')") Oracle
 
     canvas-main.preview(:style="`top: ${preview.top}px; left: ${preview.left}px;`")
     .preview_border(:style="`top: ${preview.y}px; left: ${preview.x}px;`")
@@ -104,6 +109,9 @@ export default {
   computed: {
     model () {
       return model.state
+    },
+    DBType () {
+      return ERD.store().state.DBType
     }
   },
   methods: {
@@ -141,6 +149,13 @@ export default {
     // 미리보기 네비게이션 이벤트 시작
     onPreview () {
       ERD.core.event.onPreview('start')
+    },
+    // DB 변경
+    changeDB (DBType) {
+      ERD.store().commit({
+        type: 'changeDB',
+        DBType: DBType
+      })
     }
   },
   mounted () {
@@ -236,10 +251,39 @@ export default {
       color: white;
       background-color: black;
 
-      li {
+      & > li {
         text-align: center;
-        margin-top: 20px;
+        padding: 10px;
         cursor: pointer;
+
+        ol {
+          display: none;
+          position: fixed;
+          left: 40px;
+          top: 0;
+          background-color: black;
+
+          li {
+            padding: 10px;
+            color: #a2a2a2;
+
+            &:hover {
+              color: white;
+              background-color: #383d41;
+            }
+          }
+
+          .db_active {
+            color: white;
+            background-color: #383d41;
+          }
+        }
+
+        &:hover {
+          ol {
+            display: block;
+          }
+        }
       }
     }
 

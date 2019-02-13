@@ -20,6 +20,12 @@ export default new Vuex.Store({
     ]
   },
   mutations: {
+    // 전체 import
+    importData (state, data) {
+      Object.keys(state).forEach(key => {
+        state[key] = data.state[key]
+      })
+    },
     // 모델 추가
     modelAdd (state, data) {
       JSLog('mutations', 'modelAdd')
@@ -90,12 +96,6 @@ export default new Vuex.Store({
       }
       // 모든 이벤트 중지
       ERD.core.event.stop()
-    },
-    // 전체 import
-    importData (state, data) {
-      Object.keys(state).forEach(key => {
-        state[key] = data.state[key]
-      })
     }
   }
 })
