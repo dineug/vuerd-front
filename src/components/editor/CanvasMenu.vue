@@ -2,7 +2,7 @@
   .menu_canvas
     // 메뉴 top
     draggable.menu_top(element="ul" v-model="model.tabs" :options="{group:'tab', ghostClass: 'ghost'}")
-      transition-group(type="transition" name="flip-list")
+      transition-group(type="transition" name="fade")
 
         li(v-for="(tab, i) in model.tabs" :key="tab.id")
           input(v-model="tab.name" v-focus
@@ -198,7 +198,7 @@ export default {
       position: fixed;
       left: $menu_base_size;
       z-index: 2147483647;
-      background-color: #797979;
+      background-color: black;
 
       li {
         height: $menu_base_size;
@@ -311,21 +311,6 @@ export default {
 
     .ghost {
       opacity: 0.5;
-    }
-    /* 이동 animation */
-    .flip-list-move {
-      transition: transform 0.5s;
-    }
-    /* 추가,삭제 animation */
-    .flip-list-enter-active {
-      transition: all .3s ease;
-    }
-    .flip-list-leave-active {
-      transition: all .4s ease-out;
-    }
-    .flip-list-enter, .flip-list-leave-to {
-      transform: translateX(10px);
-      opacity: 0;
     }
   }
 </style>

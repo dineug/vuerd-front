@@ -1,10 +1,15 @@
 <template lang="pug">
   .grid_canvas
-    .menu_bottom
+    ul.menu_bottom
+      li(v-for="menu in menus" :key="menu.id" :title="menu.name"
+      @click="menuAction(menu.type)")
+        font-awesome-icon(:icon="menu.icon")
 
-    grid.table_detail(:options="options" theme="clean"
-    :columnData="columns"
-    :rowData="rowColumns")
+    transition(type="transition" name="fade")
+      grid.table_detail(v-if="isTable"
+      :options="optionsColumns" theme="clean"
+      :columnData="columns"
+      :rowData="rowColumns")
 </template>
 
 <script>
@@ -12,6 +17,7 @@ import 'tui-grid/dist/tui-grid.css'
 import Grid from '@toast-ui/vue-grid/src/Grid'
 import * as util from '@/js/editor/util'
 import storeTable from '@/store/editor/table'
+import ERD from '@/js/editor/ERD'
 
 export default {
   name: 'CanvasGrid',
@@ -20,10 +26,28 @@ export default {
   },
   data () {
     return {
-      options: {
+      isTable: false,
+      menus: [
+        {
+          type: 'table',
+          icon: 'list',
+          name: 'table options'
+        }
+      ],
+      optionsColumns: {
+        header: {
+          height: 60,
+          complexColumns: [
+            {
+              title: '',
+              name: 'table',
+              childNames: ['name', 'dataType', 'primaryKey', 'notNull', 'unique', 'unsigned', 'autoIncrement', 'default', 'comment']
+            }
+          ]
+        },
         scrollX: false,
         // scrollY: false,
-        bodyHeight: 100,
+        bodyHeight: 300,
         rowHeaders: ['rowNum']
       },
       columns: [
@@ -221,6 +245,18 @@ export default {
     rowColumns () {
       return storeTable.state.rows
     }
+  },
+  methods: {
+    menuAction (type) {
+      switch (type) {
+        case 'table':
+          this.isTable = !this.isTable
+          break
+      }
+    }
+  },
+  mounted () {
+    ERD.core.event.components.CanvasGrid = this
   }
 }
 </script>
@@ -236,7 +272,13 @@ export default {
       bottom: 0;
       left: $menu_base_size;
       z-index: 2147483647;
+      color: white;
       background-color: black;
+
+      li {
+        padding: 10px;
+        cursor: pointer;
+      }
     }
 
     .table_detail {

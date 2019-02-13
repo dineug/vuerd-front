@@ -1,5 +1,5 @@
 <template lang="pug">
-  .main_canvas(name="slide-fade" tag="div")
+  .main_canvas
     // mouse drag
     svg#svg_drag(v-if="svg.isDarg"
     :style="`top: ${svg.top}px; left: ${svg.left}px; width: ${svg.width}px; height: ${svg.height}px;`")
@@ -7,75 +7,77 @@
       stroke="#0098ff" stroke-width="1" stroke-opacity="0.9" stroke-dasharray="3"
       fill-opacity="0.3")
 
-    // 테이블
-    .erd_table(v-for="table in tables" :key="table.id" :table_id="table.id"
-    :class="{ selected: table.ui.selected}"
-    :style="`width: ${TABLE_WIDTH}px; top: ${table.ui.top}px; left: ${table.ui.left}px; z-index: ${table.ui.zIndex};`"
-    @mousedown="tableSelected($event, table.id)")
+    transition-group(type="transition" name="fade")
+      // 테이블
+      .erd_table(v-for="table in tables" :key="table.id" :table_id="table.id"
+      :class="{ selected: table.ui.selected}"
+      :style="`width: ${TABLE_WIDTH}px; top: ${table.ui.top}px; left: ${table.ui.left}px; z-index: ${table.ui.zIndex};`"
+      @mousedown="tableSelected($event, table.id)")
 
-      // 테이블 해더
-      .erd_table_top
-        button(title="Delete"
-        @click="tableDelete(table.id)")
-          font-awesome-icon(icon="times")
-
-        button(title="Alt + Enter"
-        @click="columnAdd(table.id)")
-          font-awesome-icon(icon="plus")
-
-      .erd_table_header
-        input(v-model="table.name" v-focus
-        type="text" placeholder="table")
-
-        input(v-model="table.comment"
-        type="text" placeholder="comment")
-
-      draggable(v-model="table.columns" :options="{group:'table'}"
-      @end="draggableEnd")
-
-        // 컬럼
-        .erd_column(v-for="column in table.columns" :key="column.id" :column_id="column.id"
-        :class="{ selected: column.ui.selected, relation_active: column.ui.isHover}"
-        :style="`height: ${COLUMN_HEIGHT}px;`"
-        @mousedown="columnSelected(table.id, column.id)")
-
-          // 컬럼 key
-          .erd_column_key(:class="{ pk: column.ui.pk, fk: column.ui.fk, pfk: column.ui.pfk }")
-            font-awesome-icon(icon="key")
-
-          // 컬럼 이름
-          input(v-model="column.name" v-focus
-          type="text" placeholder="column"
-          @keyup="onChangeTableGrid(table.id)")
-
-          // 컬럼 데이터타입
-          div
-            input.erd_data_type(v-model="column.dataType"
-            type="text" placeholder="dataType"
-            @keyup="dataTypeHintVisible($event, table.id, column.id, true)"
-            @keydown="dataTypeHintFocus($event, table.id, column.id)")
-
-            ul.erd_data_type_list(v-if="column.ui.isDataTypeHint")
-              li(v-for="dataType in dataTypes"
-              @click="columnChangeDataType($event, table.id, column.id, dataType.name)"
-              @mouseover="dataTypeHintAddClass") {{ dataType.name }}
-
-          // 컬럼 not-null
-          input.erd_column_not_null(v-if="column.options.notNull"
-          type="text" readonly value="N-N"
-          @click="columnChangeNull(table.id, column.id)")
-          input.erd_column_not_null(v-else
-          type="text" readonly value="NULL"
-          @click="columnChangeNull(table.id, column.id)")
-
-          // 컬럼 comment
-          input(v-model="column.comment"
-          type="text" placeholder="comment"
-          @keyup="onChangeTableGrid(table.id)")
-
-          // 컬럼 삭제 버튼
-          button(@click="columnDelete(table.id, column.id)")
+        // 테이블 해더
+        .erd_table_top
+          button(title="Delete"
+          @click="tableDelete(table.id)")
             font-awesome-icon(icon="times")
+
+          button(title="Alt + Enter"
+          @click="columnAdd(table.id)")
+            font-awesome-icon(icon="plus")
+
+        .erd_table_header
+          input(v-model="table.name" v-focus
+          type="text" placeholder="table"
+          @keyup="onChangeTableGrid(table.id)")
+
+          input(v-model="table.comment"
+          type="text" placeholder="comment")
+
+        draggable(v-model="table.columns" :options="{group:'table'}"
+        @end="draggableEnd")
+
+          // 컬럼
+          .erd_column(v-for="column in table.columns" :key="column.id" :column_id="column.id"
+          :class="{ selected: column.ui.selected, relation_active: column.ui.isHover}"
+          :style="`height: ${COLUMN_HEIGHT}px;`"
+          @mousedown="columnSelected(table.id, column.id)")
+
+            // 컬럼 key
+            .erd_column_key(:class="{ pk: column.ui.pk, fk: column.ui.fk, pfk: column.ui.pfk }")
+              font-awesome-icon(icon="key")
+
+            // 컬럼 이름
+            input(v-model="column.name" v-focus
+            type="text" placeholder="column"
+            @keyup="onChangeTableGrid(table.id)")
+
+            // 컬럼 데이터타입
+            div
+              input.erd_data_type(v-model="column.dataType"
+              type="text" placeholder="dataType"
+              @keyup="dataTypeHintVisible($event, table.id, column.id, true)"
+              @keydown="dataTypeHintFocus($event, table.id, column.id)")
+
+              ul.erd_data_type_list(v-if="column.ui.isDataTypeHint")
+                li(v-for="dataType in dataTypes"
+                @click="columnChangeDataType($event, table.id, column.id, dataType.name)"
+                @mouseover="dataTypeHintAddClass") {{ dataType.name }}
+
+            // 컬럼 not-null
+            input.erd_column_not_null(v-if="column.options.notNull"
+            type="text" readonly value="N-N"
+            @click="columnChangeNull(table.id, column.id)")
+            input.erd_column_not_null(v-else
+            type="text" readonly value="NULL"
+            @click="columnChangeNull(table.id, column.id)")
+
+            // 컬럼 comment
+            input(v-model="column.comment"
+            type="text" placeholder="comment"
+            @keyup="onChangeTableGrid(table.id)")
+
+            // 컬럼 삭제 버튼
+            button(@click="columnDelete(table.id, column.id)")
+              font-awesome-icon(icon="times")
 </template>
 
 <script>

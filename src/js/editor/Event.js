@@ -18,7 +18,8 @@ class Event {
     this.components = {
       QuickMenu: null,
       CanvasMain: null,
-      CanvasMenu: null
+      CanvasMenu: null,
+      CanvasGrid: null
     }
 
     // relation Draw
@@ -601,6 +602,7 @@ class Event {
     this.onDrag('stop')
     this.onMove('stop')
     this.components.QuickMenu.isShow = false
+    this.components.CanvasGrid.isTable = false
   }
 }
 
