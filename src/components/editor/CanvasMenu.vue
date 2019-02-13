@@ -188,19 +188,20 @@ export default {
 <style lang="scss" scoped>
   $tab_color: #424242;
   $tab_active: #282828;
+  $menu_base_size: 30px;
 
   .menu_canvas {
 
     .menu_top {
       width: 100%;
-      height: 33px;
+      height: $menu_base_size;
       position: fixed;
-      left: 40px;
+      left: $menu_base_size;
       z-index: 2147483647;
       background-color: #797979;
 
       li {
-        height: 33px;
+        height: $menu_base_size;
         display: inline-flex;
       }
 
@@ -247,7 +248,7 @@ export default {
     }
 
     .menu_sidebar {
-      width: 40px;
+      width: $menu_base_size;
       height: 100%;
       position: fixed;
       z-index: 2147483647;
@@ -262,7 +263,7 @@ export default {
         ol {
           display: none;
           position: fixed;
-          left: 40px;
+          left: $menu_base_size;
           top: 0;
           background-color: black;
 

@@ -18,7 +18,8 @@ class Event {
     this.components = {
       QuickMenu: null,
       CanvasMain: null,
-      CanvasMenu: null
+      CanvasMenu: null,
+      CanvasGrid: null
     }
 
     // relation Draw
@@ -50,6 +51,9 @@ class Event {
       x: 150 + 20,
       ratio: CANVAS_SIZE / PREVIEW_SIZE
     }
+
+    // move
+    this.isMove = false
   }
 
   // 종속성 초기화
@@ -109,17 +113,33 @@ class Event {
         this.isSelectedColumn = false
       }
       // 마우스 drag
-      if (!this.isDraggable &&
+      if (!e.altKey &&
+        !this.isDraggable &&
         !this.isSelectedColumn &&
         !this.isPreview &&
-        !$(e.target).closest('.menu_top').length) {
+        !$(e.target).closest('.menu_top').length &&
+        !$(e.target).closest('.menu_sidebar').length &&
+        !$(e.target).closest('.menu_bottom').length &&
+        !$(e.target).closest('.table_detail').length) {
         this.onDrag('start', e)
+      }
+      // 마우스 이동
+      if (e.altKey &&
+        !this.isDraggable &&
+        !this.isSelectedColumn &&
+        !this.isPreview &&
+        !$(e.target).closest('.menu_top').length &&
+        !$(e.target).closest('.menu_sidebar').length &&
+        !$(e.target).closest('.menu_bottom').length &&
+        !$(e.target).closest('.table_detail').length) {
+        this.onMove('start')
       }
     }).on('mouseup', e => {
       JSLog('event', 'mouseup')
       this.onDraggable('stop')
       this.onDrag('stop', e)
       this.onPreview('stop')
+      this.onMove('stop')
     }).on('mousemove', e => {
       if (this.move.x === 0 && this.move.y === 0) {
         this.move.x = e.clientX + document.documentElement.scrollLeft
@@ -135,7 +155,7 @@ class Event {
       if (!this.isDraggable && !this.isSelectedColumn) {
         this.onDrag('update', e)
       }
-
+      this.onMove('update', e)
       this.move.x = e.clientX + document.documentElement.scrollLeft
       this.move.y = e.clientY + document.documentElement.scrollTop
     }).on('keydown', e => {
@@ -551,12 +571,35 @@ class Event {
     }
   }
 
+  // 마우스 Alt + 클릭 이동
+  onMove (type, e) {
+    switch (type) {
+      case 'start':
+        this.isMove = true
+        break
+      case 'update':
+        if (this.isMove) {
+          const x = e.clientX + document.documentElement.scrollLeft - this.move.x
+          const y = e.clientY + document.documentElement.scrollTop - this.move.y
+          window.scrollTo(-1 * x + window.scrollX, window.scrollY)
+          window.scrollTo(window.scrollX, -1 * y + window.scrollY)
+        }
+        break
+      case 'stop':
+        if (this.isMove) {
+          this.isMove = false
+        }
+        break
+    }
+  }
+
   // 모든 이벤트 중지
   stop () {
     this.onCursor('stop')
     this.onDraw('stop')
     this.onDraggable('stop')
     this.onDrag('stop')
+    this.onMove('stop')
     this.components.QuickMenu.isShow = false
   }
 }

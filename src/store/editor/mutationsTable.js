@@ -111,6 +111,24 @@ export default {
     if (table.ui.zIndex !== zIndex - 1) {
       table.ui.zIndex = zIndex
     }
+    
+    // 임시 그리드 테스트
+    const rows = []
+    for (let column of table.columns) {
+      rows.push({
+        name: column.name,
+        dataType: column.dataType,
+        primaryKey: column.options.primaryKey,
+        notNull: column.options.notNull,
+        unique: column.options.unique,
+        unsigned: column.options.unsigned,
+        autoIncrement: column.options.autoIncrement,
+        default: column.default,
+        comment: column.comment
+      })
+    }
+    ERD.core.event.components.CanvasGrid.columns.rows = rows
+    
     // multi select
     if (data.ctrlKey) {
       table.ui.selected = true
@@ -192,6 +210,7 @@ export default {
   },
   // 테이블 및 컬럼 selected All 해제
   selectedAllNone (state, data) {
+    JSLog('mutations', 'table', 'selectedAllNone')
     state.tables.forEach(table => {
       if (data.isTable) table.ui.selected = false
       table.columns.forEach(column => {
@@ -201,6 +220,7 @@ export default {
   },
   // 테이블 드래그 selected
   multiSelected (state, data) {
+    JSLog('mutations', 'table', 'multiSelected')
     state.tables.forEach(table => {
       const point = util.getPoint(table.ui)
       if (data.min.x <= point.top.x &&
@@ -215,6 +235,7 @@ export default {
   },
   // 테이블 전체 선택
   selectedAll (state) {
+    JSLog('mutations', 'table', 'selectedAll')
     state.tables.forEach(table => {
       table.ui.selected = true
     })
