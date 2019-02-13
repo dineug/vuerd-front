@@ -43,10 +43,6 @@
     font-size: 12px;
     line-height: 1;
   }
-  /* 이동 animation */
-  .fade-move {
-    transition: transform 0.5s;
-  }
   /* 추가,삭제 animation */
   .fade-enter-active {
     transition: all .3s ease-out;

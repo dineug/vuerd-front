@@ -2,7 +2,7 @@
   .menu_canvas
     // 메뉴 top
     draggable.menu_top(element="ul" v-model="model.tabs" :options="{group:'tab', ghostClass: 'ghost'}")
-      transition-group(type="transition" name="fade")
+      transition-group(type="transition" name="menu-top")
 
         li(v-for="(tab, i) in model.tabs" :key="tab.id")
           input(v-model="tab.name" v-focus
@@ -308,7 +308,21 @@ export default {
         border: solid orange 1px;
       }
     }
-
+    /* 이동 animation */
+    .menu-top-move {
+      transition: transform 0.5s;
+    }
+    /* 추가,삭제 animation */
+    .menu-top-enter-active {
+      transition: all .3s ease-out;
+    }
+    .menu-top-leave-active {
+      transition: all .3s ease-out;
+    }
+    .menu-top-enter, .menu-top-leave-to {
+      transform: translateX(20px);
+      opacity: 0;
+    }
     .ghost {
       opacity: 0.5;
     }
