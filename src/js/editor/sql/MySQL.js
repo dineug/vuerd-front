@@ -81,7 +81,11 @@ class MySQL {
     // 컬럼 DEFAULT
     if (column.default.trim() !== '') {
       if (isNaN(column.default)) {
-        stringBuffer.push(`DEFAULT '${column.default}'`)
+        if (column.default === 'CURRENT_TIMESTAMP') {
+          stringBuffer.push(`DEFAULT CURRENT_TIMESTAMP`)
+        } else {
+          stringBuffer.push(`DEFAULT '${column.default}'`)
+        }
       } else {
         stringBuffer.push(`DEFAULT ${column.default}`)
       }

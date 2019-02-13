@@ -1,22 +1,25 @@
 <template lang="pug">
   #erd
     canvas-menu
+    canvas-grid
     quick-menu
     canvas-main
     canvas-svg
 </template>
 
 <script>
-import QuickMenu from '@/components/editor/QuickMenu'
 import CanvasMenu from '@/components/editor/CanvasMenu'
+import CanvasGrid from '@/components/editor/CanvasGrid'
+import QuickMenu from '@/components/editor/QuickMenu'
 import CanvasMain from '@/components/editor/CanvasMain'
 import CanvasSvg from '@/components/editor/CanvasSvg'
 
 export default {
   name: 'ERD',
   components: {
-    QuickMenu,
     CanvasMenu,
+    CanvasGrid,
+    QuickMenu,
     CanvasMain,
     CanvasSvg
   }

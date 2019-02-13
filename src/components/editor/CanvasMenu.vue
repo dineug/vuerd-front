@@ -1,5 +1,6 @@
 <template lang="pug">
   .menu_canvas
+    // 메뉴 top
     draggable.menu_top(element="ul" v-model="model.tabs" :options="{group:'tab', ghostClass: 'ghost'}")
       transition-group(type="transition" name="flip-list")
 
@@ -14,6 +15,7 @@
             @click="modelDelete(tab.id)")
               font-awesome-icon(icon="times")
 
+    // 메뉴 sidebar left
     ul.menu_sidebar
       li(v-for="menu in menus" :key="menu.id" :title="menu.name"
       @click="menuAction(menu.type)")
@@ -24,6 +26,7 @@
           li(:class="{ db_active: DBType === 'Oracle' }"
           @click="changeDB('Oracle')") Oracle
 
+    // 메뉴 Preview Navigation
     canvas-main.preview(:style="`top: ${preview.top}px; left: ${preview.left}px;`")
     .preview_border(:style="`top: ${preview.y}px; left: ${preview.x}px;`")
       .preview_target(:style="`top: ${preview.target.y}px; left: ${preview.target.x}px; width: ${preview.target.width}px; height: ${preview.target.height}px;`"
@@ -299,10 +302,10 @@ export default {
       position: fixed;
       z-index: 2147483647;
       box-shadow: 1px 1px 6px 2px #171717;
-    }
-    .preview_target {
-      position: absolute;
-      border: solid orange 1px;
+      .preview_target {
+        position: absolute;
+        border: solid orange 1px;
+      }
     }
 
     .ghost {
