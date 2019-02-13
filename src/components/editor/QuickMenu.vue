@@ -120,13 +120,14 @@ export default {
     background-color: $mbg;
     position: fixed;
     opacity: 0.9;
-    width: 263px;
+    width: 200px;
 
     li {
       width: 100%;
       height: 100%;
       padding: 10px;
       cursor: pointer;
+      box-sizing: border-box;
 
       &:hover {
         color: white;
@@ -134,8 +135,7 @@ export default {
       }
 
       & > span {
-        padding: 5px;
-        width: 100px;
+        width: 80px;
         display: inline-flex;
         vertical-align: middle;
         align-items: center;

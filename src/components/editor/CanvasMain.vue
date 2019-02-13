@@ -316,12 +316,12 @@ export default {
           border-radius: 50%;
 
           &:first-child {
-            color: #9a0005;
-            background-color: #9a0005;
+            color: #9B0005;
+            background-color: #9B0005;
           }
           &:last-child {
-            color: #00792a;
-            background-color: #00792a;
+            color: #009B2E;
+            background-color: #009B2E;
           }
 
           &:hover {
