@@ -94,8 +94,7 @@ class MySQL {
     if (column.comment.trim() !== '') {
       stringBuffer.push(`COMMENT '${column.comment}'${isComma ? ',' : ''}`)
     }
-    stringBuffer.push(`${isComma ? ',' : ''}`)
-    buffer.push(stringBuffer.join(' '))
+    buffer.push(stringBuffer.join(' ') + `${isComma ? ',' : ''}`)
   }
 
   // 관계 formatter
