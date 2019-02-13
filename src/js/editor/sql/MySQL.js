@@ -100,7 +100,7 @@ class MySQL {
     }
     // 코멘트 처리
     if (column.comment.trim() !== '') {
-      stringBuffer.push(`COMMENT '${column.comment}'${isComma ? ',' : ''}`)
+      stringBuffer.push(`COMMENT '${column.comment}'`)
     }
     buffer.push(stringBuffer.join(' ') + `${isComma ? ',' : ''}`)
   }

@@ -64,10 +64,16 @@ export default {
       for (let column of table.columns) {
         if (data.id === column.id) {
           tableId = table.id
+          ERD.store().commit({
+            type: 'tableSelected',
+            id: table.id
+          })
           break
         }
       }
+      if (tableId) break
     }
+
     // 관계처리
     for (let i = 0; i < state.lines.length; i++) {
       let isFk = false

@@ -3,15 +3,15 @@
     .menu_bottom
 
     grid.table_detail(:options="options" theme="clean"
-    :columnData="columns.columns"
-    :rowData="columns.rows")
+    :columnData="columns"
+    :rowData="rowColumns")
 </template>
 
 <script>
 import 'tui-grid/dist/tui-grid.css'
 import Grid from '@toast-ui/vue-grid/src/Grid'
-import ERD from '@/js/editor/ERD'
 import * as util from '@/js/editor/util'
+import storeTable from '@/store/editor/table'
 
 export default {
   name: 'CanvasGrid',
@@ -26,137 +26,201 @@ export default {
         bodyHeight: 100,
         rowHeaders: ['rowNum']
       },
-      columns: {
-        rows: [],
-        columns: [
-          {
-            title: 'Column Name',
-            name: 'name',
-            onBeforeChange: ev => {
-              // ev.columnName
-              // ev.rowKey
-              // ev.value
-              console.log('Before change:' + ev.value)
-            },
-            editOptions: {
-              type: 'text',
-              useViewMode: true
-            }
+      columns: [
+        {
+          title: 'Column Name',
+          name: 'name',
+          onBeforeChange: ev => {
+            storeTable.commit({
+              type: 'sync',
+              rowKey: ev.rowKey,
+              column: {
+                name: ev.value
+              }
+            })
           },
-          {
-            title: 'DataType',
-            name: 'dataType',
-            onBeforeChange: ev => {
-              console.log('Before change:' + ev.value)
-            },
-            editOptions: {
-              type: 'text',
-              useViewMode: true
-            }
-          },
-          {
-            title: 'PK',
-            name: 'primaryKey',
-            width: 50,
-            onBeforeChange: ev => {
-              console.log('Before change:' + ev.value)
-            },
-            editOptions: {
-              type: 'checkbox',
-              listItems: [
-                { text: util.svgCheck, value: true }
-              ],
-              useViewMode: true
-            }
-          },
-          {
-            title: 'NN',
-            name: 'notNull',
-            width: 50,
-            onBeforeChange: ev => {
-              console.log('Before change:' + ev.value)
-            },
-            editOptions: {
-              type: 'checkbox',
-              listItems: [
-                { text: util.svgCheck, value: true }
-              ],
-              useViewMode: true
-            }
-          },
-          {
-            title: 'UQ',
-            name: 'unique',
-            width: 50,
-            onBeforeChange: ev => {
-              console.log('Before change:' + ev.value)
-            },
-            editOptions: {
-              type: 'checkbox',
-              listItems: [
-                { text: util.svgCheck, value: true }
-              ],
-              useViewMode: true
-            }
-          },
-          {
-            title: 'UN',
-            name: 'unsigned',
-            width: 50,
-            onBeforeChange: ev => {
-              console.log('Before change:' + ev.value)
-            },
-            editOptions: {
-              type: 'checkbox',
-              listItems: [
-                { text: util.svgCheck, value: true }
-              ],
-              useViewMode: true
-            }
-          },
-          {
-            title: 'AI',
-            name: 'autoIncrement',
-            width: 50,
-            onBeforeChange: ev => {
-              console.log('Before change:' + ev.value)
-            },
-            editOptions: {
-              type: 'checkbox',
-              listItems: [
-                { text: util.svgCheck, value: true }
-              ],
-              useViewMode: true
-            }
-          },
-          {
-            title: 'Default',
-            name: 'default',
-            onBeforeChange: ev => {
-              console.log('Before change:' + ev.value)
-            },
-            editOptions: {
-              type: 'text',
-              useViewMode: true
-            }
-          },
-          {
-            title: 'Comment',
-            name: 'comment',
-            onBeforeChange: ev => {
-              console.log('Before change:' + ev.value)
-            },
-            editOptions: {
-              type: 'text',
-              useViewMode: true
-            }
+          editOptions: {
+            type: 'text',
+            useViewMode: true
           }
-        ]
-      }
+        },
+        {
+          title: 'DataType',
+          name: 'dataType',
+          onBeforeChange: ev => {
+            storeTable.commit({
+              type: 'sync',
+              rowKey: ev.rowKey,
+              column: {
+                dataType: ev.value
+              }
+            })
+          },
+          editOptions: {
+            type: 'text',
+            useViewMode: true
+          }
+        },
+        {
+          title: 'PK',
+          name: 'primaryKey',
+          width: 50,
+          onBeforeChange: ev => {
+            storeTable.commit({
+              type: 'sync',
+              rowKey: ev.rowKey,
+              isPK: true,
+              column: {
+                options: {
+                  primaryKey: ev.value ? ev.value : false
+                },
+                ui: {
+                  pk: ev.value ? ev.value : false
+                }
+              }
+            })
+          },
+          editOptions: {
+            type: 'checkbox',
+            listItems: [
+              { text: util.svgCheck, value: true }
+            ],
+            useViewMode: true
+          }
+        },
+        {
+          title: 'NN',
+          name: 'notNull',
+          width: 50,
+          onBeforeChange: ev => {
+            storeTable.commit({
+              type: 'sync',
+              rowKey: ev.rowKey,
+              column: {
+                options: {
+                  notNull: ev.value ? ev.value : false
+                }
+              }
+            })
+          },
+          editOptions: {
+            type: 'checkbox',
+            listItems: [
+              { text: util.svgCheck, value: true }
+            ],
+            useViewMode: true
+          }
+        },
+        {
+          title: 'UQ',
+          name: 'unique',
+          width: 50,
+          onBeforeChange: ev => {
+            storeTable.commit({
+              type: 'sync',
+              rowKey: ev.rowKey,
+              column: {
+                options: {
+                  unique: ev.value ? ev.value : false
+                }
+              }
+            })
+          },
+          editOptions: {
+            type: 'checkbox',
+            listItems: [
+              { text: util.svgCheck, value: true }
+            ],
+            useViewMode: true
+          }
+        },
+        {
+          title: 'UN',
+          name: 'unsigned',
+          width: 50,
+          onBeforeChange: ev => {
+            storeTable.commit({
+              type: 'sync',
+              rowKey: ev.rowKey,
+              column: {
+                options: {
+                  unsigned: ev.value ? ev.value : false
+                }
+              }
+            })
+          },
+          editOptions: {
+            type: 'checkbox',
+            listItems: [
+              { text: util.svgCheck, value: true }
+            ],
+            useViewMode: true
+          }
+        },
+        {
+          title: 'AI',
+          name: 'autoIncrement',
+          width: 50,
+          onBeforeChange: ev => {
+            storeTable.commit({
+              type: 'sync',
+              rowKey: ev.rowKey,
+              column: {
+                options: {
+                  autoIncrement: ev.value ? ev.value : false
+                }
+              }
+            })
+          },
+          editOptions: {
+            type: 'checkbox',
+            listItems: [
+              { text: util.svgCheck, value: true }
+            ],
+            useViewMode: true
+          }
+        },
+        {
+          title: 'Default',
+          name: 'default',
+          onBeforeChange: ev => {
+            storeTable.commit({
+              type: 'sync',
+              rowKey: ev.rowKey,
+              column: {
+                default: ev.value
+              }
+            })
+          },
+          editOptions: {
+            type: 'text',
+            useViewMode: true
+          }
+        },
+        {
+          title: 'Comment',
+          name: 'comment',
+          onBeforeChange: ev => {
+            storeTable.commit({
+              type: 'sync',
+              rowKey: ev.rowKey,
+              column: {
+                comment: ev.value
+              }
+            })
+          },
+          editOptions: {
+            type: 'text',
+            useViewMode: true
+          }
+        }
+      ]
     }
   },
-  mounted () {
-    ERD.core.event.components.CanvasGrid = this
+  computed: {
+    rowColumns () {
+      return storeTable.state.rows
+    }
   }
 }
 </script>

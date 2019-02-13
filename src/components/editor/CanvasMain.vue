@@ -45,7 +45,8 @@
 
           // 컬럼 이름
           input(v-model="column.name" v-focus
-          type="text" placeholder="column")
+          type="text" placeholder="column"
+          @keyup="onChangeTableGrid(table.id)")
 
           // 컬럼 데이터타입
           div
@@ -69,7 +70,8 @@
 
           // 컬럼 comment
           input(v-model="column.comment"
-          type="text" placeholder="comment")
+          type="text" placeholder="comment"
+          @keyup="onChangeTableGrid(table.id)")
 
           // 컬럼 삭제 버튼
           button(@click="columnDelete(table.id, column.id)")
@@ -79,6 +81,7 @@
 <script>
 import $ from 'jquery'
 import ERD from '@/js/editor/ERD'
+import storeTable from '@/store/editor/table'
 import draggable from 'vuedraggable'
 
 export default {
@@ -135,6 +138,10 @@ export default {
         tableId: tableId,
         columnId: columnId
       })
+      storeTable.commit({
+        type: 'active',
+        id: tableId
+      })
     },
     // NULL 조건 변경
     columnChangeNull (tableId, columnId) {
@@ -143,6 +150,7 @@ export default {
         tableId: tableId,
         columnId: columnId
       })
+      this.onChangeTableGrid(tableId)
     },
     // 테이블 삭제
     tableDelete (id) {
@@ -150,6 +158,7 @@ export default {
         type: 'tableDelete',
         id: id
       })
+      storeTable.commit({ type: 'remove' })
     },
     // 테이블 선택
     tableSelected (e, id) {
@@ -199,6 +208,8 @@ export default {
         tableId: tableId,
         columnId: columnId
       })
+
+      this.onChangeTableGrid(tableId)
     },
     // 데이터 타입 힌트 포커스
     dataTypeHintFocus (e, tableId, columnId) {
@@ -265,6 +276,13 @@ export default {
       ERD.store().commit({
         type: 'lineValidColumn',
         id: e.item.getAttribute('column_id')
+      })
+    },
+    // 테이블 그리드 동기화
+    onChangeTableGrid (id) {
+      storeTable.commit({
+        type: 'active',
+        id: id
       })
     }
   },

@@ -1,6 +1,7 @@
 import JSLog from '@/js/JSLog'
 import * as util from '@/js/editor/util'
 import ERD from '@/js/editor/ERD'
+import storeTable from './table'
 
 JSLog('store loaded', 'mutationsTable')
 
@@ -111,24 +112,7 @@ export default {
     if (table.ui.zIndex !== zIndex - 1) {
       table.ui.zIndex = zIndex
     }
-    
-    // 임시 그리드 테스트
-    const rows = []
-    for (let column of table.columns) {
-      rows.push({
-        name: column.name,
-        dataType: column.dataType,
-        primaryKey: column.options.primaryKey,
-        notNull: column.options.notNull,
-        unique: column.options.unique,
-        unsigned: column.options.unsigned,
-        autoIncrement: column.options.autoIncrement,
-        default: column.default,
-        comment: column.comment
-      })
-    }
-    ERD.core.event.components.CanvasGrid.columns.rows = rows
-    
+
     // multi select
     if (data.ctrlKey) {
       table.ui.selected = true
@@ -191,6 +175,12 @@ export default {
         ERD.core.event.onDraw('stop', data.id)
       }
     }
+
+    // 테이블 그리드 연동
+    storeTable.commit({
+      type: 'active',
+      id: data.id
+    })
   },
   // 테이블 top, left 변경
   draggable (state, data) {
@@ -217,6 +207,8 @@ export default {
         if (data.isColumn) column.ui.selected = false
       })
     })
+    // 테이블 상세 그리드 해제
+    storeTable.commit({ type: 'remove' })
   },
   // 테이블 드래그 selected
   multiSelected (state, data) {

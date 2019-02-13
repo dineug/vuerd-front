@@ -18,8 +18,7 @@ class Event {
     this.components = {
       QuickMenu: null,
       CanvasMain: null,
-      CanvasMenu: null,
-      CanvasGrid: null
+      CanvasMenu: null
     }
 
     // relation Draw
@@ -104,7 +103,8 @@ class Event {
       }
       // 테이블 및 컬럼 selected 해제
       if (!$(e.target).closest('.erd_table').length &&
-        !$(e.target).closest('.quick_menu_pk').length) {
+        !$(e.target).closest('.quick_menu_pk').length &&
+        !$(e.target).closest('.table_detail').length) {
         this.core.erd.store().commit({
           type: 'tableSelectedAllNone',
           isTable: true,

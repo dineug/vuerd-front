@@ -79,13 +79,13 @@ export const getPKColumns = id => {
   return columns
 }
 
-// column 데이터 셋팅
-export const initColumn = (column, dColumn) => {
-  Object.keys(dColumn).forEach(key => {
-    if (typeof dColumn[key] === 'object') {
-      initColumn(column[key], dColumn[key])
+// 데이터 셋팅
+export const initData = (oldData, newData) => {
+  Object.keys(newData).forEach(key => {
+    if (typeof newData[key] === 'object') {
+      initData(oldData[key], newData[key])
     } else {
-      column[key] = dColumn[key]
+      oldData[key] = newData[key]
     }
   })
 }

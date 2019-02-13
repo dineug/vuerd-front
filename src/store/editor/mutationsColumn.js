@@ -1,5 +1,6 @@
 import JSLog from '@/js/JSLog'
 import * as util from '@/js/editor/util'
+import storeTable from './table'
 
 JSLog('store loaded', 'mutationsColumn')
 
@@ -34,7 +35,7 @@ export default {
           }
         }
         if (data.isInit) {
-          util.initColumn(column, data.column)
+          util.initData(column, data.column)
         }
         table.columns.push(column)
         this.commit({
@@ -114,6 +115,10 @@ export default {
     const table = util.getData(state.tables, data.tableId)
     const column = util.getData(table.columns, data.columnId)
     if (column) column.ui.selected = true
+    storeTable.commit({
+      type: 'active',
+      id: data.tableId
+    })
   },
   // 컬럼 key active
   key (state, data) {
@@ -153,6 +158,10 @@ export default {
     const table = util.getData(state.tables, data.tableId)
     const column = util.getData(table.columns, data.columnId)
     column.dataType = data.dataType
+    storeTable.commit({
+      type: 'active',
+      id: data.tableId
+    })
   },
   // 컬럼 데이터타입 힌트 show/hide
   dataTypeHintVisible (state, data) {
