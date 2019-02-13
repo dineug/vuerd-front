@@ -9,9 +9,10 @@
           type="text" :title="i < 9 ? `Ctrl + ${i+1}` : ''"
           @click="modelActive(tab.id)")
 
-          button(:class="{ tab_active: tab.active }" title="Ctrl + Delete"
-          @click="modelDelete(tab.id)")
-            font-awesome-icon(icon="times")
+          span.buttons(:class="{ tab_active: tab.active }")
+            button(title="Ctrl + Delete"
+            @click="modelDelete(tab.id)")
+              font-awesome-icon(icon="times")
 
     ul.menu_sidebar
       li(v-for="menu in menus" :key="menu.id" :title="menu.name"
@@ -159,6 +160,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+  $tab_color: #424242;
+  $tab_active: #282828;
+
   .menu_canvas {
 
     .menu_top {
@@ -174,29 +178,45 @@ export default {
         display: inline-flex;
       }
 
+      .buttons {
+        background-color: $tab_color;
+        padding-right: 5px;
+      }
+
       .tab_active {
-        background-color: #282828;
+        background-color: $tab_active;
+
+        button {
+          background-color: $tab_active;
+        }
       }
 
       button {
-        padding: 0;
-        width: 25px;
-        height: 33px;
-        color: #a2a2a2;
+        width: 17px;
+        height: 17px;
+        font-size: .70em;
+        margin-top: 8px;
         border: none;
         outline: none;
         cursor: pointer;
-        background-color: #424242;
+        border-radius: 50%;
+        /*color: #575a5f;*/
+        color: #b9b9b9;
+        /*background-color: #575a5f;*/
+        background-color: $tab_color;
+        /*box-shadow: 1px 1px 1px 1px #171717;*/
 
         &:hover {
           color: white;
+          font-size: .875em;
+          margin-top: 5px;
         }
       }
 
       input {
         padding: 10px;
         width: 150px;
-        background-color: #424242;
+        background-color: $tab_color;
       }
     }
 
@@ -230,7 +250,7 @@ export default {
     }
     .preview_target {
       position: absolute;
-      border: solid red 1px;
+      border: solid orange 1px;
     }
 
     .ghost {

@@ -14,13 +14,13 @@ Vue.use(Vuex)
 export default () => {
   return new Vuex.Store({
     state: {
+      TABLE_WIDTH: 460,
+      TABLE_HEIGHT: 98,
+      COLUMN_HEIGHT: 25,
       DBType: 'MySQL',
       dataTypes: dataType['MySQL'],
       tables: [],
-      lines: [],
-      TABLE_WIDTH: 630,
-      TABLE_HEIGHT: 88,
-      COLUMN_HEIGHT: 25
+      lines: []
     },
     mutations: {
       // DB 변경

@@ -15,20 +15,20 @@
 
       // 테이블 해더
       .erd_table_top
+        button(title="Delete"
+        @click="tableDelete(table.id)")
+          font-awesome-icon(icon="times")
+
+        button(title="Alt + Enter"
+        @click="columnAdd(table.id)")
+          font-awesome-icon(icon="plus")
+
       .erd_table_header
         input(v-model="table.name" v-focus
         type="text" placeholder="table")
 
         input(v-model="table.comment"
         type="text" placeholder="comment")
-
-        button(class="btn btn-outline-primary" title="Alt + Enter"
-        @click="columnAdd(table.id)")
-          font-awesome-icon(icon="plus")
-
-        button(class="btn btn-outline-danger" title="Delete"
-        @click="tableDelete(table.id)")
-          font-awesome-icon(icon="times")
 
       draggable(v-model="table.columns" :options="{group:'table'}"
       @end="draggableEnd")
@@ -302,19 +302,40 @@ export default {
       z-index: 1;
 
       .erd_table_top {
-        height: 15px;
+        height: 33px;
+
+        button {
+          width: 17px;
+          height: 17px;
+          font-size: .70em;
+          float: right;
+          margin-left: 5px;
+          border: none;
+          outline: none;
+          cursor: pointer;
+          border-radius: 50%;
+
+          &:first-child {
+            color: #9a0005;
+            background-color: #9a0005;
+          }
+          &:last-child {
+            color: #00792a;
+            background-color: #00792a;
+          }
+
+          &:hover {
+            color: white;
+          }
+        }
       }
 
       .erd_table_header {
         box-sizing: border-box;
         margin-bottom: 15px;
 
-        button {
-          margin-right: 5px;
-        }
-
         input {
-          width: 41%;
+          width: 47%;
           height: 100%;
           font-size: 20px;
           margin-right: 10px;
@@ -326,6 +347,7 @@ export default {
         overflow: hidden;
 
         input, div {
+          width: 100px;
           float: left;
           margin-right: 10px;
           margin-bottom: 2px;
@@ -341,20 +363,22 @@ export default {
           padding: 0;
           width: 25px;
           height: 25px;
-          color: #672627;
+          font-size: .70em;
+          color: #b9b9b9;
           border: none;
           outline: none;
           background-color: $table_background;
           cursor: pointer;
 
           &:hover {
-            color: #dc3545;
+            color: white;
+            font-size: .875em;
           }
         }
 
         /* 데이터 타입 힌트 */
         .erd_data_type_list {
-          width: 168px;
+          width: 100px;
           position: absolute;
           color: #a2a2a2;
           background-color: #191919;
