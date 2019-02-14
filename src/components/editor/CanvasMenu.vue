@@ -314,13 +314,13 @@ export default {
     }
     /* 추가,삭제 animation */
     .menu-top-enter-active {
-      transition: all .3s ease-out;
+      transition: all .3s ease;
     }
     .menu-top-leave-active {
-      transition: all .3s ease-out;
+      transition: all .4s ease-out;
     }
     .menu-top-enter, .menu-top-leave-to {
-      transform: translateX(20px);
+      transform: translateX(10px);
       opacity: 0;
     }
     .ghost {

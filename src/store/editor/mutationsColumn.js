@@ -1,6 +1,7 @@
 import JSLog from '@/js/JSLog'
 import * as util from '@/js/editor/util'
 import storeTable from './table'
+import ERD from '@/js/editor/ERD'
 
 JSLog('store loaded', 'mutationsColumn')
 
@@ -8,6 +9,8 @@ export default {
   // 컬럼 추가
   add (state, data) {
     JSLog('mutations', 'column', 'add')
+    ERD.core.event.isEdit = true
+
     for (let table of state.tables) {
       if (data.id === table.id) {
         table.ui.height += state.COLUMN_HEIGHT

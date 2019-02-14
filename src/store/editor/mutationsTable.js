@@ -9,6 +9,8 @@ export default {
   // 테이블 추가
   add (state) {
     JSLog('mutations', 'table', 'add')
+    ERD.core.event.isEdit = true
+
     const newTable = {
       id: util.guid(),
       name: '',
