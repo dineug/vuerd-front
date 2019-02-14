@@ -66,7 +66,8 @@ export default {
           tableId = table.id
           ERD.store().commit({
             type: 'tableSelected',
-            id: table.id
+            id: table.id,
+            isColumnSelected: true
           })
           break
         }

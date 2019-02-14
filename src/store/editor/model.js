@@ -45,10 +45,6 @@ export default new Vuex.Store({
     // 모델 변경
     modelActive (state, data) {
       JSLog('mutations', 'modelActive')
-      // 모든 이벤트 중지
-      ERD.core.event.stop()
-      // 테이블 상세 그리드 해제
-      storeTable.commit({ type: 'delete' })
 
       const isTab = util.getData(state.tabs, data.id)
       if (isTab) {
@@ -60,14 +56,15 @@ export default new Vuex.Store({
           }
         })
       }
-    },
-    // 모델 변경 단축키
-    modelActiveKeyMap (state, data) {
-      JSLog('mutations', 'modelActiveKeyMap')
+
       // 모든 이벤트 중지
       ERD.core.event.stop()
       // 테이블 상세 그리드 해제
       storeTable.commit({ type: 'delete' })
+    },
+    // 모델 변경 단축키
+    modelActiveKeyMap (state, data) {
+      JSLog('mutations', 'modelActiveKeyMap')
 
       let isActive = false
       for (let i = 0; i < state.tabs.length; i++) {
@@ -85,12 +82,15 @@ export default new Vuex.Store({
           }
         })
       }
+
+      // 모든 이벤트 중지
+      ERD.core.event.stop()
+      // 테이블 상세 그리드 해제
+      storeTable.commit({ type: 'delete' })
     },
     // 모델 삭제
     modelDelete (state, data) {
       JSLog('mutations', 'modelDelete')
-      // 모든 이벤트 중지
-      ERD.core.event.stop()
 
       const tab = util.getData(state.tabs, data.id)
       for (let i in state.tabs) {
@@ -104,6 +104,9 @@ export default new Vuex.Store({
           break
         }
       }
+
+      // 모든 이벤트 중지
+      ERD.core.event.stop()
     }
   }
 })

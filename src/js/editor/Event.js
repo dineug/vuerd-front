@@ -17,7 +17,7 @@ class Event {
     this.rightClickListener = []
     this.components = {
       QuickMenu: null,
-      CanvasMain: null,
+      CanvasMain: [],
       CanvasMenu: null,
       CanvasGrid: null
     }
@@ -94,13 +94,6 @@ class Event {
       // 테이블 메뉴 hide
       if (!$(e.target).closest('.quick_menu').length) {
         this.components.QuickMenu.isShow = false
-      }
-      // 데이터 타입 힌트 hide
-      if (!$(e.target).closest('.erd_data_type_list').length) {
-        this.core.erd.store().commit({
-          type: 'columnDataTypeHintVisibleAll',
-          isDataTypeHint: false
-        })
       }
       // 테이블 및 컬럼 selected 해제
       if (!$(e.target).closest('.erd_table').length &&
@@ -214,6 +207,7 @@ class Event {
                   type: 'modelDelete',
                   id: tab.id
                 })
+                break
               }
             }
           } else if (e.altKey) {
@@ -494,11 +488,13 @@ class Event {
     switch (type) {
       case 'start':
         this.isDrag = true
-        this.components.CanvasMain.svg.top = 0
-        this.components.CanvasMain.svg.left = 0
-        this.components.CanvasMain.svg.width = 0
-        this.components.CanvasMain.svg.height = 0
-        this.components.CanvasMain.svg.isDarg = true
+        this.components.CanvasMain.forEach(v => {
+          v.svg.top = 0
+          v.svg.left = 0
+          v.svg.width = 0
+          v.svg.height = 0
+          v.svg.isDarg = true
+        })
         this.drag.x = e.clientX + document.documentElement.scrollLeft
         this.drag.y = e.clientY + document.documentElement.scrollTop
         break
@@ -515,10 +511,12 @@ class Event {
             x: this.drag.x > currentX ? this.drag.x : currentX,
             y: this.drag.y > currentY ? this.drag.y : currentY
           }
-          this.components.CanvasMain.svg.top = min.y
-          this.components.CanvasMain.svg.left = min.x
-          this.components.CanvasMain.svg.width = max.x - min.x
-          this.components.CanvasMain.svg.height = max.y - min.y
+          this.components.CanvasMain.forEach(v => {
+            v.svg.top = min.y
+            v.svg.left = min.x
+            v.svg.width = max.x - min.x
+            v.svg.height = max.y - min.y
+          })
           this.core.erd.store().commit({
             type: 'tableMultiSelected',
             min: min,
@@ -529,7 +527,9 @@ class Event {
       case 'stop':
         if (this.isDrag) {
           this.isDrag = false
-          this.components.CanvasMain.svg.isDarg = false
+          this.components.CanvasMain.forEach(v => {
+            v.svg.isDarg = false
+          })
         }
         break
     }
@@ -606,6 +606,10 @@ class Event {
       type: 'tableSelectedAllNone',
       isTable: true,
       isColumn: true
+    })
+    this.core.erd.store().commit({
+      type: 'columnDataTypeHintVisibleAll',
+      isDataTypeHint: false
     })
   }
 }

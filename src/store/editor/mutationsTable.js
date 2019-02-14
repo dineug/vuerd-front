@@ -39,8 +39,7 @@ export default {
     this.commit({
       type: 'tableSelected',
       id: newTable.id,
-      onlyTableSelected: false,
-      isTableAdd: true
+      isNotRelation: true
     })
   },
   // 테이블 삭제
@@ -112,7 +111,7 @@ export default {
     const table = util.getData(state.tables, data.id)
     // z-index 처리
     const zIndex = util.getZIndex()
-    if (table.ui.zIndex !== zIndex - 1) {
+    if (table && table.ui.zIndex !== zIndex - 1) {
       table.ui.zIndex = zIndex
     }
 
@@ -125,12 +124,15 @@ export default {
       })
     }
     // column 선택 제거
-    if (data.onlyTableSelected) {
+    if (!data.isColumnSelected) {
       this.commit({
         type: 'tableSelectedAllNone',
         isTable: false,
         isColumn: true
       })
+    }
+
+    if (data.isEvent) {
       const tableIds = []
       for (let targetTable of state.tables) {
         if (targetTable.ui.selected) {
@@ -139,14 +141,9 @@ export default {
       }
       ERD.core.event.onDraggable('start', tableIds)
     }
+
     // 테이블추가에서 호출시 처리
-    if (data.isTableAdd) {
-      this.commit({
-        type: 'tableSelectedAllNone',
-        isTable: false,
-        isColumn: true
-      })
-    } else {
+    if (!data.isNotRelation) {
       // 관계 drawing 시작
       if (ERD.core.event.isCursor && !ERD.core.event.isDraw) {
         // table pk 컬럼이 있는지 체크 없으면 자동생성

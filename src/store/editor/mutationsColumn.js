@@ -103,7 +103,7 @@ export default {
     // 마지막 컬럼 포커스
     const isColumns = table.columns.length
     if (isColumns !== 0) {
-      document.getElementById(`column_name_${table.columns[isColumns - 1].id}`).focus()
+      document.getElementById(`columnName_${table.columns[isColumns - 1].id}`).focus()
     }
   },
   // 컬럼 NULL 조건 변경
@@ -122,9 +122,10 @@ export default {
       isColumn: true
     })
     const table = util.getData(state.tables, data.tableId)
-    const column = util.getData(table.columns, data.columnId)
-    if (column) column.ui.selected = true
-    ERD.core.event.isSelectedColumn = true
+    if (table) {
+      const column = util.getData(table.columns, data.columnId)
+      if (column) column.ui.selected = true
+    }
 
     // 테이블 상세 활성화
     storeTable.commit({

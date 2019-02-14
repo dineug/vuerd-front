@@ -1,7 +1,7 @@
 <template lang="pug">
   .main_canvas(v-if="!isPreview")
     // mouse drag
-    svg#svg_drag(v-if="svg.isDarg"
+    svg.svg_drag(v-if="svg.isDarg"
     :style="`top: ${svg.top}px; left: ${svg.left}px; width: ${svg.width}px; height: ${svg.height}px;`")
       rect(:width="svg.width" :height="svg.height"
       stroke="#0098ff" stroke-width="1" stroke-opacity="0.9" stroke-dasharray="3"
@@ -41,17 +41,18 @@
           .erd_column(v-for="column in table.columns" :key="column.id" :column_id="column.id"
           :class="{ selected: column.ui.selected, relation_active: column.ui.isHover}"
           :style="`height: ${COLUMN_HEIGHT}px;`"
-          @mousedown="columnSelected(table.id, column.id)")
+          @mousedown.stop="onColumnSelected($event, table.id, column.id)")
 
             // 컬럼 key
             .erd_column_key(:class="{ pk: column.ui.pk, fk: column.ui.fk, pfk: column.ui.pfk }")
               font-awesome-icon(icon="key")
 
             // 컬럼 이름
-            input(v-model="column.name" v-focus :id="`column_name_${column.id}`"
+            input(v-model="column.name" v-focus :id="`columnName_${column.id}`"
             type="text" placeholder="column"
             @keyup="onChangeTableGrid(table.id)"
             @keyup.enter="onEnterMove($event, 'columnName')"
+            @keydown="onKeyArrowMove"
             @focus="columnSelected(table.id, column.id)")
 
             // 컬럼 데이터타입
@@ -77,12 +78,14 @@
             @click="columnChangeNull(table.id, column.id)"
             @keyup.32="columnChangeNull(table.id, column.id)"
             @keyup.enter="onEnterMove($event, 'columnNotNull')"
+            @keydown="onKeyArrowMove"
             @focus="columnSelected(table.id, column.id)")
             input.erd_column_not_null(v-else
             type="text" readonly value="NULL"
             @click="columnChangeNull(table.id, column.id)"
             @keyup.32="columnChangeNull(table.id, column.id)"
             @keyup.enter="onEnterMove($event, 'columnNotNull')"
+            @keydown="onKeyArrowMove"
             @focus="columnSelected(table.id, column.id)")
 
             // 컬럼 comment
@@ -90,6 +93,7 @@
             type="text" placeholder="comment"
             @keyup="onChangeTableGrid(table.id)"
             @keyup.enter="onEnterMove($event, 'columnComment', table.id, column.id)"
+            @keydown="onKeyArrowMove"
             @focus="columnSelected(table.id, column.id)")
 
             // 컬럼 삭제 버튼
@@ -99,6 +103,8 @@
 
   // ========================================== 미리보기 영역 이벤트 중첩방지 ==========================================
   .main_canvas(v-else)
+    svg.svg_drag(v-if="svg.isDarg" :style="`top: ${svg.top}px; left: ${svg.left}px; width: ${svg.width}px; height: ${svg.height}px;`")
+      rect(:width="svg.width" :height="svg.height" stroke="#0098ff" stroke-width="1" stroke-opacity="0.9" stroke-dasharray="3" fill-opacity="0.3")
     .erd_table(v-for="table in tables" :key="table.id" :table_id="table.id" :class="{ selected: table.ui.selected}" :style="`width: ${TABLE_WIDTH}px; top: ${table.ui.top}px; left: ${table.ui.left}px; z-index: ${table.ui.zIndex};`")
       .erd_table_top
         button
@@ -150,7 +156,6 @@ export default {
   },
   data () {
     return {
-      onlyTableSelected: true,
       svg: {
         isDarg: false,
         top: 0,
@@ -208,13 +213,29 @@ export default {
     },
     // 테이블 선택
     tableSelected (e, id) {
+      ERD.core.event.isSelectedColumn = false
       ERD.store().commit({
         type: 'tableSelected',
         id: id,
         ctrlKey: e.ctrlKey,
-        onlyTableSelected: this.onlyTableSelected
+        isEvent: true
       })
-      this.onlyTableSelected = true
+    },
+    // 컬럼 선택 전역
+    onColumnSelected (e, tableId, columnId) {
+      // 데이터 타입 힌트 hide
+      if (!$(e.target).closest('.erd_data_type_list').length) {
+        ERD.core.erd.store().commit({
+          type: 'columnDataTypeHintVisibleAll',
+          isDataTypeHint: false
+        })
+      }
+      ERD.store().commit({
+        type: 'tableSelected',
+        id: tableId,
+        isColumnSelected: true
+      })
+      this.columnSelected(tableId, columnId)
     },
     // 컬럼 선택
     columnSelected (tableId, columnId) {
@@ -223,21 +244,25 @@ export default {
         tableId: tableId,
         columnId: columnId
       })
-      this.onlyTableSelected = false
+      ERD.core.event.isSelectedColumn = true
     },
     // 데이터타입 힌트 show/hide
     dataTypeHintVisible (e, tableId, columnId, isDataTypeHint) {
-      ERD.store().commit({
-        type: 'columnDataTypeHintVisible',
-        tableId: tableId,
-        columnId: columnId,
-        isDataTypeHint: isDataTypeHint
-      })
+      if (e.keyCode === 27) { // key: ESC
+        ERD.store().commit({
+          type: 'columnDataTypeHintVisibleAll',
+          isDataTypeHint: false
+        })
+      } else {
+        ERD.store().commit({
+          type: 'columnDataTypeHintVisible',
+          tableId: tableId,
+          columnId: columnId,
+          isDataTypeHint: isDataTypeHint
+        })
+      }
 
-      if (e.keyCode !== 38 &&
-        e.keyCode !== 40 &&
-        e.keyCode !== 13 &&
-        e.keyCode !== 9) {
+      if (e.keyCode !== 38 && e.keyCode !== 40) {
         // 데이터타입 검색 정렬
         if (isDataTypeHint) {
           ERD.store().commit({
@@ -273,6 +298,7 @@ export default {
           }
           break
         case 40: // key: Arrow down
+          e.preventDefault()
           if (index === -1) {
             $li.eq(0).addClass('selected')
           } else {
@@ -297,11 +323,14 @@ export default {
             }
           }
           break
+        case 37: // key: Arrow left
+        case 39: // key: Arrow right
         case 9: // key: Tab
           ERD.store().commit({
             type: 'columnDataTypeHintVisibleAll',
             isDataTypeHint: false
           })
+          this.onKeyArrowMove(e)
           break
       }
     },
@@ -355,6 +384,48 @@ export default {
         }
       }
     },
+    // 컬럼 화살표 이동
+    onKeyArrowMove (e) {
+      const $div = $(e.target).parents('.erd_table').find('.erd_column')
+      const $input = $(e.target).parents('.erd_column').find('input')
+      const rowIndex = $input.index(e.target)
+      const index = $div.filter('.selected').index()
+      const len = $div.length
+      switch (e.keyCode) {
+        case 38: // key: Arrow up
+          e.preventDefault()
+          if (index === -1) {
+            $div.eq(len - 1).find('input').eq(rowIndex).focus()
+          } else {
+            $div.eq(index - 1).find('input').eq(rowIndex).focus()
+          }
+          break
+        case 40: // key: Arrow down
+          e.preventDefault()
+          if (index === -1) {
+            $div.eq(0).find('input').eq(rowIndex).focus()
+          } else {
+            $div.eq(index + 1 === len ? 0 : index + 1).find('input').eq(rowIndex).focus()
+          }
+          break
+        case 37: // key: Arrow left
+          e.preventDefault()
+          if (rowIndex === -1) {
+            $div.eq(index).find('input').eq(2).focus()
+          } else {
+            $div.eq(index).find('input').eq(rowIndex - 1).focus()
+          }
+          break
+        case 39: // key: Arrow right
+          e.preventDefault()
+          if (rowIndex === -1) {
+            $div.eq(index).find('input').eq(0).focus()
+          } else {
+            $div.eq(index).find('input').eq(rowIndex + 1 === 4 ? 0 : rowIndex + 1).focus()
+          }
+          break
+      }
+    },
     // 마우스 hover addClass
     dataTypeHintAddClass (e) {
       $(e.target).parent('ul').find('li').removeClass('selected')
@@ -383,7 +454,7 @@ export default {
       el.style.height = 0
     },
     onEnter (el, done) {
-      const delay = el.dataset.index * 150
+      const delay = el.dataset.index * 100
       setTimeout(() => {
         Velocity(
           el,
@@ -393,7 +464,7 @@ export default {
       }, delay)
     },
     onLeave (el, done) {
-      const delay = el.dataset.index * 150
+      const delay = el.dataset.index * 100
       setTimeout(() => {
         Velocity(
           el,
@@ -405,7 +476,7 @@ export default {
   },
   mounted () {
     // 이벤트 핸들러에 컴포넌트 등록
-    ERD.core.event.components.CanvasMain = this
+    ERD.core.event.components.CanvasMain.push(this)
   }
 }
 </script>
@@ -428,7 +499,7 @@ export default {
       border-bottom: solid $column_selected 1px;
     }
 
-    #svg_drag {
+    .svg_drag {
       position: absolute;
       z-index: 2147483646;
     }
@@ -526,7 +597,7 @@ export default {
           color: #a2a2a2;
           background-color: #191919;
           opacity: 0.9;
-          margin-top: 20px;
+          margin-top: 25px;
 
           li {
             cursor: pointer;
