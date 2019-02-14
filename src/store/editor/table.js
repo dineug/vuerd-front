@@ -60,6 +60,13 @@ export default new Vuex.Store({
             }
           })
         } else {
+          state.table.columns.forEach((column, i) => {
+            if (i === data.rowKey) {
+              column.ui.selected = true
+            } else {
+              column.ui.selected = false
+            }
+          })
           util.setData(state.table.columns[data.rowKey], data.column)
         }
       }

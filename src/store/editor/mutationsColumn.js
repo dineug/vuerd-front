@@ -1,6 +1,7 @@
 import JSLog from '@/js/JSLog'
 import * as util from '@/js/editor/util'
 import storeTable from './table'
+import ERD from '@/js/editor/ERD'
 
 JSLog('store loaded', 'mutationsColumn')
 
@@ -38,11 +39,6 @@ export default {
           util.setData(column, data.column)
         }
         table.columns.push(column)
-        this.commit({
-          type: 'columnSelected',
-          tableId: data.id,
-          columnId: column.id
-        })
         break
       }
     }
@@ -58,6 +54,7 @@ export default {
         break
       }
     }
+
     // 관계처리
     for (let i = 0; i < state.lines.length; i++) {
       if (state.lines[i].points[0].id === data.tableId || state.lines[i].points[1].id === data.tableId) {
@@ -102,6 +99,12 @@ export default {
       type: 'active',
       id: data.tableId
     })
+
+    // 마지막 컬럼 포커스
+    const isColumns = table.columns.length
+    if (isColumns !== 0) {
+      document.getElementById(`column_name_${table.columns[isColumns - 1].id}`).focus()
+    }
   },
   // 컬럼 NULL 조건 변경
   changeNull (state, data) {
@@ -121,6 +124,7 @@ export default {
     const table = util.getData(state.tables, data.tableId)
     const column = util.getData(table.columns, data.columnId)
     if (column) column.ui.selected = true
+    ERD.core.event.isSelectedColumn = true
 
     // 테이블 상세 활성화
     storeTable.commit({
@@ -153,6 +157,12 @@ export default {
             column.ui[data.key] = !column.ui[data.key]
           }
           check = true
+
+          // 테이블 상세 활성화
+          storeTable.commit({
+            type: 'active',
+            id: table.id
+          })
         }
       }
       if (check) {

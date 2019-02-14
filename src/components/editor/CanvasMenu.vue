@@ -27,14 +27,14 @@
           @click="changeDB('Oracle')") Oracle
 
     // 메뉴 Preview Navigation
-    canvas-main.preview(:style="`top: ${preview.top}px; left: ${preview.left}px;`")
+    canvas-main.preview(:style="`top: ${preview.top}px; left: ${preview.left}px;`"
+    :isPreview="true")
     .preview_border(:style="`top: ${preview.y}px; left: ${preview.x}px;`")
       .preview_target(:style="`top: ${preview.target.y}px; left: ${preview.target.x}px; width: ${preview.target.width}px; height: ${preview.target.height}px;`"
       @mousedown="onPreview")
 </template>
 
 <script>
-import $ from 'jquery'
 import ERD from '@/js/editor/ERD'
 import model from '@/store/editor/model'
 import draggable from 'vuedraggable'
@@ -164,8 +164,8 @@ export default {
   mounted () {
     // 이벤트 핸들러에 컴포넌트 등록
     ERD.core.event.components.CanvasMenu = this
-    const width = $(window).width()
-    const height = $(window).height()
+    const width = window.innerWidth
+    const height = window.innerHeight
     this.preview.left = (-1 * 5000 / 2) + (150 / 2) + width - 150 - 20
     this.preview.x = width - 150 - 20
     this.preview.target.width = width * 0.03
@@ -177,7 +177,7 @@ export default {
     // 단축키 활성화 포커스처리
     for (let i in this.model.tabs) {
       if (this.model.tabs[i].active) {
-        $(this.$el).find('.menu_top input').eq(i).focus()
+        this.$el.querySelectorAll('.menu_top input')[i].focus()
         break
       }
     }

@@ -34,6 +34,10 @@ export default {
     height: 5000px;
     z-index: 2;
     background-color: #282828;
+
+    .canvas {
+      display: flex;
+    }
   }
 
   input {

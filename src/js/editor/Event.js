@@ -79,8 +79,8 @@ class Event {
       this.core.event.onRightClick(e)
     }).on('resize', e => {
       // 미리보기 창크기 동적 위치
-      const width = $(window).width()
-      const height = $(window).height()
+      const width = window.innerWidth
+      const height = window.innerHeight
       this.components.CanvasMenu.preview.left = this.preview.left + width
       this.components.CanvasMenu.preview.x = width - this.preview.x
       this.components.CanvasMenu.preview.target.width = width * 0.03
@@ -159,10 +159,10 @@ class Event {
       this.move.y = e.clientY + document.documentElement.scrollTop
     }).on('keydown', e => {
       JSLog('event', 'keydown', e.keyCode)
+      if (e.altKey || e.ctrlKey) e.preventDefault()
       switch (e.keyCode) {
         case 13: // key: Enter
           if (e.altKey) {
-            e.preventDefault()
             // 컬럼 생성
             for (let table of this.core.erd.store().state.tables) {
               if (table.ui.selected) {
@@ -176,7 +176,6 @@ class Event {
           break
         case 75: // key: K
           if (e.altKey) {
-            e.preventDefault()
             // 컬럼 PK 부여
             this.core.erd.store().commit({
               type: 'columnKey',
@@ -186,21 +185,18 @@ class Event {
           break
         case 78: // key: N
           if (e.altKey) {
-            e.preventDefault()
             // 모델 생성
             model.commit({ type: 'modelAdd' })
           }
           break
         case 84: // key: T
           if (e.altKey) {
-            e.preventDefault()
             // 테이블 생성
             this.core.erd.store().commit({ type: 'tableAdd' })
           }
           break
         case 65: // key: A
           if (e.ctrlKey) {
-            e.preventDefault()
             // 테이블 전체 선택
             this.core.erd.store().commit({ type: 'tableSelectedAll' })
           }
@@ -210,7 +206,6 @@ class Event {
           this.stop()
           break
         case 46: // key: Delete
-          e.preventDefault()
           if (e.ctrlKey) {
             // 모델 삭제
             for (let tab of model.state.tabs) {
@@ -234,6 +229,7 @@ class Event {
               }
             }
           } else {
+            // 컬럼 삭제
             const store = this.core.erd.store()
             store.state.tables.forEach(table => {
               for (let i = 0; i < table.columns.length; i++) {
@@ -243,7 +239,7 @@ class Event {
                     tableId: table.id,
                     columnId: table.columns[i].id
                   })
-                  i--
+                  break
                 }
               }
             })
@@ -251,13 +247,11 @@ class Event {
           break
         case 49: // key: 1
           if (e.ctrlKey) {
-            e.preventDefault()
             model.commit({
               type: 'modelActiveKeyMap',
               index: 1
             })
           } else if (e.altKey) {
-            e.preventDefault()
             // 관계 1:1
             if (this.isCursor) {
               this.onCursor('stop')
@@ -268,13 +262,11 @@ class Event {
           break
         case 50: // key: 2
           if (e.ctrlKey) {
-            e.preventDefault()
             model.commit({
               type: 'modelActiveKeyMap',
               index: 2
             })
           } else if (e.altKey) {
-            e.preventDefault()
             // 관계 1:N
             if (this.isCursor) {
               this.onCursor('stop')
@@ -285,7 +277,6 @@ class Event {
           break
         case 51: // key: 3
           if (e.ctrlKey) {
-            e.preventDefault()
             model.commit({
               type: 'modelActiveKeyMap',
               index: 3
@@ -294,7 +285,6 @@ class Event {
           break
         case 52: // key: 4
           if (e.ctrlKey) {
-            e.preventDefault()
             model.commit({
               type: 'modelActiveKeyMap',
               index: 4
@@ -303,7 +293,6 @@ class Event {
           break
         case 53: // key: 5
           if (e.ctrlKey) {
-            e.preventDefault()
             model.commit({
               type: 'modelActiveKeyMap',
               index: 5
@@ -312,7 +301,6 @@ class Event {
           break
         case 54: // key: 6
           if (e.ctrlKey) {
-            e.preventDefault()
             model.commit({
               type: 'modelActiveKeyMap',
               index: 6
@@ -321,7 +309,6 @@ class Event {
           break
         case 55: // key: 7
           if (e.ctrlKey) {
-            e.preventDefault()
             model.commit({
               type: 'modelActiveKeyMap',
               index: 7
@@ -330,7 +317,6 @@ class Event {
           break
         case 56: // key: 8
           if (e.ctrlKey) {
-            e.preventDefault()
             model.commit({
               type: 'modelActiveKeyMap',
               index: 8
@@ -339,7 +325,6 @@ class Event {
           break
         case 57: // key: 9
           if (e.ctrlKey) {
-            e.preventDefault()
             model.commit({
               type: 'modelActiveKeyMap',
               index: 9
@@ -562,8 +547,8 @@ class Event {
           const moveY = e.clientY + document.documentElement.scrollTop - this.move.y
           const x = this.components.CanvasMenu.preview.target.x + moveX
           const y = this.components.CanvasMenu.preview.target.y + moveY
-          const width = $(window).width()
-          const height = $(window).height()
+          const width = window.innerWidth
+          const height = window.innerHeight
           const targetWidth = width * 0.03
           const targetHeight = height * 0.03
           if (x >= 0 && targetWidth + x <= 150) {

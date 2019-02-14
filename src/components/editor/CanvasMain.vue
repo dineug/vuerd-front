@@ -1,5 +1,5 @@
 <template lang="pug">
-  .main_canvas
+  .main_canvas(v-if="!isPreview")
     // mouse drag
     svg#svg_drag(v-if="svg.isDarg"
     :style="`top: ${svg.top}px; left: ${svg.left}px; width: ${svg.width}px; height: ${svg.height}px;`")
@@ -27,10 +27,12 @@
         .erd_table_header
           input(v-model="table.name" v-focus
           type="text" placeholder="table"
-          @keyup="onChangeTableGrid(table.id)")
+          @keyup="onChangeTableGrid(table.id)"
+          @keyup.enter="onEnterMove($event, 'tableName')")
 
           input(v-model="table.comment"
-          type="text" placeholder="comment")
+          type="text" placeholder="comment"
+          @keyup.enter="onEnterMove($event, 'tableComment', table.id)")
 
         draggable(v-model="table.columns" :options="{group:'table'}"
         @end="draggableEnd")
@@ -46,16 +48,19 @@
               font-awesome-icon(icon="key")
 
             // 컬럼 이름
-            input(v-model="column.name" v-focus
+            input(v-model="column.name" v-focus :id="`column_name_${column.id}`"
             type="text" placeholder="column"
-            @keyup="onChangeTableGrid(table.id)")
+            @keyup="onChangeTableGrid(table.id)"
+            @keyup.enter="onEnterMove($event, 'columnName')"
+            @focus="columnSelected(table.id, column.id)")
 
             // 컬럼 데이터타입
             div
               input.erd_data_type(v-model="column.dataType"
               type="text" placeholder="dataType"
               @keyup="dataTypeHintVisible($event, table.id, column.id, true)"
-              @keydown="dataTypeHintFocus($event, table.id, column.id)")
+              @keydown="dataTypeHintFocus($event, table.id, column.id)"
+              @focus="columnSelected(table.id, column.id)")
 
               transition-group.erd_data_type_list(v-if="column.ui.isDataTypeHint"
               tag="ul"
@@ -69,20 +74,51 @@
             // 컬럼 not-null
             input.erd_column_not_null(v-if="column.options.notNull"
             type="text" readonly value="N-N"
-            @click="columnChangeNull(table.id, column.id)")
+            @click="columnChangeNull(table.id, column.id)"
+            @keyup.32="columnChangeNull(table.id, column.id)"
+            @keyup.enter="onEnterMove($event, 'columnNotNull')"
+            @focus="columnSelected(table.id, column.id)")
             input.erd_column_not_null(v-else
             type="text" readonly value="NULL"
-            @click="columnChangeNull(table.id, column.id)")
+            @click="columnChangeNull(table.id, column.id)"
+            @keyup.32="columnChangeNull(table.id, column.id)"
+            @keyup.enter="onEnterMove($event, 'columnNotNull')"
+            @focus="columnSelected(table.id, column.id)")
 
             // 컬럼 comment
             input(v-model="column.comment"
             type="text" placeholder="comment"
-            @keyup="onChangeTableGrid(table.id)")
+            @keyup="onChangeTableGrid(table.id)"
+            @keyup.enter="onEnterMove($event, 'columnComment', table.id, column.id)"
+            @focus="columnSelected(table.id, column.id)")
 
             // 컬럼 삭제 버튼
             button(title="Delete"
             @click="columnDelete(table.id, column.id)")
               font-awesome-icon(icon="times")
+
+  // ========================================== 미리보기 영역 이벤트 중첩방지 ==========================================
+  .main_canvas(v-else)
+    .erd_table(v-for="table in tables" :key="table.id" :table_id="table.id" :class="{ selected: table.ui.selected}" :style="`width: ${TABLE_WIDTH}px; top: ${table.ui.top}px; left: ${table.ui.left}px; z-index: ${table.ui.zIndex};`")
+      .erd_table_top
+        button
+          font-awesome-icon(icon="times")
+        button
+          font-awesome-icon(icon="plus")
+      .erd_table_header
+        input(v-model="table.name" type="text" placeholder="table")
+        input(v-model="table.comment" type="text" placeholder="comment")
+      .erd_column(v-for="column in table.columns" :key="column.id" :column_id="column.id" :class="{ selected: column.ui.selected, relation_active: column.ui.isHover}" :style="`height: ${COLUMN_HEIGHT}px;`")
+        .erd_column_key(:class="{ pk: column.ui.pk, fk: column.ui.fk, pfk: column.ui.pfk }")
+          font-awesome-icon(icon="key")
+        input(v-model="column.name" type="text" placeholder="column")
+        div
+          input.erd_data_type(v-model="column.dataType" type="text" placeholder="dataType")
+        input.erd_column_not_null(v-if="column.options.notNull" type="text" readonly value="N-N")
+        input.erd_column_not_null(v-else type="text" readonly value="NULL")
+        input(v-model="column.comment" type="text" placeholder="comment")
+        button(title="Delete")
+          font-awesome-icon(icon="times")
 </template>
 
 <script>
@@ -91,6 +127,7 @@ import ERD from '@/js/editor/ERD'
 import storeTable from '@/store/editor/table'
 import draggable from 'vuedraggable'
 import Velocity from 'velocity-animate'
+import * as util from '@/js/editor/util'
 
 export default {
   name: 'CanvasMain',
@@ -103,6 +140,12 @@ export default {
       inserted (el) {
         el.focus()
       }
+    }
+  },
+  props: {
+    isPreview: {
+      type: Boolean,
+      default: false
     }
   },
   data () {
@@ -181,7 +224,6 @@ export default {
         columnId: columnId
       })
       this.onlyTableSelected = false
-      ERD.core.event.isSelectedColumn = true
     },
     // 데이터타입 힌트 show/hide
     dataTypeHintVisible (e, tableId, columnId, isDataTypeHint) {
@@ -239,13 +281,20 @@ export default {
           }
           break
         case 13: // key: Enter
-          if (index !== -1) {
+          if (e.altKey) {
             ERD.store().commit({
-              type: 'columnChangeDataType',
-              tableId: tableId,
-              columnId: columnId,
-              dataType: $li.filter('.selected').text()
+              type: 'columnDataTypeHintVisibleAll',
+              isDataTypeHint: false
             })
+          } else {
+            if (index !== -1) {
+              ERD.store().commit({
+                type: 'columnChangeDataType',
+                tableId: tableId,
+                columnId: columnId,
+                dataType: $li.filter('.selected').text()
+              })
+            }
           }
           break
         case 9: // key: Tab
@@ -264,7 +313,47 @@ export default {
         columnId: columnId,
         dataType: dataType
       })
-      $(e.target).parent().parent('div').find('.erd_data_type').focus()
+      e.target.parentNode.parentNode.childNodes[0].focus()
+    },
+    // 컬럼 포커스 이동 이벤트
+    onEnterMove (e, current, tableId, columnId) {
+      if (!e.altKey) {
+        switch (current) {
+          case 'tableName':
+            e.target.parentNode.childNodes[1].focus()
+            break
+          case 'tableComment':
+            const node = e.target.parentNode.parentNode.querySelector('.erd_column')
+            if (node != null) {
+              node.querySelector('input').focus()
+            } else {
+              ERD.store().commit({
+                type: 'columnAdd',
+                id: tableId
+              })
+            }
+            break
+          case 'columnName':
+            if (!e.altKey) {
+              e.target.parentNode.querySelectorAll('input')[1].focus()
+            }
+            break
+          case 'columnNotNull':
+            e.target.parentNode.querySelectorAll('input')[3].focus()
+            break
+          case 'columnComment':
+            const table = util.getData(ERD.store().state.tables, tableId)
+            if (table.columns[table.columns.length - 1].id === columnId) {
+              ERD.store().commit({
+                type: 'columnAdd',
+                id: tableId
+              })
+            } else {
+              e.target.parentNode.nextSibling.querySelectorAll('input')[0].focus()
+            }
+            break
+        }
+      }
     },
     // 마우스 hover addClass
     dataTypeHintAddClass (e) {
@@ -294,8 +383,8 @@ export default {
       el.style.height = 0
     },
     onEnter (el, done) {
-      var delay = el.dataset.index * 150
-      setTimeout(function () {
+      const delay = el.dataset.index * 150
+      setTimeout(() => {
         Velocity(
           el,
           { opacity: 1, height: '13.64px' },
@@ -304,8 +393,8 @@ export default {
       }, delay)
     },
     onLeave (el, done) {
-      var delay = el.dataset.index * 150
-      setTimeout(function () {
+      const delay = el.dataset.index * 150
+      setTimeout(() => {
         Velocity(
           el,
           { opacity: 0, height: 0 },
@@ -324,6 +413,7 @@ export default {
 <style lang="scss" scoped>
   $table_background: #191919;
   $table_selected: #14496d;
+  $column_selected: #00a9ff;
   /* column key color */
   $key_pk: #B4B400;
   $key_fk: #dda8b1;
@@ -333,6 +423,10 @@ export default {
     width: 5000px;
     height: 5000px;
     background-color: #282828;
+
+    input:focus {
+      border-bottom: solid $column_selected 1px;
+    }
 
     #svg_drag {
       position: absolute;
@@ -391,12 +485,15 @@ export default {
       .erd_column {
         height: 25px;
         overflow: hidden;
+        box-sizing: border-box;
+        display: inline-flex;
+        vertical-align: middle;
+        align-items: center;
 
         input, div {
           width: 100px;
           float: left;
           margin-right: 10px;
-          margin-bottom: 2px;
           font-size: 14px;
         }
 
@@ -461,7 +558,7 @@ export default {
 
         /* 컬럼 선택시 */
         &.selected {
-          border: solid #383d41 1px;
+          border-left: solid $column_selected 3px;
         }
 
         /* 컬럼 관계 */
