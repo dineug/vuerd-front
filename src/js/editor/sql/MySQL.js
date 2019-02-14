@@ -39,7 +39,7 @@ class MySQL {
   // 테이블 formatter
   formatTable ({ name, table, buffer }) {
     buffer.push(`CREATE TABLE \`${name}\`.\`${table.name}\` (`)
-    const isPK = util.tableIsPrimaryKey(table.columns)
+    const isPK = util.isPK(table.columns)
     const spaceSize = this.formatSize(table.columns)
 
     table.columns.forEach((column, i) => {
@@ -61,7 +61,7 @@ class MySQL {
     })
     // pk 추가
     if (isPK) {
-      const columns = util.getPKColumns(table.id)
+      const columns = util.getPKs(table.id)
       buffer.push(`\tPRIMARY KEY (${this.formatNames(columns)})`)
     }
     // 코멘트 처리

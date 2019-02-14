@@ -55,7 +55,7 @@ export default new Vuex.Store({
             }
           })
         } else {
-          util.initData(state.table.columns[data.rowKey], data.column)
+          util.setData(state.table.columns[data.rowKey], data.column)
         }
       }
     }

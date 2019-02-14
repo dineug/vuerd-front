@@ -147,7 +147,7 @@ export default {
       // 관계 drawing 시작
       if (ERD.core.event.isCursor && !ERD.core.event.isDraw) {
         // table pk 컬럼이 있는지 체크 없으면 자동생성
-        if (!util.tableIsPrimaryKey(table.columns)) {
+        if (!util.isPK(table.columns)) {
           this.commit({
             type: 'columnAdd',
             id: table.id,

@@ -5,7 +5,6 @@ import dataType from './dataType'
 import table from './mutationsTable'
 import column from './mutationsColumn'
 import line from './mutationsLine'
-import * as util from '@/js/editor/util'
 
 JSLog('store loaded', 'erd')
 Vue.use(Vuex)
@@ -32,7 +31,9 @@ export default () => {
       // 데이터타입 검색
       changeDataTypeHint (state, data) {
         JSLog('mutations', 'erd', 'changeDataTypeHint')
-        state.dataTypes = util.getDataTypeSearch(data.key)
+        state.dataTypes = dataType[state.DBType].filter(v => {
+          return v.name.toLowerCase().indexOf(data.key.toLowerCase()) !== -1
+        })
       },
       // 전체 import
       importData (state, data) {

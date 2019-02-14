@@ -415,7 +415,7 @@ class Event {
             const startColumnIds = []
             const endColumnIds = []
             const line = util.getData(this.core.erd.store().state.lines, this.lineId)
-            const columns = util.getPKColumns(line.points[0].id)
+            const columns = util.getPKs(line.points[0].id)
             columns.forEach(v => {
               const columnId = util.guid()
               startColumnIds.push(v.id)
