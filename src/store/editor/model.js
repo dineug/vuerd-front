@@ -28,7 +28,7 @@ export default new Vuex.Store({
       })
     },
     // 모델 추가
-    modelAdd (state, data) {
+    modelAdd (state) {
       JSLog('mutations', 'modelAdd')
       const tab = {
         id: util.guid(),

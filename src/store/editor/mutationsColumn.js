@@ -1,7 +1,6 @@
 import JSLog from '@/js/JSLog'
 import * as util from '@/js/editor/util'
 import storeTable from './table'
-import ERD from '@/js/editor/ERD'
 
 JSLog('store loaded', 'mutationsColumn')
 

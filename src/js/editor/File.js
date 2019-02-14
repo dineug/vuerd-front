@@ -29,6 +29,7 @@ class File {
         reader.readAsText(f)
         reader.onload = () => {
           this.load('json', reader.result)
+          this.importJSONTag.val('')
         }
       } else {
         alert('json 파일만 올려주세요')
@@ -41,6 +42,7 @@ class File {
         reader.readAsText(f)
         reader.onload = () => {
           this.load('sql', reader.result)
+          this.importSQLTag.val('')
         }
       } else {
         alert('sql 파일만 올려주세요')

@@ -7,99 +7,98 @@
       stroke="#0098ff" stroke-width="1" stroke-opacity="0.9" stroke-dasharray="3"
       fill-opacity="0.3")
 
-    transition-group(type="transition" name="fade")
-      // 테이블
-      .erd_table(v-for="table in tables" :key="table.id" :table_id="table.id"
-      :class="{ selected: table.ui.selected}"
-      :style="`width: ${TABLE_WIDTH}px; top: ${table.ui.top}px; left: ${table.ui.left}px; z-index: ${table.ui.zIndex};`"
-      @mousedown="tableSelected($event, table.id)")
+    // 테이블
+    .erd_table(v-for="table in tables" :key="table.id" :table_id="table.id"
+    :class="{ selected: table.ui.selected}"
+    :style="`width: ${TABLE_WIDTH}px; top: ${table.ui.top}px; left: ${table.ui.left}px; z-index: ${table.ui.zIndex};`"
+    @mousedown="tableSelected($event, table.id)")
 
-        // 테이블 해더
-        .erd_table_top
-          button(title="Alt + Delete"
-          @click="tableDelete(table.id)")
-            font-awesome-icon(icon="times")
+      // 테이블 해더
+      .erd_table_top
+        button(title="Alt + Delete"
+        @click="tableDelete(table.id)")
+          font-awesome-icon(icon="times")
 
-          button(title="Alt + Enter"
-          @click="columnAdd(table.id)")
-            font-awesome-icon(icon="plus")
+        button(title="Alt + Enter"
+        @click="columnAdd(table.id)")
+          font-awesome-icon(icon="plus")
 
-        .erd_table_header
-          input(v-model="table.name" v-focus
-          type="text" placeholder="table"
+      .erd_table_header
+        input(v-model="table.name" v-focus
+        type="text" placeholder="table"
+        @keyup="onChangeTableGrid(table.id)"
+        @keyup.enter="onEnterMove($event, 'tableName')")
+
+        input(v-model="table.comment"
+        type="text" placeholder="comment"
+        @keyup.enter="onEnterMove($event, 'tableComment', table.id)")
+
+      draggable(v-model="table.columns" :options="{group:'table'}"
+      @end="draggableEnd")
+
+        // 컬럼
+        .erd_column(v-for="column in table.columns" :key="column.id" :column_id="column.id"
+        :class="{ selected: column.ui.selected, relation_active: column.ui.isHover}"
+        :style="`height: ${COLUMN_HEIGHT}px;`"
+        @mousedown.stop="onColumnSelected($event, table.id, column.id)")
+
+          // 컬럼 key
+          .erd_column_key(:class="{ pk: column.ui.pk, fk: column.ui.fk, pfk: column.ui.pfk }")
+            font-awesome-icon(icon="key")
+
+          // 컬럼 이름
+          input(v-model="column.name" v-focus :id="`columnName_${column.id}`"
+          type="text" placeholder="column"
           @keyup="onChangeTableGrid(table.id)"
-          @keyup.enter="onEnterMove($event, 'tableName')")
+          @keyup.enter="onEnterMove($event, 'columnName')"
+          @keydown="onKeyArrowMove"
+          @focus="columnSelected(table.id, column.id)")
 
-          input(v-model="table.comment"
+          // 컬럼 데이터타입
+          div
+            input.erd_data_type(v-model="column.dataType"
+            type="text" placeholder="dataType"
+            @keyup="dataTypeHintVisible($event, table.id, column.id, true)"
+            @keydown="dataTypeHintFocus($event, table.id, column.id)"
+            @focus="columnSelected(table.id, column.id)")
+
+            transition-group.erd_data_type_list(v-if="column.ui.isDataTypeHint"
+            tag="ul"
+            @before-enter="onBeforeEnter"
+            @enter="onEnter"
+            @leave="onLeave")
+              li(v-for="dataType in dataTypes" :key="dataType.name"
+              @click="columnChangeDataType($event, table.id, column.id, dataType.name)"
+              @mouseover="dataTypeHintAddClass") {{ dataType.name }}
+
+          // 컬럼 not-null
+          input.erd_column_not_null(v-if="column.options.notNull"
+          type="text" readonly value="N-N"
+          @click="columnChangeNull(table.id, column.id)"
+          @keyup.32="columnChangeNull(table.id, column.id)"
+          @keyup.enter="onEnterMove($event, 'columnNotNull')"
+          @keydown="onKeyArrowMove"
+          @focus="columnSelected(table.id, column.id)")
+          input.erd_column_not_null(v-else
+          type="text" readonly value="NULL"
+          @click="columnChangeNull(table.id, column.id)"
+          @keyup.32="columnChangeNull(table.id, column.id)"
+          @keyup.enter="onEnterMove($event, 'columnNotNull')"
+          @keydown="onKeyArrowMove"
+          @focus="columnSelected(table.id, column.id)")
+
+          // 컬럼 comment
+          input(v-model="column.comment"
           type="text" placeholder="comment"
-          @keyup.enter="onEnterMove($event, 'tableComment', table.id)")
+          @keyup="onChangeTableGrid(table.id)"
+          @keyup.enter="onEnterMove($event, 'columnComment', table.id, column.id)"
+          @keydown="onKeyArrowMove"
+          @focus="columnSelected(table.id, column.id)")
 
-        draggable(v-model="table.columns" :options="{group:'table'}"
-        @end="draggableEnd")
-
-          // 컬럼
-          .erd_column(v-for="column in table.columns" :key="column.id" :column_id="column.id"
-          :class="{ selected: column.ui.selected, relation_active: column.ui.isHover}"
-          :style="`height: ${COLUMN_HEIGHT}px;`"
-          @mousedown.stop="onColumnSelected($event, table.id, column.id)")
-
-            // 컬럼 key
-            .erd_column_key(:class="{ pk: column.ui.pk, fk: column.ui.fk, pfk: column.ui.pfk }")
-              font-awesome-icon(icon="key")
-
-            // 컬럼 이름
-            input(v-model="column.name" v-focus :id="`columnName_${column.id}`"
-            type="text" placeholder="column"
-            @keyup="onChangeTableGrid(table.id)"
-            @keyup.enter="onEnterMove($event, 'columnName')"
-            @keydown="onKeyArrowMove"
-            @focus="columnSelected(table.id, column.id)")
-
-            // 컬럼 데이터타입
-            div
-              input.erd_data_type(v-model="column.dataType"
-              type="text" placeholder="dataType"
-              @keyup="dataTypeHintVisible($event, table.id, column.id, true)"
-              @keydown="dataTypeHintFocus($event, table.id, column.id)"
-              @focus="columnSelected(table.id, column.id)")
-
-              transition-group.erd_data_type_list(v-if="column.ui.isDataTypeHint"
-              tag="ul"
-              @before-enter="onBeforeEnter"
-              @enter="onEnter"
-              @leave="onLeave")
-                li(v-for="dataType in dataTypes" :key="dataType.name"
-                @click="columnChangeDataType($event, table.id, column.id, dataType.name)"
-                @mouseover="dataTypeHintAddClass") {{ dataType.name }}
-
-            // 컬럼 not-null
-            input.erd_column_not_null(v-if="column.options.notNull"
-            type="text" readonly value="N-N"
-            @click="columnChangeNull(table.id, column.id)"
-            @keyup.32="columnChangeNull(table.id, column.id)"
-            @keyup.enter="onEnterMove($event, 'columnNotNull')"
-            @keydown="onKeyArrowMove"
-            @focus="columnSelected(table.id, column.id)")
-            input.erd_column_not_null(v-else
-            type="text" readonly value="NULL"
-            @click="columnChangeNull(table.id, column.id)"
-            @keyup.32="columnChangeNull(table.id, column.id)"
-            @keyup.enter="onEnterMove($event, 'columnNotNull')"
-            @keydown="onKeyArrowMove"
-            @focus="columnSelected(table.id, column.id)")
-
-            // 컬럼 comment
-            input(v-model="column.comment"
-            type="text" placeholder="comment"
-            @keyup="onChangeTableGrid(table.id)"
-            @keyup.enter="onEnterMove($event, 'columnComment', table.id, column.id)"
-            @keydown="onKeyArrowMove"
-            @focus="columnSelected(table.id, column.id)")
-
-            // 컬럼 삭제 버튼
-            button(title="Delete"
-            @click="columnDelete(table.id, column.id)")
-              font-awesome-icon(icon="times")
+          // 컬럼 삭제 버튼
+          button(title="Delete"
+          @click="columnDelete(table.id, column.id)")
+            font-awesome-icon(icon="times")
 
   // ========================================== 미리보기 영역 이벤트 중첩방지 ==========================================
   .main_canvas(v-else)
@@ -144,7 +143,10 @@ export default {
     // focus 정의
     focus: {
       inserted (el) {
-        el.focus()
+        if (ERD.core.event.isEdit) {
+          el.focus()
+          ERD.core.event.isEdit = false
+        }
       }
     }
   },

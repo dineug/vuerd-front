@@ -21,6 +21,7 @@ class Event {
       CanvasMenu: null,
       CanvasGrid: null
     }
+    this.isEdit = false
 
     // relation Draw
     this.isCursor = false
@@ -157,6 +158,7 @@ class Event {
         case 13: // key: Enter
           if (e.altKey) {
             // 컬럼 생성
+            this.isEdit = true
             for (let table of this.core.erd.store().state.tables) {
               if (table.ui.selected) {
                 this.core.erd.store().commit({
@@ -185,6 +187,7 @@ class Event {
         case 84: // key: T
           if (e.altKey) {
             // 테이블 생성
+            this.isEdit = true
             this.core.erd.store().commit({ type: 'tableAdd' })
           }
           break
@@ -569,7 +572,7 @@ class Event {
     }
   }
 
-  // 마우스 Alt + 클릭 이동
+  // 마우스 클릭 이동
   onMove (type, e) {
     switch (type) {
       case 'start':

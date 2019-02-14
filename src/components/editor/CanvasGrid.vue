@@ -5,11 +5,10 @@
       @click="menuAction(menu.type)")
         font-awesome-icon(:icon="menu.icon")
 
-    transition(type="transition" name="fade")
-      grid.table_detail(v-if="isTable"
-      :options="optionsColumns" theme="clean"
-      :columnData="columns"
-      :rowData="rowColumns")
+    grid.table_detail(v-if="isTable"
+    :options="optionsColumns" theme="clean"
+    :columnData="columns"
+    :rowData="rowColumns")
 </template>
 
 <script>
@@ -261,7 +260,7 @@ export default {
 }
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
   $menu_base_size: 30px;
 
   .grid_canvas {
