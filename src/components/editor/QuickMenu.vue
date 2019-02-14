@@ -38,14 +38,14 @@ export default {
           icon: 'file-medical',
           isImg: false,
           name: 'New Model',
-          keymap: 'Ctrl + Alt + N'
+          keymap: 'Alt + N'
         },
         {
           type: 'tableAdd',
           icon: 'table',
           isImg: false,
           name: 'New Table',
-          keymap: 'Alt + N'
+          keymap: 'Alt + T'
         },
         {
           type: 'pk',
@@ -120,7 +120,7 @@ export default {
     background-color: $mbg;
     position: fixed;
     opacity: 0.9;
-    width: 200px;
+    width: 168px;
 
     li {
       width: 100%;

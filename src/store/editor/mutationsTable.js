@@ -46,6 +46,9 @@ export default {
   // 테이블 삭제
   delete (state, data) {
     JSLog('mutations', 'table', 'delete')
+    // 테이블 상세 그리드 해제
+    storeTable.commit({ type: 'delete' })
+
     for (let i in state.tables) {
       if (data.id === state.tables[i].id) {
         state.tables.splice(i, 1)
@@ -176,7 +179,7 @@ export default {
       }
     }
 
-    // 테이블 그리드 연동
+    // 테이블 상세 활성화
     storeTable.commit({
       type: 'active',
       id: data.id
@@ -201,14 +204,15 @@ export default {
   // 테이블 및 컬럼 selected All 해제
   selectedAllNone (state, data) {
     JSLog('mutations', 'table', 'selectedAllNone')
+    // 테이블 상세 그리드 해제
+    storeTable.commit({ type: 'delete' })
+
     state.tables.forEach(table => {
       if (data.isTable) table.ui.selected = false
       table.columns.forEach(column => {
         if (data.isColumn) column.ui.selected = false
       })
     })
-    // 테이블 상세 그리드 해제
-    storeTable.commit({ type: 'remove' })
   },
   // 테이블 드래그 selected
   multiSelected (state, data) {

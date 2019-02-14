@@ -3,8 +3,9 @@
     canvas-menu
     canvas-grid
     quick-menu
-    canvas-main
-    canvas-svg
+    .canvas
+      canvas-main
+      canvas-svg
 </template>
 
 <script>

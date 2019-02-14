@@ -159,7 +159,7 @@ class MySQL {
       dataTypeMax: dataTypeMax
     }
   }
-  
+
   // 숫자만큼 공백생성
   formatSpace (size) {
     let space = ''

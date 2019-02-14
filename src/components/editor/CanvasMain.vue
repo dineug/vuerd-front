@@ -16,7 +16,7 @@
 
         // 테이블 해더
         .erd_table_top
-          button(title="Delete"
+          button(title="Alt + Delete"
           @click="tableDelete(table.id)")
             font-awesome-icon(icon="times")
 
@@ -80,7 +80,8 @@
             @keyup="onChangeTableGrid(table.id)")
 
             // 컬럼 삭제 버튼
-            button(@click="columnDelete(table.id, column.id)")
+            button(title="Delete"
+            @click="columnDelete(table.id, column.id)")
               font-awesome-icon(icon="times")
 </template>
 
@@ -145,10 +146,6 @@ export default {
         tableId: tableId,
         columnId: columnId
       })
-      storeTable.commit({
-        type: 'active',
-        id: tableId
-      })
     },
     // NULL 조건 변경
     columnChangeNull (tableId, columnId) {
@@ -165,7 +162,6 @@ export default {
         type: 'tableDelete',
         id: id
       })
-      storeTable.commit({ type: 'remove' })
     },
     // 테이블 선택
     tableSelected (e, id) {

@@ -96,6 +96,12 @@ export default {
         }
       }
     }
+
+    // 테이블 상세 활성화
+    storeTable.commit({
+      type: 'active',
+      id: data.tableId
+    })
   },
   // 컬럼 NULL 조건 변경
   changeNull (state, data) {
@@ -115,6 +121,8 @@ export default {
     const table = util.getData(state.tables, data.tableId)
     const column = util.getData(table.columns, data.columnId)
     if (column) column.ui.selected = true
+
+    // 테이블 상세 활성화
     storeTable.commit({
       type: 'active',
       id: data.tableId
@@ -158,6 +166,8 @@ export default {
     const table = util.getData(state.tables, data.tableId)
     const column = util.getData(table.columns, data.columnId)
     column.dataType = data.dataType
+
+    // 테이블 상세 활성화
     storeTable.commit({
       type: 'active',
       id: data.tableId

@@ -113,7 +113,7 @@ class Event {
         })
         this.isSelectedColumn = false
       }
-      // 마우스 drag
+
       if (!e.altKey &&
         !this.isDraggable &&
         !this.isSelectedColumn &&
@@ -122,18 +122,13 @@ class Event {
         !$(e.target).closest('.menu_sidebar').length &&
         !$(e.target).closest('.menu_bottom').length &&
         !$(e.target).closest('.table_detail').length) {
-        this.onDrag('start', e)
-      }
-      // 마우스 이동
-      if (e.altKey &&
-        !this.isDraggable &&
-        !this.isSelectedColumn &&
-        !this.isPreview &&
-        !$(e.target).closest('.menu_top').length &&
-        !$(e.target).closest('.menu_sidebar').length &&
-        !$(e.target).closest('.menu_bottom').length &&
-        !$(e.target).closest('.table_detail').length) {
-        this.onMove('start')
+        if (e.ctrlKey) {
+          // 마우스 drag
+          this.onDrag('start', e)
+        } else {
+          // 마우스 이동
+          this.onMove('start')
+        }
       }
     }).on('mouseup', e => {
       JSLog('event', 'mouseup')
@@ -151,12 +146,15 @@ class Event {
       this.onDraw('update', null, e)
       // 테이블 draggable
       this.onDraggable('update', null, e)
+      // 미리보기 이동
       this.onPreview('update', e)
       // 마우스 drag
       if (!this.isDraggable && !this.isSelectedColumn) {
         this.onDrag('update', e)
       }
+      // 마우스 이동
       this.onMove('update', e)
+
       this.move.x = e.clientX + document.documentElement.scrollLeft
       this.move.y = e.clientY + document.documentElement.scrollTop
     }).on('keydown', e => {
@@ -164,6 +162,7 @@ class Event {
       switch (e.keyCode) {
         case 13: // key: Enter
           if (e.altKey) {
+            e.preventDefault()
             // 컬럼 생성
             for (let table of this.core.erd.store().state.tables) {
               if (table.ui.selected) {
@@ -177,6 +176,7 @@ class Event {
           break
         case 75: // key: K
           if (e.altKey) {
+            e.preventDefault()
             // 컬럼 PK 부여
             this.core.erd.store().commit({
               type: 'columnKey',
@@ -185,11 +185,15 @@ class Event {
           }
           break
         case 78: // key: N
-          if (e.ctrlKey && e.altKey) {
+          if (e.altKey) {
+            e.preventDefault()
             // 모델 생성
             model.commit({ type: 'modelAdd' })
           }
-          if (e.altKey && !e.ctrlKey) {
+          break
+        case 84: // key: T
+          if (e.altKey) {
+            e.preventDefault()
             // 테이블 생성
             this.core.erd.store().commit({ type: 'tableAdd' })
           }
@@ -204,27 +208,9 @@ class Event {
         case 27: // key: ESC
           // 모든 이벤트 중지
           this.stop()
-          // 모든 selected 해제
-          this.core.erd.store().commit({
-            type: 'tableSelectedAllNone',
-            isTable: true,
-            isColumn: true
-          })
-          this.isSelectedColumn = false
           break
         case 46: // key: Delete
           e.preventDefault()
-          // 테이블 삭제
-          const store = this.core.erd.store()
-          for (let i = 0; i < store.state.tables.length; i++) {
-            if (store.state.tables[i].ui.selected) {
-              store.commit({
-                type: 'tableDelete',
-                id: store.state.tables[i].id
-              })
-              i--
-            }
-          }
           if (e.ctrlKey) {
             // 모델 삭제
             for (let tab of model.state.tabs) {
@@ -235,10 +221,43 @@ class Event {
                 })
               }
             }
+          } else if (e.altKey) {
+            // 테이블 삭제
+            const store = this.core.erd.store()
+            for (let i = 0; i < store.state.tables.length; i++) {
+              if (store.state.tables[i].ui.selected) {
+                store.commit({
+                  type: 'tableDelete',
+                  id: store.state.tables[i].id
+                })
+                i--
+              }
+            }
+          } else {
+            const store = this.core.erd.store()
+            store.state.tables.forEach(table => {
+              for (let i = 0; i < table.columns.length; i++) {
+                if (table.columns[i].ui.selected) {
+                  store.commit({
+                    type: 'columnDelete',
+                    tableId: table.id,
+                    columnId: table.columns[i].id
+                  })
+                  i--
+                }
+              }
+            })
           }
           break
         case 49: // key: 1
-          if (e.altKey) {
+          if (e.ctrlKey) {
+            e.preventDefault()
+            model.commit({
+              type: 'modelActiveKeyMap',
+              index: 1
+            })
+          } else if (e.altKey) {
+            e.preventDefault()
             // 관계 1:1
             if (this.isCursor) {
               this.onCursor('stop')
@@ -246,29 +265,22 @@ class Event {
               this.onCursor('start', 'erd-0-1')
             }
           }
-          if (e.ctrlKey) {
-            e.preventDefault()
-            model.commit({
-              type: 'modelActiveKeyMap',
-              index: 1
-            })
-          }
           break
         case 50: // key: 2
-          if (e.altKey) {
-            // 관계 1:N
-            if (this.isCursor) {
-              this.onCursor('stop')
-            } else {
-              this.onCursor('start', 'erd-0-1-N')
-            }
-          }
           if (e.ctrlKey) {
             e.preventDefault()
             model.commit({
               type: 'modelActiveKeyMap',
               index: 2
             })
+          } else if (e.altKey) {
+            e.preventDefault()
+            // 관계 1:N
+            if (this.isCursor) {
+              this.onCursor('stop')
+            } else {
+              this.onCursor('start', 'erd-0-1-N')
+            }
           }
           break
         case 51: // key: 3
@@ -603,6 +615,13 @@ class Event {
     this.onMove('stop')
     this.components.QuickMenu.isShow = false
     this.components.CanvasGrid.isTable = false
+    this.isSelectedColumn = false
+    // 모든 selected 해제
+    this.core.erd.store().commit({
+      type: 'tableSelectedAllNone',
+      isTable: true,
+      isColumn: true
+    })
   }
 }
 

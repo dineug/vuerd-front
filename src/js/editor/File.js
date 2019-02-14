@@ -111,7 +111,7 @@ class File {
         this.execute(blobSQL, fileName)
         break
       case 'png':
-        domtoimage.toBlob(document.querySelector('#erd')).then(blob => {
+        domtoimage.toBlob(document.querySelector('.canvas')).then(blob => {
           this.execute(blob, fileName)
         })
         break
