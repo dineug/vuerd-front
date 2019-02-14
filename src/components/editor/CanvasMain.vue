@@ -57,8 +57,12 @@
               @keyup="dataTypeHintVisible($event, table.id, column.id, true)"
               @keydown="dataTypeHintFocus($event, table.id, column.id)")
 
-              ul.erd_data_type_list(v-if="column.ui.isDataTypeHint")
-                li(v-for="dataType in dataTypes"
+              transition-group.erd_data_type_list(v-if="column.ui.isDataTypeHint"
+              tag="ul"
+              @before-enter="onBeforeEnter"
+              @enter="onEnter"
+              @leave="onLeave")
+                li(v-for="dataType in dataTypes" :key="dataType.name"
                 @click="columnChangeDataType($event, table.id, column.id, dataType.name)"
                 @mouseover="dataTypeHintAddClass") {{ dataType.name }}
 
@@ -85,6 +89,7 @@ import $ from 'jquery'
 import ERD from '@/js/editor/ERD'
 import storeTable from '@/store/editor/table'
 import draggable from 'vuedraggable'
+import Velocity from 'velocity-animate'
 
 export default {
   name: 'CanvasMain',
@@ -286,6 +291,31 @@ export default {
         type: 'active',
         id: id
       })
+    },
+    // 데이터 타입 힌트 애니메이션
+    onBeforeEnter (el) {
+      el.style.opacity = 0
+      el.style.height = 0
+    },
+    onEnter (el, done) {
+      var delay = el.dataset.index * 150
+      setTimeout(function () {
+        Velocity(
+          el,
+          { opacity: 1, height: '13.64px' },
+          { complete: done }
+        )
+      }, delay)
+    },
+    onLeave (el, done) {
+      var delay = el.dataset.index * 150
+      setTimeout(function () {
+        Velocity(
+          el,
+          { opacity: 0, height: 0 },
+          { complete: done }
+        )
+      }, delay)
     }
   },
   mounted () {
