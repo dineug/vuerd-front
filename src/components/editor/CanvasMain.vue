@@ -487,6 +487,7 @@ export default {
   $table_background: #191919;
   $table_selected: #14496d;
   $column_selected: #00a9ff;
+  $selected: #383d41;
   /* column key color */
   $key_pk: #B4B400;
   $key_fk: #dda8b1;
@@ -594,8 +595,8 @@ export default {
 
         /* 데이터 타입 힌트 */
         .erd_data_type_list {
-          width: 100px;
           position: absolute;
+          /*padding-left: 1px;*/
           color: #a2a2a2;
           background-color: #191919;
           opacity: 0.9;
@@ -606,7 +607,7 @@ export default {
 
             &.selected {
               color: white;
-              background-color: #383d41;
+              background-color: $selected;
             }
           }
         }

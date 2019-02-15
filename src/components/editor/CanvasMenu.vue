@@ -188,6 +188,7 @@ export default {
 <style lang="scss" scoped>
   $tab_color: #424242;
   $tab_active: #282828;
+  $selected: #383d41;
   $menu_base_size: 30px;
 
   .menu_canvas {
@@ -273,13 +274,13 @@ export default {
 
             &:hover {
               color: white;
-              background-color: #383d41;
+              background-color: $selected;
             }
           }
 
           .db_active {
             color: white;
-            background-color: #383d41;
+            background-color: $selected;
           }
         }
 

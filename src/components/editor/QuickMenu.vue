@@ -115,6 +115,8 @@ export default {
 
 <style lang="scss" scoped>
   $mbg: #191919;
+  $selected: #383d41;
+
   .quick_menu {
     color: #a2a2a2;
     background-color: $mbg;
@@ -131,7 +133,7 @@ export default {
 
       &:hover {
         color: white;
-        background-color: #383d41;
+        background-color: $selected;
       }
 
       & > span {

@@ -96,6 +96,14 @@ class Event {
       if (!$(e.target).closest('.quick_menu').length) {
         this.components.QuickMenu.isShow = false
       }
+      // 데이터 타입 힌트 hide
+      if (!$(e.target).closest('.erd_data_type_list').length &&
+        !$(e.target).closest('.menu_sidebar').length) {
+        this.core.erd.store().commit({
+          type: 'columnDataTypeHintVisibleAll',
+          isDataTypeHint: false
+        })
+      }
       // 테이블 및 컬럼 selected 해제
       if (!$(e.target).closest('.erd_table').length &&
         !$(e.target).closest('.quick_menu_pk').length &&
