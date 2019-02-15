@@ -15,6 +15,13 @@ class MySQL {
     const stringBuffer = []
     const tables = database.store.state.tables
     const lines = database.store.state.lines
+
+    stringBuffer.push(`DROP SCHEMA IF EXISTS \`${database.name}\` ;`)
+    stringBuffer.push('')
+    stringBuffer.push(`CREATE SCHEMA IF NOT EXISTS \`${database.name}\` DEFAULT CHARACTER SET utf8 ;`)
+    stringBuffer.push(`USE \`${database.name}\` ;`)
+    stringBuffer.push('')
+
     tables.forEach(table => {
       this.formatTable({
         name: database.name,
@@ -38,12 +45,13 @@ class MySQL {
 
   // 테이블 formatter
   formatTable ({ name, table, buffer }) {
-    buffer.push(`CREATE TABLE \`${name}\`.\`${table.name}\` (`)
-    const isPK = util.isPK(table.columns)
+    buffer.push(`CREATE TABLE IF NOT EXISTS \`${name}\`.\`${table.name}\` (`)
+    const isPK = util.isColumnOption('primaryKey', table.columns)
+    const isUQ = util.isColumnOption('unique', table.columns)
     const spaceSize = this.formatSize(table.columns)
 
     table.columns.forEach((column, i) => {
-      if (isPK) {
+      if (isPK || isUQ) {
         this.formatColumn({
           column: column,
           isComma: true,
@@ -59,10 +67,22 @@ class MySQL {
         })
       }
     })
-    // pk 추가
-    if (isPK) {
-      const columns = util.getPKs(table.id)
+    // PK 및 UQ 추가
+    if (isPK && isUQ) {
+      const pkColumns = util.getColumnOptions('primaryKey', table.columns)
+      buffer.push(`\tPRIMARY KEY (${this.formatNames(pkColumns)}),`)
+      const uqColumns = util.getColumnOptions('unique', table.columns)
+      uqColumns.forEach((column, i) => {
+        buffer.push(`\tUNIQUE INDEX \`${column.name}_UNIQUE\` (\`${column.name}\` ASC)${uqColumns.length !== i + 1 ? ',' : ''}`)
+      })
+    } else if (isPK) {
+      const columns = util.getColumnOptions('primaryKey', table.columns)
       buffer.push(`\tPRIMARY KEY (${this.formatNames(columns)})`)
+    } else if (isUQ) {
+      const columns = util.getColumnOptions('unique', table.columns)
+      columns.forEach((column, i) => {
+        buffer.push(`\tUNIQUE INDEX \`${column.name}_UNIQUE\` (\`${column.name}\` ASC)${columns.length !== i + 1 ? ',' : ''}`)
+      })
     }
     // 코멘트 처리
     if (table.comment.trim() === '') {

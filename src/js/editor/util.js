@@ -57,18 +57,17 @@ export const autoName = (list, name, num) => {
   return name
 }
 
-// 테이블 pk 컬럼 리스트 반환
-export const getPKs = id => {
-  const table = getData(ERD.store().state.tables, id)
-  return table.columns.filter(column => {
-    return column.options.primaryKey
+// 테이블 옵션 컬럼 리스트 반환
+export const getColumnOptions = (target, columns) => {
+  return columns.filter(column => {
+    return column.options[target]
   })
 }
 
-// PrimaryKey check
-export const isPK = columns => {
+// 컬럼 옵션 체크
+export const isColumnOption = (target, columns) => {
   return columns.some(column => {
-    return column.options.primaryKey
+    return column.options[target]
   })
 }
 

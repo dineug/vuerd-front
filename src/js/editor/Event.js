@@ -107,7 +107,8 @@ class Event {
       // 테이블 및 컬럼 selected 해제
       if (!$(e.target).closest('.erd_table').length &&
         !$(e.target).closest('.quick_menu_pk').length &&
-        !$(e.target).closest('.table_detail').length) {
+        !$(e.target).closest('.table_detail').length &&
+        !$(e.target).closest('.menu_bottom').length) {
         this.core.erd.store().commit({
           type: 'tableSelectedAllNone',
           isTable: true,
@@ -415,7 +416,8 @@ class Event {
             const startColumnIds = []
             const endColumnIds = []
             const line = util.getData(this.core.erd.store().state.lines, this.lineId)
-            const columns = util.getPKs(line.points[0].id)
+            const startTable = util.getData(this.core.erd.store().state.tables, line.points[0].id)
+            const columns = util.getColumnOptions('primaryKey', startTable.columns)
             columns.forEach(v => {
               const columnId = util.guid()
               startColumnIds.push(v.id)

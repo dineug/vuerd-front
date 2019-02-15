@@ -35,7 +35,7 @@ export default {
       ],
       optionsColumns: {
         header: {
-          height: 60,
+          height: 50,
           complexColumns: [
             {
               title: '',
@@ -46,7 +46,7 @@ export default {
         },
         scrollX: false,
         // scrollY: false,
-        bodyHeight: 300,
+        bodyHeight: 160,
         rowHeaders: ['rowNum']
       },
       columns: [
@@ -281,7 +281,6 @@ export default {
     }
 
     .table_detail {
-      width: 800px;
       position: fixed;
       bottom: $menu_base_size;
       left: $menu_base_size;
