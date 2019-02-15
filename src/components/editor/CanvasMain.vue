@@ -351,12 +351,12 @@ export default {
       if (!e.altKey) {
         switch (current) {
           case 'tableName':
-            e.target.parentNode.childNodes[1].focus()
+            $(e.target).parent('.erd_table_header').find('input:eq(1)').focus()
             break
           case 'tableComment':
-            const node = e.target.parentNode.parentNode.querySelector('.erd_column')
-            if (node != null) {
-              node.querySelector('input').focus()
+            const $divColumns = $(e.target).parents('.erd_table').find('.erd_column')
+            if ($divColumns.length !== 0) {
+              $divColumns.first().find('input:eq(0)').focus()
             } else {
               ERD.store().commit({
                 type: 'columnAdd',
@@ -366,11 +366,11 @@ export default {
             break
           case 'columnName':
             if (!e.altKey) {
-              e.target.parentNode.querySelectorAll('input')[1].focus()
+              $(e.target).parent('.erd_column').find('input:eq(1)').focus()
             }
             break
           case 'columnNotNull':
-            e.target.parentNode.querySelectorAll('input')[3].focus()
+            $(e.target).parent('.erd_column').find('input:eq(3)').focus()
             break
           case 'columnComment':
             const table = util.getData(ERD.store().state.tables, tableId)
@@ -380,7 +380,7 @@ export default {
                 id: tableId
               })
             } else {
-              e.target.parentNode.nextSibling.querySelectorAll('input')[0].focus()
+              $(e.target).parent('.erd_column').next().find('input:eq(0)').focus()
             }
             break
         }
@@ -388,42 +388,42 @@ export default {
     },
     // 컬럼 화살표 이동
     onKeyArrowMove (e) {
-      const $div = $(e.target).parents('.erd_table').find('.erd_column')
+      const $divColumns = $(e.target).parents('.erd_table').find('.erd_column')
       const $input = $(e.target).parents('.erd_column').find('input')
       const rowIndex = $input.index(e.target)
-      const index = $div.filter('.selected').index()
-      const len = $div.length
+      const index = $divColumns.filter('.selected').index()
+      const len = $divColumns.length
       switch (e.keyCode) {
         case 38: // key: Arrow up
           e.preventDefault()
           if (index === -1) {
-            $div.eq(len - 1).find('input').eq(rowIndex).focus()
+            $divColumns.eq(len - 1).find('input').eq(rowIndex).focus()
           } else {
-            $div.eq(index - 1).find('input').eq(rowIndex).focus()
+            $divColumns.eq(index - 1).find('input').eq(rowIndex).focus()
           }
           break
         case 40: // key: Arrow down
           e.preventDefault()
           if (index === -1) {
-            $div.eq(0).find('input').eq(rowIndex).focus()
+            $divColumns.eq(0).find('input').eq(rowIndex).focus()
           } else {
-            $div.eq(index + 1 === len ? 0 : index + 1).find('input').eq(rowIndex).focus()
+            $divColumns.eq(index + 1 === len ? 0 : index + 1).find('input').eq(rowIndex).focus()
           }
           break
         case 37: // key: Arrow left
           e.preventDefault()
           if (rowIndex === -1) {
-            $div.eq(index).find('input').eq(2).focus()
+            $divColumns.eq(index).find('input').eq(2).focus()
           } else {
-            $div.eq(index).find('input').eq(rowIndex - 1).focus()
+            $divColumns.eq(index).find('input').eq(rowIndex - 1).focus()
           }
           break
         case 39: // key: Arrow right
           e.preventDefault()
           if (rowIndex === -1) {
-            $div.eq(index).find('input').eq(0).focus()
+            $divColumns.eq(index).find('input').eq(0).focus()
           } else {
-            $div.eq(index).find('input').eq(rowIndex + 1 === 4 ? 0 : rowIndex + 1).focus()
+            $divColumns.eq(index).find('input').eq(rowIndex + 1 === 4 ? 0 : rowIndex + 1).focus()
           }
           break
       }
