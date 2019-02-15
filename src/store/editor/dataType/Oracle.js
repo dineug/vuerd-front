@@ -3,10 +3,10 @@ import JSLog from '@/js/JSLog'
 JSLog('store loaded', 'Oracle')
 
 const Oracle = [
-  { name: 'VARCHAR2()' },
-  { name: 'NVARCHAR2()' },
-  { name: 'CHAR()' },
-  { name: 'NCHAR()' },
+  { name: 'VARCHAR2' },
+  { name: 'NVARCHAR2' },
+  { name: 'CHAR' },
+  { name: 'NCHAR' },
   { name: 'INT' },
   { name: 'NUMBER' },
   { name: 'DATE' },
@@ -23,7 +23,7 @@ const Oracle = [
   { name: 'ROWID' },
   { name: 'TIMESTAMP' },
   { name: 'UROWID' },
-  { name: 'VARCHAR()' },
+  { name: 'VARCHAR' },
   { name: 'BINARY_DOUBLE' },
   { name: 'BINARY_FLOAT' }
 ]

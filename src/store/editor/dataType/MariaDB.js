@@ -4,11 +4,11 @@ JSLog('store loaded', 'MariaDB')
 
 const MariaDB = [
   { name: 'INT' },
-  { name: 'VARCHAR()' },
-  { name: 'DECIMAL()' },
+  { name: 'VARCHAR' },
+  { name: 'DECIMAL' },
   { name: 'DATETIME' },
   { name: 'BLOB' },
-  { name: 'CHAR()' },
+  { name: 'CHAR' },
   { name: 'TINYTEXT' },
   { name: 'TEXT' },
   { name: 'MEDIUMTEXT' },
@@ -25,14 +25,14 @@ const MariaDB = [
   { name: 'FLOAT' },
   { name: 'DOUBLE' },
   { name: 'DOUBLE PRECISION' },
-  { name: 'NUMERIC()' },
+  { name: 'NUMERIC' },
   { name: 'DATE' },
   { name: 'TIMESTAMP' },
   { name: 'TIME' },
   { name: 'YEAR' },
-  { name: 'ENUM()' },
+  { name: 'ENUM' },
   { name: 'REAL' },
-  { name: 'SET()' }
+  { name: 'SET' }
 ]
 
 export default MariaDB

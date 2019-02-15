@@ -8,7 +8,7 @@ const MySQL = [
   { name: 'LONGBLOB' },
   { name: 'MEDIUMBLOB' },
   { name: 'TINYBLOB' },
-  { name: 'VARBINARY()' },
+  { name: 'VARBINARY' },
 
   { name: 'DATE' },
   { name: 'DATETIME' },
@@ -38,8 +38,8 @@ const MySQL = [
   { name: 'CHAR' },
   { name: 'JSON' },
   { name: 'NCHAR' },
-  { name: 'NVARCHAR()' },
-  { name: 'VARCHAR()' },
+  { name: 'NVARCHAR' },
+  { name: 'VARCHAR' },
 
   { name: 'LONGTEXT' },
   { name: 'MEDIUMTEXT' },
@@ -48,8 +48,8 @@ const MySQL = [
 
   { name: 'BIT' },
   { name: 'BOOLEAN' },
-  { name: 'ENUM()' },
-  { name: 'SET()' }
+  { name: 'ENUM' },
+  { name: 'SET' }
 ]
 
 export default MySQL

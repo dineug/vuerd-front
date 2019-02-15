@@ -392,12 +392,12 @@ class Event {
   onCursor (type, cursor) {
     switch (type) {
       case 'start':
-        document.querySelector('body').setAttribute('style', `cursor: url("/img/erd/${cursor}.png") 16 16, auto;`)
+        document.body.setAttribute('style', `cursor: url("/img/erd/${cursor}.png") 16 16, auto;`)
         this.isCursor = true
         this.cursor = cursor
         break
       case 'stop':
-        document.querySelector('body').removeAttribute('style')
+        document.body.removeAttribute('style')
         this.isCursor = false
         this.cursor = null
         this.onDraw('stop')
