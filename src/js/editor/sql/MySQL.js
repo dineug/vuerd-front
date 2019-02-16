@@ -34,6 +34,7 @@ class MySQL {
         buffer: stringBuffer
       })
       stringBuffer.push('')
+      // 유니크
       if (util.isColumnOption('unique', table.columns)) {
         const uqColumns = util.getColumnOptions('unique', table.columns)
         uqColumns.forEach(column => {
@@ -58,7 +59,8 @@ class MySQL {
 
   // 테이블 formatter
   formatTable ({ name, table, buffer }) {
-    buffer.push(`CREATE TABLE \`${name}\`.\`${table.name}\` (`)
+    buffer.push(`CREATE TABLE \`${name}\`.\`${table.name}\``)
+    buffer.push(`(`)
     const spaceSize = this.sql.formatSize(table.columns)
     const isPK = util.isColumnOption('primaryKey', table.columns)
 
@@ -79,6 +81,7 @@ class MySQL {
         })
       }
     })
+    // PK
     if (isPK) {
       const pkColumns = util.getColumnOptions('primaryKey', table.columns)
       buffer.push(`\tPRIMARY KEY (${this.sql.formatNames(pkColumns, '`')})`)
@@ -97,13 +100,14 @@ class MySQL {
     stringBuffer.push(`\t\`${column.name}\`` + this.sql.formatSpace(spaceSize.nameMax - column.name.length))
     stringBuffer.push(`${column.dataType}` + this.sql.formatSpace(spaceSize.dataTypeMax - column.dataType.length))
     stringBuffer.push(`${column.options.notNull ? 'NOT NULL' : 'NULL    '}`)
-    // 컬럼 DEFAULT
-    if (column.default.trim() !== '') {
-      stringBuffer.push(`DEFAULT ${column.default}`)
-    }
     // 옵션 AUTO_INCREMENT
     if (column.options.autoIncrement) {
       stringBuffer.push(`AUTO_INCREMENT`)
+    } else {
+      // 컬럼 DEFAULT
+      if (column.default.trim() !== '') {
+        stringBuffer.push(`DEFAULT ${column.default}`)
+      }
     }
     // 코멘트 처리
     if (column.comment.trim() !== '') {

@@ -71,7 +71,9 @@ export default {
       DBTypes: [
         'MySQL',
         'Oracle',
-        'MariaDB'
+        'MariaDB',
+        'MSSQL',
+        'PostgreSQL'
       ],
       menus: [
         {

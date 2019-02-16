@@ -3,6 +3,8 @@ import model from '@/store/editor/model'
 import mysql from './sql/MySQL'
 import oracle from './sql/Oracle'
 import mariadb from './sql/MariaDB'
+import mssql from './sql/MSSQL'
+import postgresql from './sql/PostgreSQL'
 
 /**
  * SQL 클래스
@@ -13,6 +15,8 @@ class SQL {
     mysql.init(this)
     oracle.init(this)
     mariadb.init(this)
+    mssql.init(this)
+    postgresql.init(this)
   }
 
   // 종속성 초기화
@@ -42,15 +46,23 @@ class SQL {
         return oracle.ddl(database)
       case 'MariaDB':
         return mariadb.ddl(database)
+      case 'MSSQL':
+        return mssql.ddl(database)
+      case 'PostgreSQL':
+        return postgresql.ddl(database)
     }
   }
 
   // 이름 foramtter
-  formatNames (list, backtick) {
+  formatNames (list, backtick, backtick2) {
     let str = ''
     list.forEach((v, i) => {
       if (backtick) {
-        str += `${backtick}${v.name}${backtick}`
+        if (backtick2) {
+          str += `${backtick}${v.name}${backtick2}`
+        } else {
+          str += `${backtick}${v.name}${backtick}`
+        }
       } else {
         str += v.name
       }
