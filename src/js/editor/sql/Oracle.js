@@ -37,7 +37,7 @@ class Oracle {
         if (column.options.autoIncrement) {
           let aiName = `${table.name}_SEQ`
           aiName = util.autoName(this.aiNames, aiName)
-          this.aiNames.push(aiName)
+          this.aiNames.push({ name: aiName })
 
           stringBuffer.push(`CREATE SEQUENCE ${aiName}`)
           stringBuffer.push(`START WITH 1 INCREMENT BY 1;`)
@@ -45,7 +45,7 @@ class Oracle {
 
           let trgName = `${table.name}_SEQ_TRG`
           trgName = util.autoName(this.aiNames, trgName)
-          this.trgNames.push(trgName)
+          this.trgNames.push({ name: trgName })
           stringBuffer.push(`CREATE OR REPLACE TRIGGER ${trgName}`)
           stringBuffer.push(`BEFORE INSERT ON ${table.name}`)
           stringBuffer.push(`REFERENCING NEW AS NEW FOR EACH ROW`)

@@ -139,7 +139,7 @@ class MySQL {
     // FK 중복 처리
     let fkName = `FK_${startTable.name}_TO_${endTable.name}`
     fkName = util.autoName(this.fkNames, fkName)
-    this.fkNames.push(fkName)
+    this.fkNames.push({ name: fkName })
 
     buffer.push(`\tADD CONSTRAINT ${fkName}`)
 
