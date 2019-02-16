@@ -32,25 +32,35 @@ class Oracle {
         buffer: stringBuffer
       })
       stringBuffer.push('')
+      // 유니크
+      if (util.isColumnOption('unique', table.columns)) {
+        const uqColumns = util.getColumnOptions('unique', table.columns)
+        uqColumns.forEach(column => {
+          stringBuffer.push(`ALTER TABLE ${database.name}.${table.name}`)
+          stringBuffer.push(`\tADD CONSTRAINT UQ_${column.name} UNIQUE (${column.name});`)
+          stringBuffer.push('')
+        })
+      }
       // 시퀀스 추가
       table.columns.forEach(column => {
         if (column.options.autoIncrement) {
-          let aiName = `${table.name}_SEQ`
+          let aiName = `SEQ_${table.name}`
           aiName = util.autoName(this.aiNames, aiName)
           this.aiNames.push({ name: aiName })
 
-          stringBuffer.push(`CREATE SEQUENCE ${aiName}`)
-          stringBuffer.push(`START WITH 1 INCREMENT BY 1;`)
+          stringBuffer.push(`CREATE SEQUENCE ${database.name}.${aiName}`)
+          stringBuffer.push(`START WITH 1`)
+          stringBuffer.push(`INCREMENT BY 1;`)
           stringBuffer.push('')
 
-          let trgName = `${table.name}_SEQ_TRG`
+          let trgName = `SEQ_TRG_${table.name}`
           trgName = util.autoName(this.aiNames, trgName)
           this.trgNames.push({ name: trgName })
-          stringBuffer.push(`CREATE OR REPLACE TRIGGER ${trgName}`)
-          stringBuffer.push(`BEFORE INSERT ON ${table.name}`)
+          stringBuffer.push(`CREATE OR REPLACE TRIGGER ${database.name}.${trgName}`)
+          stringBuffer.push(`BEFORE INSERT ON ${database.name}.${table.name}`)
           stringBuffer.push(`REFERENCING NEW AS NEW FOR EACH ROW`)
           stringBuffer.push(`BEGIN`)
-          stringBuffer.push(`\tSELECT ${aiName}.NEXTVAL`)
+          stringBuffer.push(`\tSELECT ${database.name}.${aiName}.NEXTVAL`)
           stringBuffer.push(`\tINTO: NEW.${column.name}`)
           stringBuffer.push(`\tFROM DUAL;`)
           stringBuffer.push(`END;`)
@@ -103,7 +113,7 @@ class Oracle {
     // PK
     if (isPK) {
       const pkColumns = util.getColumnOptions('primaryKey', table.columns)
-      buffer.push(`\tCONSTRAINT ${table.name}_PK PRIMARY KEY (${this.sql.formatNames(pkColumns)})`)
+      buffer.push(`\tCONSTRAINT PK_${table.name} PRIMARY KEY (${this.sql.formatNames(pkColumns)})`)
     }
     buffer.push(`);`)
   }
@@ -117,17 +127,9 @@ class Oracle {
     if (column.options.notNull) {
       stringBuffer.push(`NOT NULL`)
     }
-    // 옵션 유니크
-    if (column.options.unique) {
-      stringBuffer.push(`UNIQUE`)
-    }
     // 컬럼 DEFAULT
     if (column.default.trim() !== '') {
-      if (isNaN(column.default)) {
-        stringBuffer.push(`DEFAULT '${column.default}'`)
-      } else {
-        stringBuffer.push(`DEFAULT ${column.default}`)
-      }
+      stringBuffer.push(`DEFAULT ${column.default}`)
     }
     buffer.push(stringBuffer.join(' ') + `${isComma ? ',' : ''}`)
   }

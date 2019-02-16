@@ -40,7 +40,7 @@ export default {
             {
               title: '',
               name: 'table',
-              childNames: ['name', 'dataType', 'primaryKey', 'notNull', 'unique', 'unsigned', 'autoIncrement', 'default', 'comment']
+              childNames: ['name', 'dataType', 'primaryKey', 'notNull', 'unique', 'autoIncrement', 'default', 'comment']
             }
           ]
         },
@@ -145,29 +145,6 @@ export default {
               column: {
                 options: {
                   unique: ev.value ? ev.value : false
-                }
-              }
-            })
-          },
-          editOptions: {
-            type: 'checkbox',
-            listItems: [
-              { text: util.svgCheck, value: true }
-            ],
-            useViewMode: true
-          }
-        },
-        {
-          title: 'UN',
-          name: 'unsigned',
-          width: 50,
-          onBeforeChange: ev => {
-            storeTable.commit({
-              type: 'sync',
-              rowKey: ev.rowKey,
-              column: {
-                options: {
-                  unsigned: ev.value ? ev.value : false
                 }
               }
             })

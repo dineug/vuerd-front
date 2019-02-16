@@ -28,7 +28,6 @@ export default new Vuex.Store({
             primaryKey: column.options.primaryKey,
             notNull: column.options.notNull,
             unique: column.options.unique,
-            unsigned: column.options.unsigned,
             autoIncrement: column.options.autoIncrement,
             default: column.default,
             comment: column.comment

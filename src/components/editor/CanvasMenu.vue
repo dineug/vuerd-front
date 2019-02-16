@@ -21,10 +21,8 @@
       @click="menuAction(menu.type)")
         font-awesome-icon(:icon="menu.icon")
         ol(v-if="menu.type === 'DBType'")
-          li(:class="{ db_active: DBType === 'MySQL' }"
-          @click="changeDB('MySQL')") MySQL
-          li(:class="{ db_active: DBType === 'Oracle' }"
-          @click="changeDB('Oracle')") Oracle
+          li(v-for="dbType in DBTypes" :class="{ db_active: DBType === dbType }"
+          @click="changeDB(dbType)") {{ dbType }}
 
     // 메뉴 Preview Navigation
     canvas-main.preview(:style="`top: ${preview.top}px; left: ${preview.left}px;`"
@@ -70,6 +68,11 @@ export default {
           height: 0
         }
       },
+      DBTypes: [
+        'MySQL',
+        'Oracle',
+        'MariaDB'
+      ],
       menus: [
         {
           type: 'DBType',

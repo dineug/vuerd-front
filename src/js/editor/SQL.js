@@ -2,6 +2,7 @@ import JSLog from '../JSLog'
 import model from '@/store/editor/model'
 import mysql from './sql/MySQL'
 import oracle from './sql/Oracle'
+import mariadb from './sql/MariaDB'
 
 /**
  * SQL 클래스
@@ -9,14 +10,15 @@ import oracle from './sql/Oracle'
 class SQL {
   constructor () {
     JSLog('module loaded', 'SQL')
+    mysql.init(this)
+    oracle.init(this)
+    mariadb.init(this)
   }
 
   // 종속성 초기화
   init (core) {
     JSLog('module dependency init', 'SQL')
     this.core = core
-    mysql.init(this)
-    oracle.init(this)
   }
 
   // SQL DDL
@@ -38,14 +40,20 @@ class SQL {
         return mysql.ddl(database)
       case 'Oracle':
         return oracle.ddl(database)
+      case 'MariaDB':
+        return mariadb.ddl(database)
     }
   }
 
   // 이름 foramtter
-  formatNames (list) {
+  formatNames (list, backtick) {
     let str = ''
     list.forEach((v, i) => {
-      str += v.name
+      if (backtick) {
+        str += `${backtick}${v.name}${backtick}`
+      } else {
+        str += v.name
+      }
       if (list.length !== i + 1) str += ', '
     })
     return str

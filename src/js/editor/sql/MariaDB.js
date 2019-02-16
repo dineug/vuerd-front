@@ -2,11 +2,11 @@ import JSLog from '../../JSLog'
 import * as util from '../util'
 
 /**
- * MySQL
+ * MariaDB
  */
-class MySQL {
+class MariaDB {
   constructor () {
-    JSLog('module loaded', 'MySQL')
+    JSLog('module loaded', 'MariaDB')
     this.sql = null
     this.fkNames = []
   }
@@ -21,10 +21,10 @@ class MySQL {
     const tables = database.store.state.tables
     const lines = database.store.state.lines
 
-    stringBuffer.push(`DROP SCHEMA IF EXISTS \`${database.name}\`;`)
+    stringBuffer.push(`DROP DATABASE IF EXISTS ${database.name};`)
     stringBuffer.push('')
-    stringBuffer.push(`CREATE SCHEMA \`${database.name}\`;`)
-    stringBuffer.push(`USE \`${database.name}\`;`)
+    stringBuffer.push(`CREATE DATABASE ${database.name};`)
+    stringBuffer.push(`USE ${database.name}`)
     stringBuffer.push('')
 
     tables.forEach(table => {
@@ -37,8 +37,8 @@ class MySQL {
       if (util.isColumnOption('unique', table.columns)) {
         const uqColumns = util.getColumnOptions('unique', table.columns)
         uqColumns.forEach(column => {
-          stringBuffer.push(`ALTER TABLE \`${database.name}\`.\`${table.name}\``)
-          stringBuffer.push(`\tADD CONSTRAINT \`UQ_${column.name}\` UNIQUE (\`${column.name}\`);`)
+          stringBuffer.push(`ALTER TABLE ${database.name}.${table.name}`)
+          stringBuffer.push(`\tADD CONSTRAINT UQ_${column.name} UNIQUE (\`${column.name}\`);`)
           stringBuffer.push('')
         })
       }
@@ -58,9 +58,9 @@ class MySQL {
 
   // 테이블 formatter
   formatTable ({ name, table, buffer }) {
-    buffer.push(`CREATE TABLE \`${name}\`.\`${table.name}\` (`)
-    const spaceSize = this.sql.formatSize(table.columns)
+    buffer.push(`CREATE TABLE ${name}.${table.name} (`)
     const isPK = util.isColumnOption('primaryKey', table.columns)
+    const spaceSize = this.sql.formatSize(table.columns)
 
     table.columns.forEach((column, i) => {
       if (isPK) {
@@ -79,6 +79,7 @@ class MySQL {
         })
       }
     })
+    // PK
     if (isPK) {
       const pkColumns = util.getColumnOptions('primaryKey', table.columns)
       buffer.push(`\tPRIMARY KEY (${this.sql.formatNames(pkColumns, '`')})`)
@@ -116,14 +117,14 @@ class MySQL {
   formatRelation ({ name, tables, line, buffer }) {
     const startTable = util.getData(tables, line.points[0].id)
     const endTable = util.getData(tables, line.points[1].id)
-    buffer.push(`ALTER TABLE \`${name}\`.\`${endTable.name}\``)
+    buffer.push(`ALTER TABLE ${name}.${endTable.name}`)
 
     // FK 중복 처리
     let fkName = `FK_${startTable.name}_TO_${endTable.name}`
     fkName = util.autoName(this.fkNames, fkName)
     this.fkNames.push({ name: fkName })
 
-    buffer.push(`\tADD CONSTRAINT \`${fkName}\``)
+    buffer.push(`\tADD CONSTRAINT ${fkName}`)
 
     // key 컬럼 정제
     const columns = {
@@ -138,8 +139,8 @@ class MySQL {
     })
 
     buffer.push(`\t\tFOREIGN KEY (${this.sql.formatNames(columns.end, '`')})`)
-    buffer.push(`\t\tREFERENCES \`${name}\`.\`${startTable.name}\` (${this.sql.formatNames(columns.start, '`')});`)
+    buffer.push(`\t\tREFERENCES ${name}.${startTable.name} (${this.sql.formatNames(columns.start, '`')});`)
   }
 }
 
-export default new MySQL()
+export default new MariaDB()

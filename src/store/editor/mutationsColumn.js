@@ -25,8 +25,7 @@ export default {
             autoIncrement: false,
             primaryKey: false,
             unique: false,
-            notNull: false,
-            unsigned: false
+            notNull: false
           },
           ui: {
             selected: false,
