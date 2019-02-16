@@ -15,6 +15,8 @@ class SQL {
   init (core) {
     JSLog('module dependency init', 'SQL')
     this.core = core
+    mysql.init(this)
+    oracle.init(this)
   }
 
   // SQL DDL
@@ -37,6 +39,39 @@ class SQL {
       case 'Oracle':
         return oracle.ddl(database)
     }
+  }
+
+  // 이름 foramtter
+  formatNames (list) {
+    let str = ''
+    list.forEach((v, i) => {
+      str += v.name
+      if (list.length !== i + 1) str += ', '
+    })
+    return str
+  }
+
+  // 컬럼 이름, 데이터 타입 정렬 최대길이
+  formatSize (columns) {
+    let nameMax = 0
+    let dataTypeMax = 0
+    columns.forEach(column => {
+      if (nameMax < column.name.length) nameMax = column.name.length
+      if (dataTypeMax < column.dataType.length) dataTypeMax = column.dataType.length
+    })
+    return {
+      nameMax: nameMax,
+      dataTypeMax: dataTypeMax
+    }
+  }
+
+  // 숫자만큼 공백생성
+  formatSpace (size) {
+    let space = ''
+    for (let i = 0; i < size; i++) {
+      space += ' '
+    }
+    return space
   }
 }
 

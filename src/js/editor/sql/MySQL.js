@@ -7,7 +7,12 @@ import * as util from '../util'
 class MySQL {
   constructor () {
     JSLog('module loaded', 'MySQL')
+    this.sql = null
     this.fkNames = []
+  }
+
+  init (sql) {
+    this.sql = sql
   }
 
   ddl (database) {
@@ -16,10 +21,10 @@ class MySQL {
     const tables = database.store.state.tables
     const lines = database.store.state.lines
 
-    stringBuffer.push(`DROP SCHEMA IF EXISTS \`${database.name}\` ;`)
+    stringBuffer.push(`DROP SCHEMA IF EXISTS ${database.name} ;`)
     stringBuffer.push('')
-    stringBuffer.push(`CREATE SCHEMA IF NOT EXISTS \`${database.name}\` DEFAULT CHARACTER SET utf8 ;`)
-    stringBuffer.push(`USE \`${database.name}\` ;`)
+    stringBuffer.push(`CREATE SCHEMA IF NOT EXISTS ${database.name} DEFAULT CHARACTER SET utf8 ;`)
+    stringBuffer.push(`USE ${database.name} ;`)
     stringBuffer.push('')
 
     tables.forEach(table => {
@@ -45,10 +50,10 @@ class MySQL {
 
   // 테이블 formatter
   formatTable ({ name, table, buffer }) {
-    buffer.push(`CREATE TABLE IF NOT EXISTS \`${name}\`.\`${table.name}\` (`)
+    buffer.push(`CREATE TABLE IF NOT EXISTS ${name}.${table.name} (`)
     const isPK = util.isColumnOption('primaryKey', table.columns)
     const isUQ = util.isColumnOption('unique', table.columns)
-    const spaceSize = this.formatSize(table.columns)
+    const spaceSize = this.sql.formatSize(table.columns)
 
     table.columns.forEach((column, i) => {
       if (isPK || isUQ) {
@@ -70,18 +75,18 @@ class MySQL {
     // PK 및 UQ 추가
     if (isPK && isUQ) {
       const pkColumns = util.getColumnOptions('primaryKey', table.columns)
-      buffer.push(`\tPRIMARY KEY (${this.formatNames(pkColumns)}),`)
+      buffer.push(`\tPRIMARY KEY (${this.sql.formatNames(pkColumns)}),`)
       const uqColumns = util.getColumnOptions('unique', table.columns)
       uqColumns.forEach((column, i) => {
-        buffer.push(`\tUNIQUE INDEX \`${column.name}_UNIQUE\` (\`${column.name}\` ASC)${uqColumns.length !== i + 1 ? ',' : ''}`)
+        buffer.push(`\tUNIQUE INDEX ${column.name}_UNIQUE (${column.name} ASC)${uqColumns.length !== i + 1 ? ',' : ''}`)
       })
     } else if (isPK) {
       const columns = util.getColumnOptions('primaryKey', table.columns)
-      buffer.push(`\tPRIMARY KEY (${this.formatNames(columns)})`)
+      buffer.push(`\tPRIMARY KEY (${this.sql.formatNames(columns)})`)
     } else if (isUQ) {
       const columns = util.getColumnOptions('unique', table.columns)
       columns.forEach((column, i) => {
-        buffer.push(`\tUNIQUE INDEX \`${column.name}_UNIQUE\` (\`${column.name}\` ASC)${columns.length !== i + 1 ? ',' : ''}`)
+        buffer.push(`\tUNIQUE INDEX ${column.name}_UNIQUE (${column.name} ASC)${columns.length !== i + 1 ? ',' : ''}`)
       })
     }
     // 코멘트 처리
@@ -95,8 +100,8 @@ class MySQL {
   // 컬럼 formatter
   formatColumn ({ column, isComma, spaceSize, buffer }) {
     const stringBuffer = []
-    stringBuffer.push(`\t\`${column.name}\`` + this.formatSpace(spaceSize.nameMax - column.name.length))
-    stringBuffer.push(`${column.dataType}` + this.formatSpace(spaceSize.dataTypeMax - column.dataType.length))
+    stringBuffer.push(`\t${column.name}` + this.sql.formatSpace(spaceSize.nameMax - column.name.length))
+    stringBuffer.push(`${column.dataType}` + this.sql.formatSpace(spaceSize.dataTypeMax - column.dataType.length))
     // 옵션 UNSIGNED
     if (column.options.unsigned) {
       stringBuffer.push(`UNSIGNED`)
@@ -129,14 +134,14 @@ class MySQL {
   formatRelation ({ name, tables, line, buffer }) {
     const startTable = util.getData(tables, line.points[0].id)
     const endTable = util.getData(tables, line.points[1].id)
-    buffer.push(`ALTER TABLE \`${name}\`.\`${endTable.name}\``)
+    buffer.push(`ALTER TABLE ${name}.${endTable.name}`)
 
     // FK 중복 처리
     let fkName = `FK_${startTable.name}_TO_${endTable.name}`
     fkName = util.autoName(this.fkNames, fkName)
     this.fkNames.push(fkName)
 
-    buffer.push(`\tADD CONSTRAINT \`${fkName}\``)
+    buffer.push(`\tADD CONSTRAINT ${fkName}`)
 
     // key 컬럼 정제
     const columns = {
@@ -150,43 +155,10 @@ class MySQL {
       columns.start.push(util.getData(startTable.columns, id))
     })
 
-    buffer.push(`\t\tFOREIGN KEY (${this.formatNames(columns.end)})`)
-    buffer.push(`\t\tREFERENCES \`${name}\`.\`${startTable.name}\` (${this.formatNames(columns.start)}),`)
+    buffer.push(`\t\tFOREIGN KEY (${this.sql.formatNames(columns.end)})`)
+    buffer.push(`\t\tREFERENCES ${name}.${startTable.name} (${this.sql.formatNames(columns.start)}),`)
 
-    buffer.push(`\tADD INDEX \`${fkName}\` (${this.formatNames(columns.end)});`)
-  }
-
-  // 이름 foramtter
-  formatNames (list) {
-    let str = ''
-    list.forEach((v, i) => {
-      str += `\`${v.name}\``
-      if (list.length !== i + 1) str += ', '
-    })
-    return str
-  }
-
-  // 컬럼 이름, 데이터 타입 정렬 최대길이
-  formatSize (columns) {
-    let nameMax = 0
-    let dataTypeMax = 0
-    columns.forEach(column => {
-      if (nameMax < column.name.length) nameMax = column.name.length
-      if (dataTypeMax < column.dataType.length) dataTypeMax = column.dataType.length
-    })
-    return {
-      nameMax: nameMax,
-      dataTypeMax: dataTypeMax
-    }
-  }
-
-  // 숫자만큼 공백생성
-  formatSpace (size) {
-    let space = ''
-    for (let i = 0; i < size; i++) {
-      space += ' '
-    }
-    return space
+    buffer.push(`\tADD INDEX ${fkName} (${this.sql.formatNames(columns.end)});`)
   }
 }
 
