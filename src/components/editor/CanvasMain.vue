@@ -34,7 +34,8 @@
         @keyup.enter="onEnterMove($event, 'tableComment', table.id)")
 
       draggable(v-model="table.columns" :options="{group:'table'}"
-      @end="draggableEnd")
+      @update="draggableEnd"
+      @add="draggableEnd")
 
         // 컬럼
         .erd_column(v-for="column in table.columns" :key="column.id" :column_id="column.id"
@@ -435,6 +436,7 @@ export default {
     },
     // draggableEnd event
     draggableEnd (e) {
+      console.log('end')
       ERD.store().commit({
         type: 'tableHeightReset'
       })

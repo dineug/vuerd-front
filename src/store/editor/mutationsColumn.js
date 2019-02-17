@@ -9,6 +9,8 @@ export default {
   // 컬럼 추가
   add (state, data) {
     JSLog('mutations', 'column', 'add')
+    const undo = JSON.stringify(state)
+
     ERD.core.event.isEdit = true
 
     for (let table of state.tables) {
@@ -43,10 +45,20 @@ export default {
         break
       }
     }
+
+    if (!data.isInit) {
+      // undo, redo 등록
+      ERD.core.undoRedo.add({
+        undo: undo,
+        redo: JSON.stringify(state)
+      })
+    }
   },
   // 컬럼 삭제
   delete (state, data) {
     JSLog('mutations', 'column', 'delete')
+    const undo = JSON.stringify(state)
+
     const table = util.getData(state.tables, data.tableId)
     for (let i in table.columns) {
       if (data.columnId === table.columns[i].id) {
@@ -106,13 +118,26 @@ export default {
     if (isColumns !== 0) {
       document.getElementById(`columnName_${table.columns[isColumns - 1].id}`).focus()
     }
+    // undo, redo 등록
+    ERD.core.undoRedo.add({
+      undo: undo,
+      redo: JSON.stringify(state)
+    })
   },
   // 컬럼 NULL 조건 변경
   changeNull (state, data) {
     JSLog('mutations', 'column', 'changeNull')
+    const undo = JSON.stringify(state)
+
     const table = util.getData(state.tables, data.tableId)
     const column = util.getData(table.columns, data.columnId)
     column.options.notNull = !column.options.notNull
+
+    // undo, redo 등록
+    ERD.core.undoRedo.add({
+      undo: undo,
+      redo: JSON.stringify(state)
+    })
   },
   // 컬럼 선택
   selected (state, data) {
@@ -137,6 +162,8 @@ export default {
   // 컬럼 key active
   key (state, data) {
     JSLog('mutations', 'column', 'key')
+    const undo = JSON.stringify(state)
+
     for (let table of state.tables) {
       let check = false
       for (let column of table.columns) {
@@ -171,10 +198,18 @@ export default {
         break
       }
     }
+
+    // undo, redo 등록
+    ERD.core.undoRedo.add({
+      undo: undo,
+      redo: JSON.stringify(state)
+    })
   },
   // 컬럼 데이터변경
   changeDataType (state, data) {
     JSLog('mutations', 'column', 'changeDataType')
+    const undo = JSON.stringify(state)
+
     const table = util.getData(state.tables, data.tableId)
     const column = util.getData(table.columns, data.columnId)
     column.dataType = data.dataType
@@ -183,6 +218,12 @@ export default {
     storeTable.commit({
       type: 'active',
       id: data.tableId
+    })
+
+    // undo, redo 등록
+    ERD.core.undoRedo.add({
+      undo: undo,
+      redo: JSON.stringify(state)
     })
   },
   // 컬럼 데이터타입 힌트 show/hide

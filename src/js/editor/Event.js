@@ -177,6 +177,15 @@ class Event {
             }
           }
           break
+        case 90: // key: Z
+          if (e.ctrlKey && e.shiftKey) {
+            e.preventDefault()
+            this.core.undoRedo.getManager().redo()
+          } else if (e.ctrlKey) {
+            e.preventDefault()
+            this.core.undoRedo.getManager().undo()
+          }
+          break
         case 75: // key: K
           if (e.altKey) {
             e.preventDefault()
@@ -427,7 +436,6 @@ class Event {
           this.isDraw = false
           if (id) {
             const table = util.getData(this.core.erd.store().state.tables, id)
-
             // fk 컬럼 생성
             const startColumnIds = []
             const endColumnIds = []
@@ -468,6 +476,11 @@ class Event {
               endColumnIds: endColumnIds
             })
 
+            // undo, redo 등록
+            this.core.undoRedo.add({
+              undo: JSON.stringify(this.core.erd.store().state),
+              redo: JSON.stringify(this.core.erd.store().state)
+            })
             this.onCursor('stop')
           } else {
             this.core.erd.store().commit({

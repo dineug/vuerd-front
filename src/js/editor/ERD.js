@@ -40,6 +40,15 @@ class ERD {
       }
     }
   }
+
+  // 활성화 된 탭 state
+  active () {
+    for (let tab of model.state.tabs) {
+      if (tab.active) {
+        return tab
+      }
+    }
+  }
 }
 
 export default new ERD()

@@ -37,6 +37,7 @@ export default () => {
       },
       // 전체 import
       importData (state, data) {
+        JSLog('mutations', 'erd', 'importData')
         Object.keys(state).forEach(key => {
           state[key] = data.state[key]
         })

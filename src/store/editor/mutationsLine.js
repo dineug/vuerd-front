@@ -132,6 +132,12 @@ export default {
         }
       }
     }
+
+    // undo, redo 등록
+    ERD.core.undoRedo.add({
+      undo: JSON.stringify(state),
+      redo: JSON.stringify(state)
+    })
   },
   // 관계 컬럼 hover 처리
   hover (state, data) {

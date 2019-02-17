@@ -7,8 +7,10 @@ JSLog('store loaded', 'mutationsTable')
 
 export default {
   // 테이블 추가
-  add (state) {
+  add (state, data) {
     JSLog('mutations', 'table', 'add')
+    const undo = JSON.stringify(state)
+
     ERD.core.event.isEdit = true
 
     const newTable = {
@@ -43,10 +45,18 @@ export default {
       id: newTable.id,
       isNotRelation: true
     })
+
+    // undo, redo 등록
+    ERD.core.undoRedo.add({
+      undo: undo,
+      redo: JSON.stringify(state)
+    })
   },
   // 테이블 삭제
   delete (state, data) {
     JSLog('mutations', 'table', 'delete')
+    const undo = JSON.stringify(state)
+
     // 테이블 상세 그리드 해제
     storeTable.commit({ type: 'delete' })
 
@@ -99,6 +109,12 @@ export default {
         break
       }
     }
+
+    // undo, redo 등록
+    ERD.core.undoRedo.add({
+      undo: undo,
+      redo: JSON.stringify(state)
+    })
   },
   // 테이블 높이 리셋
   heightReset (state) {

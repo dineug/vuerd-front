@@ -18,6 +18,7 @@
     // 메뉴 sidebar left
     ul.menu_sidebar
       li(v-for="menu in menus" :key="menu.id" :title="menu.name"
+      :class="{ undo_none: menu.type === 'undo' && !isUndo, redo_none: menu.type === 'redo' && !isRedo }"
       @click="menuAction(menu.type)")
         font-awesome-icon(:icon="menu.icon")
         ol(v-if="menu.type === 'DBType'")
@@ -68,11 +69,13 @@ export default {
           height: 0
         }
       },
+      isUndo: false,
+      isRedo: false,
       DBTypes: [
-        'MySQL',
-        'Oracle',
         'MariaDB',
         'MSSQL',
+        'MySQL',
+        'Oracle',
         'PostgreSQL'
       ],
       menus: [
@@ -107,9 +110,14 @@ export default {
           name: 'import-json'
         },
         {
-          type: 'export-json',
-          icon: 'file-export',
-          name: 'export-json'
+          type: 'undo',
+          icon: 'undo',
+          name: 'undo(Ctrl + Z)'
+        },
+        {
+          type: 'redo',
+          icon: 'redo',
+          name: 'redo(Ctrl + Shift + Z)'
         }
       ]
     }
@@ -152,6 +160,16 @@ export default {
         case 'export-json':
           ERD.core.file.exportData('json')
           break
+        case 'undo':
+          if (this.isUndo) {
+            ERD.core.undoRedo.undo()
+          }
+          break
+        case 'redo':
+          if (this.isRedo) {
+            ERD.core.undoRedo.redo()
+          }
+          break
       }
     },
     // 미리보기 네비게이션 이벤트 시작
@@ -177,6 +195,11 @@ export default {
     this.preview.target.height = height * 0.03
     this.preview.target.x = window.scrollX / ERD.core.event.preview.ratio
     this.preview.target.y = window.scrollY / ERD.core.event.preview.ratio
+    // undo, redo 활성화 callback 등록
+    ERD.core.undoRedo.callback = () => {
+      this.isUndo = ERD.core.undoRedo.getManager().hasUndo()
+      this.isRedo = ERD.core.undoRedo.getManager().hasRedo()
+    }
   },
   updated () {
     // 단축키 활성화 포커스처리
@@ -186,6 +209,8 @@ export default {
         break
       }
     }
+    // undo, redo 활성화
+    ERD.core.undoRedo.callback()
   }
 }
 </script>
@@ -293,6 +318,11 @@ export default {
           ol {
             display: block;
           }
+        }
+
+        &.undo_none, &.redo_none {
+          cursor: default;
+          color: #a2a2a2;
         }
       }
     }
