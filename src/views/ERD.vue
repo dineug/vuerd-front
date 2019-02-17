@@ -81,10 +81,9 @@ export default {
   }
 
   input {
-    color: white;
     border: none;
-    background-color: #191919;
   }
+
   *:focus {
     outline: none;
   }

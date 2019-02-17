@@ -495,6 +495,11 @@ export default {
   $key_fk: #dda8b1;
   $key_pfk: #60b9c4;
 
+  input {
+    background-color: #191919;
+    color: white;
+  }
+
   .main_canvas {
     width: 5000px;
     height: 5000px;
