@@ -362,6 +362,11 @@ class Event {
             }
             break
         }
+      } else {
+        if (e.keyCode === 27) {
+          // 모든 이벤트 중지
+          this.stop()
+        }
       }
     }).on('keyup', e => {
       JSLog('event', 'keyup', e.keyCode)
