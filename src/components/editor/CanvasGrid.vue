@@ -263,7 +263,7 @@ export default {
       position: fixed;
       bottom: $menu_base_size;
       left: $menu_base_size;
-      z-index: 2147483647;
+      z-index: 2147483646;
     }
   }
 </style>
