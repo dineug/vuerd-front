@@ -9,6 +9,7 @@ export default {
   // 컬럼 추가
   add (state, data) {
     JSLog('mutations', 'column', 'add')
+    ERD.core.event.onCursor('stop')
     const undo = JSON.stringify(state)
 
     ERD.core.event.isEdit = true
@@ -35,11 +36,19 @@ export default {
             fk: false,
             pfk: false,
             isDataTypeHint: false,
-            isHover: false
+            isHover: false,
+            widthName: state.COLUMN_WIDTH,
+            widthDataType: state.COLUMN_WIDTH,
+            widthComment: state.COLUMN_WIDTH
           }
         }
         if (data.isInit) {
           util.setData(column, data.column)
+        }
+        if (table.columns.length !== 0) {
+          column.ui.widthName = table.columns[0].ui.widthName
+          column.ui.widthDataType = table.columns[0].ui.widthDataType
+          column.ui.widthComment = table.columns[0].ui.widthComment
         }
         table.columns.push(column)
         break
@@ -57,6 +66,7 @@ export default {
   // 컬럼 삭제
   delete (state, data) {
     JSLog('mutations', 'column', 'delete')
+    ERD.core.event.onCursor('stop')
     const undo = JSON.stringify(state)
 
     const table = util.getData(state.tables, data.tableId)
@@ -118,6 +128,8 @@ export default {
     if (isColumns !== 0) {
       document.getElementById(`columnName_${table.columns[isColumns - 1].id}`).focus()
     }
+
+    this.commit({ type: 'columnWidthReset' })
     // undo, redo 등록
     ERD.core.undoRedo.add({
       undo: undo,
@@ -127,6 +139,7 @@ export default {
   // 컬럼 NULL 조건 변경
   changeNull (state, data) {
     JSLog('mutations', 'column', 'changeNull')
+    ERD.core.event.onCursor('stop')
     const undo = JSON.stringify(state)
 
     const table = util.getData(state.tables, data.tableId)
@@ -162,6 +175,7 @@ export default {
   // 컬럼 key active
   key (state, data) {
     JSLog('mutations', 'column', 'key')
+    ERD.core.event.onCursor('stop')
     const undo = JSON.stringify(state)
 
     for (let table of state.tables) {
@@ -208,6 +222,7 @@ export default {
   // 컬럼 데이터변경
   changeDataType (state, data) {
     JSLog('mutations', 'column', 'changeDataType')
+    ERD.core.event.onCursor('stop')
     const undo = JSON.stringify(state)
 
     const table = util.getData(state.tables, data.tableId)
@@ -220,6 +235,7 @@ export default {
       id: data.tableId
     })
 
+    this.commit({ type: 'columnWidthReset' })
     // undo, redo 등록
     ERD.core.undoRedo.add({
       undo: undo,
@@ -257,5 +273,27 @@ export default {
         v.dataType = column.dataType
       })
     }
+  },
+  // 컬럼 너비 리셋
+  widthReset (state) {
+    JSLog('mutations', 'column', 'widthReset')
+    state.tables.forEach(table => {
+      const max = util.columnMaxWidth(state, table.columns)
+      table.columns.forEach(column => {
+        column.ui.widthName = max.name
+        column.ui.widthDataType = max.dataType
+        column.ui.widthComment = max.comment
+      })
+      if (table.columns.length !== 0) {
+        let width = table.columns[0].ui.widthName + table.columns[0].ui.widthDataType + table.columns[0].ui.widthComment
+        if (width > state.COLUMN_WIDTH * 3) {
+          table.ui.width = state.TABLE_WIDTH + width - state.COLUMN_WIDTH * 3
+        } else {
+          table.ui.width = state.TABLE_WIDTH
+        }
+      } else {
+        table.ui.width = state.TABLE_WIDTH
+      }
+    })
   }
 }

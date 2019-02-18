@@ -1,5 +1,6 @@
 import JSLog from '../JSLog'
 import ERD from './ERD'
+import $ from 'jquery'
 
 JSLog('module loaded', 'util')
 
@@ -180,6 +181,32 @@ export const changeIdentification = (state, table) => {
       })
     }
   }
+}
+
+// 컬럼 max width
+$(document.body).append('<span id="textWidth" style="display: none; font: 400 12px Arial;"></span>')
+const textWidthTag = $('#textWidth')
+export const columnMaxWidth = (state, columns) => {
+  const max = {
+    name: state.COLUMN_WIDTH,
+    dataType: state.COLUMN_WIDTH,
+    comment: state.COLUMN_WIDTH
+  }
+  columns.forEach(column => {
+    const widthName = textWidthTag.text(column.name).width()
+    const widthDataType = textWidthTag.text(column.dataType).width()
+    const widthComment = textWidthTag.text(column.comment).width()
+    if (max.name < widthName) {
+      max.name = widthName
+    }
+    if (max.dataType < widthDataType) {
+      max.dataType = widthDataType
+    }
+    if (max.comment < widthComment) {
+      max.comment = widthComment
+    }
+  })
+  return max
 }
 
 // line convert

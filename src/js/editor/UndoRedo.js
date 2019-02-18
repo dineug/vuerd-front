@@ -54,10 +54,12 @@ class UndoRedo {
 
   // 이전
   undo () {
+    this.core.event.stop()
     this.getManager().undo()
   }
   // 앞전
   redo () {
+    this.core.event.stop()
     this.getManager().redo()
   }
 

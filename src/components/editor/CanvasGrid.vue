@@ -227,6 +227,7 @@ export default {
       switch (type) {
         case 'table':
           this.isTable = !this.isTable
+          ERD.core.event.isGrid.table = this.isTable
           break
       }
     }
@@ -247,13 +248,14 @@ export default {
       position: fixed;
       bottom: 0;
       left: $menu_base_size;
-      z-index: 2147483647;
+      z-index: 2147483646;
       color: white;
       background-color: black;
 
       li {
         padding: 10px;
         cursor: pointer;
+        display: inline-block;
       }
     }
 
@@ -261,7 +263,7 @@ export default {
       position: fixed;
       bottom: $menu_base_size;
       left: $menu_base_size;
-      z-index: 2147483647;
+      z-index: 2147483646;
     }
   }
 </style>

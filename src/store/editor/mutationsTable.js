@@ -9,6 +9,7 @@ export default {
   // 테이블 추가
   add (state, data) {
     JSLog('mutations', 'table', 'add')
+    ERD.core.event.onCursor('stop')
     const undo = JSON.stringify(state)
 
     ERD.core.event.isEdit = true
@@ -55,6 +56,7 @@ export default {
   // 테이블 삭제
   delete (state, data) {
     JSLog('mutations', 'table', 'delete')
+    ERD.core.event.onCursor('stop')
     const undo = JSON.stringify(state)
 
     // 테이블 상세 그리드 해제

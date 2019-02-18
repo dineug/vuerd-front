@@ -17,6 +17,9 @@ export default new Vuex.Store({
     // 그리드 활성화
     active (state, data) {
       JSLog('mutations', 'table grid', 'active')
+      if (ERD.core.event.isGrid.table) {
+        ERD.core.event.components.CanvasMenu.isTable = true
+      }
       state.rows = []
       state.table = util.getData(ERD.store().state.tables, data.id)
       if (state.table) {
@@ -38,6 +41,9 @@ export default new Vuex.Store({
     // 삭제
     delete (state) {
       JSLog('mutations', 'table grid', 'delete')
+      if (ERD.core.event.isGrid.table) {
+        ERD.core.event.components.CanvasMenu.isTable = false
+      }
       state.rows = []
       state.table = null
       $('.tui-grid-head-area:eq(1)').find('tr:eq(0) > th').text('')
@@ -46,6 +52,7 @@ export default new Vuex.Store({
     sync (state, data) {
       JSLog('mutations', 'table grid', 'sync')
       if (state.table) {
+        const undo = JSON.stringify(ERD.core.erd.store().state)
         if (data.isPK) {
           state.table.columns.forEach((column, i) => {
             if (i === data.rowKey) {
@@ -68,6 +75,12 @@ export default new Vuex.Store({
           })
           util.setData(state.table.columns[data.rowKey], data.column)
         }
+        ERD.core.erd.store().commit({ type: 'columnWidthReset' })
+        // undo, redo 등록
+        ERD.core.undoRedo.add({
+          undo: undo,
+          redo: JSON.stringify(ERD.core.erd.store().state)
+        })
       }
     }
   }
