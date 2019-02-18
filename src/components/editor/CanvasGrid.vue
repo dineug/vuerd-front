@@ -227,6 +227,7 @@ export default {
       switch (type) {
         case 'table':
           this.isTable = !this.isTable
+          ERD.core.event.isGrid.table = this.isTable
           break
       }
     }

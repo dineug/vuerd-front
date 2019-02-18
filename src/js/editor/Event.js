@@ -48,6 +48,11 @@ class Event {
 
     // move
     this.isMove = false
+
+    // grid
+    this.isGrid = {
+      table: false
+    }
   }
 
   // 종속성 초기화
@@ -162,6 +167,7 @@ class Event {
       }
     }).on('keydown', e => {
       JSLog('event', 'keydown', e.keyCode)
+      if (e.altKey) e.preventDefault()
       if (!this.isStop) {
         switch (e.keyCode) {
           case 13: // key: Enter
@@ -651,6 +657,7 @@ class Event {
     this.components.CanvasGrid.isTable = false
     this.components.CanvasMenu.isModal = false
     this.isSelectedColumn = false
+    this.isGrid.table = false
     this.isStop = false
     // 모든 selected 해제
     this.core.erd.store().commit({
