@@ -3,6 +3,9 @@ import $ from 'jquery'
 import * as util from './util'
 import model from '@/store/editor/model'
 
+const CANVAS_SIZE = 5000
+const PREVIEW_SIZE = 150
+
 /**
  * 이벤트 클래스
  */
@@ -14,8 +17,11 @@ class Event {
     this.rightClickListener = []
     this.components = {
       QuickMenu: null,
-      CanvasMain: null
+      CanvasMain: [],
+      CanvasMenu: null,
+      CanvasGrid: null
     }
+    this.isEdit = false
 
     // relation Draw
     this.isCursor = false
@@ -38,6 +44,17 @@ class Event {
       x: 0,
       y: 0
     }
+
+    // preview
+    this.isPreview = false
+    this.preview = {
+      left: (-1 * CANVAS_SIZE / 2) + (PREVIEW_SIZE / 2) - PREVIEW_SIZE - 20,
+      x: 150 + 20,
+      ratio: CANVAS_SIZE / PREVIEW_SIZE
+    }
+
+    // move
+    this.isMove = false
   }
 
   // 종속성 초기화
@@ -54,20 +71,34 @@ class Event {
     //   e.returnValue = dialogText;
     //   return dialogText;
     // }
+
     // 전역 이벤트
     this.on('contextmenu', e => {
       // 오른쪽 클릭 이벤트
       JSLog('event', 'contextmenu')
       e.preventDefault()
       this.core.event.onRightClick(e)
+    }).on('resize', e => {
+      // 미리보기 창크기 동적 위치
+      const width = window.innerWidth
+      const height = window.innerHeight
+      this.components.CanvasMenu.preview.left = this.preview.left + width
+      this.components.CanvasMenu.preview.x = width - this.preview.x
+      this.components.CanvasMenu.preview.target.width = width * 0.03
+      this.components.CanvasMenu.preview.target.height = height * 0.03
+    }).on('scroll', e => {
+      // 스크롤 위치에 따라 미리보기 target 수정
+      this.components.CanvasMenu.preview.target.x = window.scrollX / this.preview.ratio
+      this.components.CanvasMenu.preview.target.y = window.scrollY / this.preview.ratio
     }).on('mousedown', e => {
       JSLog('event', 'mousedown')
       // 테이블 메뉴 hide
-      if (!$(e.target).closest('#quick_menu').length) {
+      if (!$(e.target).closest('.quick_menu').length) {
         this.components.QuickMenu.isShow = false
       }
       // 데이터 타입 힌트 hide
-      if (!$(e.target).closest('.erd_data_type_list').length) {
+      if (!$(e.target).closest('.erd_data_type_list').length &&
+        !$(e.target).closest('.menu_sidebar').length) {
         this.core.erd.store().commit({
           type: 'columnDataTypeHintVisibleAll',
           isDataTypeHint: false
@@ -75,7 +106,9 @@ class Event {
       }
       // 테이블 및 컬럼 selected 해제
       if (!$(e.target).closest('.erd_table').length &&
-        !$(e.target).closest('.quick_menu_pk').length) {
+        !$(e.target).closest('.quick_menu_pk').length &&
+        !$(e.target).closest('.table_detail').length &&
+        !$(e.target).closest('.menu_bottom').length) {
         this.core.erd.store().commit({
           type: 'tableSelectedAllNone',
           isTable: true,
@@ -83,15 +116,29 @@ class Event {
         })
         this.isSelectedColumn = false
       }
-      // 마우스 drag
-      if (!this.isDraggable && !this.isSelectedColumn &&
-        !$(e.target).closest('.menu_top').length) {
-        this.onDrag('start', e)
+
+      if (!e.altKey &&
+        !this.isDraggable &&
+        !this.isSelectedColumn &&
+        !this.isPreview &&
+        !$(e.target).closest('.menu_top').length &&
+        !$(e.target).closest('.menu_sidebar').length &&
+        !$(e.target).closest('.menu_bottom').length &&
+        !$(e.target).closest('.table_detail').length) {
+        if (e.ctrlKey) {
+          // 마우스 drag
+          this.onDrag('start', e)
+        } else {
+          // 마우스 이동
+          this.onMove('start')
+        }
       }
     }).on('mouseup', e => {
       JSLog('event', 'mouseup')
       this.onDraggable('stop')
       this.onDrag('stop', e)
+      this.onPreview('stop')
+      this.onMove('stop')
     }).on('mousemove', e => {
       if (this.move.x === 0 && this.move.y === 0) {
         this.move.x = e.clientX + document.documentElement.scrollLeft
@@ -102,10 +149,14 @@ class Event {
       this.onDraw('update', null, e)
       // 테이블 draggable
       this.onDraggable('update', null, e)
+      // 미리보기 이동
+      this.onPreview('update', e)
       // 마우스 drag
       if (!this.isDraggable && !this.isSelectedColumn) {
         this.onDrag('update', e)
       }
+      // 마우스 이동
+      this.onMove('update', e)
 
       this.move.x = e.clientX + document.documentElement.scrollLeft
       this.move.y = e.clientY + document.documentElement.scrollTop
@@ -114,6 +165,7 @@ class Event {
       switch (e.keyCode) {
         case 13: // key: Enter
           if (e.altKey) {
+            e.preventDefault()
             // 컬럼 생성
             for (let table of this.core.erd.store().state.tables) {
               if (table.ui.selected) {
@@ -125,8 +177,18 @@ class Event {
             }
           }
           break
+        case 90: // key: Z
+          if (e.ctrlKey && e.shiftKey) {
+            e.preventDefault()
+            this.core.undoRedo.getManager().redo()
+          } else if (e.ctrlKey) {
+            e.preventDefault()
+            this.core.undoRedo.getManager().undo()
+          }
+          break
         case 75: // key: K
           if (e.altKey) {
+            e.preventDefault()
             // 컬럼 PK 부여
             this.core.erd.store().commit({
               type: 'columnKey',
@@ -135,11 +197,15 @@ class Event {
           }
           break
         case 78: // key: N
-          if (e.ctrlKey && e.altKey) {
+          if (e.altKey) {
+            e.preventDefault()
             // 모델 생성
             model.commit({ type: 'modelAdd' })
           }
-          if (e.altKey && !e.ctrlKey) {
+          break
+        case 84: // key: T
+          if (e.altKey) {
+            e.preventDefault()
             // 테이블 생성
             this.core.erd.store().commit({ type: 'tableAdd' })
           }
@@ -154,27 +220,9 @@ class Event {
         case 27: // key: ESC
           // 모든 이벤트 중지
           this.stop()
-          // 모든 selected 해제
-          this.core.erd.store().commit({
-            type: 'tableSelectedAllNone',
-            isTable: true,
-            isColumn: true
-          })
-          this.isSelectedColumn = false
           break
         case 46: // key: Delete
           e.preventDefault()
-          // 테이블 삭제
-          const store = this.core.erd.store()
-          for (let i = 0; i < store.state.tables.length; i++) {
-            if (store.state.tables[i].ui.selected) {
-              store.commit({
-                type: 'tableDelete',
-                id: store.state.tables[i].id
-              })
-              i--
-            }
-          }
           if (e.ctrlKey) {
             // 모델 삭제
             for (let tab of model.state.tabs) {
@@ -183,12 +231,47 @@ class Event {
                   type: 'modelDelete',
                   id: tab.id
                 })
+                break
               }
             }
+          } else if (e.altKey) {
+            // 테이블 삭제
+            const store = this.core.erd.store()
+            for (let i = 0; i < store.state.tables.length; i++) {
+              if (store.state.tables[i].ui.selected) {
+                store.commit({
+                  type: 'tableDelete',
+                  id: store.state.tables[i].id
+                })
+                i--
+              }
+            }
+          } else {
+            // 컬럼 삭제
+            const store = this.core.erd.store()
+            store.state.tables.forEach(table => {
+              for (let i = 0; i < table.columns.length; i++) {
+                if (table.columns[i].ui.selected) {
+                  store.commit({
+                    type: 'columnDelete',
+                    tableId: table.id,
+                    columnId: table.columns[i].id
+                  })
+                  break
+                }
+              }
+            })
           }
           break
         case 49: // key: 1
-          if (e.altKey) {
+          if (e.ctrlKey) {
+            e.preventDefault()
+            model.commit({
+              type: 'modelActiveKeyMap',
+              index: 1
+            })
+          } else if (e.altKey) {
+            e.preventDefault()
             // 관계 1:1
             if (this.isCursor) {
               this.onCursor('stop')
@@ -196,29 +279,22 @@ class Event {
               this.onCursor('start', 'erd-0-1')
             }
           }
-          if (e.ctrlKey) {
-            e.preventDefault()
-            model.commit({
-              type: 'modelActiveKeyMap',
-              index: 1
-            })
-          }
           break
         case 50: // key: 2
-          if (e.altKey) {
-            // 관계 1:N
-            if (this.isCursor) {
-              this.onCursor('stop')
-            } else {
-              this.onCursor('start', 'erd-0-1-N')
-            }
-          }
           if (e.ctrlKey) {
             e.preventDefault()
             model.commit({
               type: 'modelActiveKeyMap',
               index: 2
             })
+          } else if (e.altKey) {
+            e.preventDefault()
+            // 관계 1:N
+            if (this.isCursor) {
+              this.onCursor('stop')
+            } else {
+              this.onCursor('start', 'erd-0-1-N')
+            }
           }
           break
         case 51: // key: 3
@@ -325,12 +401,12 @@ class Event {
   onCursor (type, cursor) {
     switch (type) {
       case 'start':
-        document.querySelector('body').setAttribute('style', `cursor: url("/img/erd/${cursor}.png") 16 16, auto;`)
+        document.body.setAttribute('style', `cursor: url("/img/erd/${cursor}.png") 16 16, auto;`)
         this.isCursor = true
         this.cursor = cursor
         break
       case 'stop':
-        document.querySelector('body').removeAttribute('style')
+        document.body.removeAttribute('style')
         this.isCursor = false
         this.cursor = null
         this.onDraw('stop')
@@ -360,12 +436,12 @@ class Event {
           this.isDraw = false
           if (id) {
             const table = util.getData(this.core.erd.store().state.tables, id)
-
             // fk 컬럼 생성
             const startColumnIds = []
             const endColumnIds = []
             const line = util.getData(this.core.erd.store().state.lines, this.lineId)
-            const columns = util.getPKColumns(line.points[0].id)
+            const startTable = util.getData(this.core.erd.store().state.tables, line.points[0].id)
+            const columns = util.getColumnOptions('primaryKey', startTable.columns)
             columns.forEach(v => {
               const columnId = util.guid()
               startColumnIds.push(v.id)
@@ -400,6 +476,11 @@ class Event {
               endColumnIds: endColumnIds
             })
 
+            // undo, redo 등록
+            this.core.undoRedo.add({
+              undo: this.core.undoRedo.undoJson.draw,
+              redo: JSON.stringify(this.core.erd.store().state)
+            })
             this.onCursor('stop')
           } else {
             this.core.erd.store().commit({
@@ -447,11 +528,13 @@ class Event {
     switch (type) {
       case 'start':
         this.isDrag = true
-        this.components.CanvasMain.svg.top = 0
-        this.components.CanvasMain.svg.left = 0
-        this.components.CanvasMain.svg.width = 0
-        this.components.CanvasMain.svg.height = 0
-        this.components.CanvasMain.svg.isDarg = true
+        this.components.CanvasMain.forEach(v => {
+          v.svg.top = 0
+          v.svg.left = 0
+          v.svg.width = 0
+          v.svg.height = 0
+          v.svg.isDarg = true
+        })
         this.drag.x = e.clientX + document.documentElement.scrollLeft
         this.drag.y = e.clientY + document.documentElement.scrollTop
         break
@@ -468,10 +551,12 @@ class Event {
             x: this.drag.x > currentX ? this.drag.x : currentX,
             y: this.drag.y > currentY ? this.drag.y : currentY
           }
-          this.components.CanvasMain.svg.top = min.y
-          this.components.CanvasMain.svg.left = min.x
-          this.components.CanvasMain.svg.width = max.x - min.x
-          this.components.CanvasMain.svg.height = max.y - min.y
+          this.components.CanvasMain.forEach(v => {
+            v.svg.top = min.y
+            v.svg.left = min.x
+            v.svg.width = max.x - min.x
+            v.svg.height = max.y - min.y
+          })
           this.core.erd.store().commit({
             type: 'tableMultiSelected',
             min: min,
@@ -482,7 +567,65 @@ class Event {
       case 'stop':
         if (this.isDrag) {
           this.isDrag = false
-          this.components.CanvasMain.svg.isDarg = false
+          this.components.CanvasMain.forEach(v => {
+            v.svg.isDarg = false
+          })
+        }
+        break
+    }
+  }
+
+  // 미리보기 네비게이션
+  onPreview (type, e) {
+    switch (type) {
+      case 'start':
+        this.isPreview = true
+        break
+      case 'update':
+        if (this.isPreview) {
+          const moveX = e.clientX + document.documentElement.scrollLeft - this.move.x
+          const moveY = e.clientY + document.documentElement.scrollTop - this.move.y
+          const x = this.components.CanvasMenu.preview.target.x + moveX
+          const y = this.components.CanvasMenu.preview.target.y + moveY
+          const width = window.innerWidth
+          const height = window.innerHeight
+          const targetWidth = width * 0.03
+          const targetHeight = height * 0.03
+          if (x >= 0 && targetWidth + x <= 150) {
+            this.components.CanvasMenu.preview.target.x = x
+            window.scrollTo(x * this.preview.ratio, window.scrollY)
+          }
+          if (y >= 0 && targetHeight + y <= 150) {
+            this.components.CanvasMenu.preview.target.y = y
+            window.scrollTo(window.scrollX, y * this.preview.ratio)
+          }
+        }
+        break
+      case 'stop':
+        if (this.isPreview) {
+          this.isPreview = false
+        }
+        break
+    }
+  }
+
+  // 마우스 클릭 이동
+  onMove (type, e) {
+    switch (type) {
+      case 'start':
+        this.isMove = true
+        break
+      case 'update':
+        if (this.isMove) {
+          const x = e.clientX + document.documentElement.scrollLeft - this.move.x
+          const y = e.clientY + document.documentElement.scrollTop - this.move.y
+          window.scrollTo(-1 * x + window.scrollX, window.scrollY)
+          window.scrollTo(window.scrollX, -1 * y + window.scrollY)
+        }
+        break
+      case 'stop':
+        if (this.isMove) {
+          this.isMove = false
         }
         break
     }
@@ -494,7 +637,20 @@ class Event {
     this.onDraw('stop')
     this.onDraggable('stop')
     this.onDrag('stop')
+    this.onMove('stop')
     this.components.QuickMenu.isShow = false
+    this.components.CanvasGrid.isTable = false
+    this.isSelectedColumn = false
+    // 모든 selected 해제
+    this.core.erd.store().commit({
+      type: 'tableSelectedAllNone',
+      isTable: true,
+      isColumn: true
+    })
+    this.core.erd.store().commit({
+      type: 'columnDataTypeHintVisibleAll',
+      isDataTypeHint: false
+    })
   }
 }
 

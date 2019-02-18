@@ -15,13 +15,17 @@
     "@fortawesome/fontawesome-svg-core": "^1.2.10",
     "@fortawesome/free-solid-svg-icons": "^5.6.1",
     "@fortawesome/vue-fontawesome": "^0.1.3",
+    "@toast-ui/vue-grid": "^1.0.4",
     "axios": "^0.18.0",
-    "bootstrap": "^4.1.3",
+    "dom-to-image": "^2.6.0",
     "jquery": "^3.3.1",
     "jquery-ui-bundle": "^1.12.1-migrate",
+    "undo-manager": "^1.0.5",
+    "velocity-animate": "^1.5.2",
     "vue": "^2.5.21",
     "vue-router": "^3.0.1",
     "vuedraggable": "^2.17.0",
+    "vuetify": "^1.5.1",
     "vuex": "^3.0.1"
   },
   "devDependencies": {

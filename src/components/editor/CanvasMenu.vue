@@ -1,7 +1,8 @@
 <template lang="pug">
   .menu_canvas
+    // 메뉴 top
     draggable.menu_top(element="ul" v-model="model.tabs" :options="{group:'tab', ghostClass: 'ghost'}")
-      transition-group(type="transition" name="flip-list")
+      transition-group(type="transition" name="menu-top")
 
         li(v-for="(tab, i) in model.tabs" :key="tab.id")
           input(v-model="tab.name" v-focus
@@ -9,26 +10,42 @@
           type="text" :title="i < 9 ? `Ctrl + ${i+1}` : ''"
           @click="modelActive(tab.id)")
 
-          button(:class="{ tab_active: tab.active }" title="Ctrl + Delete"
-          @click="modelDelete(tab.id)")
-            font-awesome-icon(icon="times")
+          span.buttons(:class="{ tab_active: tab.active }")
+            button(title="Ctrl + Delete"
+            @click="modelDelete(tab.id)")
+              font-awesome-icon(icon="times")
 
+    // 메뉴 sidebar left
     ul.menu_sidebar
       li(v-for="menu in menus" :key="menu.id" :title="menu.name"
+      :class="{ undo_none: menu.type === 'undo' && !isUndo, redo_none: menu.type === 'redo' && !isRedo }"
       @click="menuAction(menu.type)")
         font-awesome-icon(:icon="menu.icon")
+        ol(v-if="menu.type === 'DBType'")
+          li(v-for="dbType in DBTypes" :class="{ db_active: DBType === dbType }"
+          @click="changeDB(dbType)") {{ dbType }}
+
+    // 메뉴 Preview Navigation
+    canvas-main.preview(:style="`top: ${preview.top}px; left: ${preview.left}px;`"
+    :isPreview="true")
+    .preview_border(:style="`top: ${preview.y}px; left: ${preview.x}px;`")
+      .preview_target(:style="`top: ${preview.target.y}px; left: ${preview.target.x}px; width: ${preview.target.width}px; height: ${preview.target.height}px;`"
+      @mousedown="onPreview")
 </template>
 
 <script>
-import $ from 'jquery'
 import ERD from '@/js/editor/ERD'
 import model from '@/store/editor/model'
 import draggable from 'vuedraggable'
+import CanvasMain from './CanvasMain'
+import CanvasSvg from './CanvasSvg'
 
 export default {
   name: 'CanvasMenu',
   components: {
-    draggable
+    draggable,
+    CanvasMain,
+    CanvasSvg
   },
   directives: {
     // focus 정의
@@ -40,6 +57,27 @@ export default {
   },
   data () {
     return {
+      preview: {
+        top: (-1 * 5000 / 2) + (150 / 2) + 53,
+        left: 0,
+        x: 0,
+        y: 53,
+        target: {
+          x: 0,
+          y: 0,
+          width: 0,
+          height: 0
+        }
+      },
+      isUndo: false,
+      isRedo: false,
+      DBTypes: [
+        'MariaDB',
+        'MSSQL',
+        'MySQL',
+        'Oracle',
+        'PostgreSQL'
+      ],
       menus: [
         {
           type: 'DBType',
@@ -50,6 +88,11 @@ export default {
           type: 'save',
           icon: 'save',
           name: 'save'
+        },
+        {
+          type: 'export-png',
+          icon: 'file-image',
+          name: 'export-png'
         },
         // {
         //   type: 'import-sql',
@@ -67,9 +110,14 @@ export default {
           name: 'import-json'
         },
         {
-          type: 'export-json',
-          icon: 'file-export',
-          name: 'export-json'
+          type: 'undo',
+          icon: 'undo',
+          name: 'undo(Ctrl + Z)'
+        },
+        {
+          type: 'redo',
+          icon: 'redo',
+          name: 'redo(Ctrl + Shift + Z)'
         }
       ]
     }
@@ -77,6 +125,9 @@ export default {
   computed: {
     model () {
       return model.state
+    },
+    DBType () {
+      return ERD.store().state.DBType
     }
   },
   methods: {
@@ -97,6 +148,9 @@ export default {
     // sidebar action
     menuAction (type) {
       switch (type) {
+        case 'export-png':
+          ERD.core.file.exportData('png')
+          break
         case 'export-sql':
           ERD.core.file.exportData('sql')
           break
@@ -106,95 +160,208 @@ export default {
         case 'export-json':
           ERD.core.file.exportData('json')
           break
+        case 'undo':
+          if (this.isUndo) {
+            ERD.core.undoRedo.undo()
+          }
+          break
+        case 'redo':
+          if (this.isRedo) {
+            ERD.core.undoRedo.redo()
+          }
+          break
       }
+    },
+    // 미리보기 네비게이션 이벤트 시작
+    onPreview () {
+      ERD.core.event.onPreview('start')
+    },
+    // DB 변경
+    changeDB (DBType) {
+      ERD.store().commit({
+        type: 'changeDB',
+        DBType: DBType
+      })
+    }
+  },
+  mounted () {
+    // 이벤트 핸들러에 컴포넌트 등록
+    ERD.core.event.components.CanvasMenu = this
+    const width = window.innerWidth
+    const height = window.innerHeight
+    this.preview.left = (-1 * 5000 / 2) + (150 / 2) + width - 150 - 20
+    this.preview.x = width - 150 - 20
+    this.preview.target.width = width * 0.03
+    this.preview.target.height = height * 0.03
+    this.preview.target.x = window.scrollX / ERD.core.event.preview.ratio
+    this.preview.target.y = window.scrollY / ERD.core.event.preview.ratio
+    // undo, redo 활성화 callback 등록
+    ERD.core.undoRedo.callback = () => {
+      this.isUndo = ERD.core.undoRedo.getManager().hasUndo()
+      this.isRedo = ERD.core.undoRedo.getManager().hasRedo()
     }
   },
   updated () {
     // 단축키 활성화 포커스처리
     for (let i in this.model.tabs) {
       if (this.model.tabs[i].active) {
-        $(this.$el).find('.menu_top input').eq(i).focus()
+        this.$el.querySelectorAll('.menu_top input')[i].focus()
         break
       }
     }
+    // undo, redo 활성화
+    ERD.core.undoRedo.callback()
   }
 }
 </script>
 
 <style lang="scss" scoped>
+  $tab_color: #424242;
+  $tab_active: #282828;
+  $selected: #383d41;
+  $menu_base_size: 30px;
+
   .menu_canvas {
 
     .menu_top {
       width: 100%;
-      height: 33px;
+      height: $menu_base_size;
       position: fixed;
-      left: 40px;
+      left: $menu_base_size;
       z-index: 2147483647;
-      background-color: #797979;
+      background-color: black;
 
       li {
-        height: 33px;
+        height: $menu_base_size;
         display: inline-flex;
       }
 
+      .buttons {
+        background-color: $tab_color;
+        padding-right: 5px;
+      }
+
       .tab_active {
-        background-color: #282828;
+        background-color: $tab_active;
+
+        button {
+          background-color: $tab_active;
+        }
       }
 
       button {
-        padding: 0;
-        width: 25px;
-        height: 33px;
-        color: #a2a2a2;
+        width: 17px;
+        height: 17px;
+        font-size: .70em;
+        margin-top: 8px;
         border: none;
         outline: none;
         cursor: pointer;
-        background-color: #424242;
+        border-radius: 50%;
+        /*color: #575a5f;*/
+        color: #b9b9b9;
+        /*background-color: #575a5f;*/
+        background-color: $tab_color;
+        /*box-shadow: 1px 1px 1px 1px #171717;*/
 
         &:hover {
           color: white;
+          font-size: .875em;
+          margin-top: 7.5px;
         }
       }
 
       input {
         padding: 10px;
         width: 150px;
-        background-color: #424242;
+        color: white;
+        background-color: $tab_color;
       }
     }
 
     .menu_sidebar {
-      width: 40px;
+      width: $menu_base_size;
       height: 100%;
       position: fixed;
       z-index: 2147483647;
       color: white;
       background-color: black;
 
-      li {
+      & > li {
         text-align: center;
-        margin-top: 20px;
+        padding: 10px;
         cursor: pointer;
+
+        ol {
+          display: none;
+          position: fixed;
+          left: $menu_base_size;
+          top: 0;
+          background-color: black;
+
+          li {
+            padding: 10px;
+            color: #a2a2a2;
+
+            &:hover {
+              color: white;
+              background-color: $selected;
+            }
+          }
+
+          .db_active {
+            color: white;
+            background-color: $selected;
+          }
+        }
+
+        &:hover {
+          ol {
+            display: block;
+          }
+        }
+
+        &.undo_none, &.redo_none {
+          cursor: default;
+          color: #a2a2a2;
+        }
       }
     }
 
-    .ghost {
-      opacity: 0.5;
+    .preview {
+      position: fixed;
+      z-index: 2147483647;
+      transform: scale(0.03, 0.03);
+      overflow: hidden;
+    }
+    .preview_border {
+      width: 150px;
+      height: 150px;
+      position: fixed;
+      z-index: 2147483647;
+      box-shadow: 1px 1px 6px 2px #171717;
+      .preview_target {
+        position: absolute;
+        border: solid orange 1px;
+      }
     }
     /* 이동 animation */
-    .flip-list-move {
+    .menu-top-move {
       transition: transform 0.5s;
     }
     /* 추가,삭제 animation */
-    .flip-list-enter-active {
+    .menu-top-enter-active {
       transition: all .3s ease;
     }
-    .flip-list-leave-active {
+    .menu-top-leave-active {
       transition: all .4s ease-out;
     }
-    .flip-list-enter, .flip-list-leave-to {
+    .menu-top-enter, .menu-top-leave-to {
       transform: translateX(10px);
       opacity: 0;
+    }
+    .ghost {
+      opacity: 0.5;
     }
   }
 </style>

@@ -2,6 +2,7 @@ import JSLog from '../JSLog'
 import event from './Event'
 import file from './File'
 import sql from './SQL'
+import undoRedo from './UndoRedo'
 import model from '@/store/editor/model'
 
 /**
@@ -16,7 +17,8 @@ class ERD {
       erd: this,
       event: event,
       file: file,
-      sql: sql
+      sql: sql,
+      undoRedo: undoRedo
     }
 
     this.setInit(this.core)
@@ -35,6 +37,15 @@ class ERD {
     for (let tab of model.state.tabs) {
       if (tab.active) {
         return tab.store
+      }
+    }
+  }
+
+  // 활성화 된 탭 state
+  active () {
+    for (let tab of model.state.tabs) {
+      if (tab.active) {
+        return tab
       }
     }
   }

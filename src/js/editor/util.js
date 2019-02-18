@@ -1,8 +1,9 @@
 import JSLog from '../JSLog'
 import ERD from './ERD'
-import dataType from '@/store/editor/dataType'
 
 JSLog('module loaded', 'util')
+
+export const svgCheck = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="svg-inline--fa fa-check fa-w-16"><path fill="currentColor" d="M173.898 439.404l-166.4-166.4c-9.997-9.997-9.997-26.206 0-36.204l36.203-36.204c9.997-9.998 26.207-9.998 36.204 0L192 312.69 432.095 72.596c9.997-9.997 26.207-9.997 36.204 0l36.203 36.204c9.997 9.997 9.997 26.206 0 36.204l-294.4 294.401c-9.998 9.997-26.207 9.997-36.204-.001z"></path></svg>`
 
 // UUID 생성
 export const guid = () => {
@@ -22,23 +23,15 @@ export const getData = (list, id) => {
   }
 }
 
-// option 검색
-export const getDataTypeSearch = key => {
-  const DBType = ERD.store().state.DBType
-  const dataTypes = dataType[DBType].slice()
-
-  for (let i = 0; i < dataTypes.length; i++) {
-    let check = true
-
-    if (dataTypes[i].name.toLowerCase().indexOf(key.toLowerCase()) !== -1) {
-      check = false
+// 데이터 셋팅
+export const setData = (oldData, newData) => {
+  Object.keys(newData).forEach(key => {
+    if (typeof newData[key] === 'object') {
+      setData(oldData[key], newData[key])
+    } else {
+      oldData[key] = newData[key]
     }
-    if (check) {
-      dataTypes.splice(i, 1)
-      i--
-    }
-  }
-  return dataTypes
+  })
 }
 
 // max z-index 반환
@@ -53,7 +46,7 @@ export const getZIndex = () => {
   return ++max
 }
 
-// 자동 이름 생성 column, table
+// 자동 이름 생성
 export const autoName = (list, name, num) => {
   if (!num) num = 1
   for (let v of list) {
@@ -64,79 +57,64 @@ export const autoName = (list, name, num) => {
   return name
 }
 
-// 테이블 pk 컬럼 리스트 반환
-export const getPKColumns = id => {
-  const table = getData(ERD.store().state.tables, id)
-  const columns = []
-
-  for (let column of table.columns) {
-    if (column.options.primaryKey) {
-      columns.push(column)
-    }
-  }
-  return columns
-}
-
-// column 데이터 셋팅
-export const initColumn = (column, dColumn) => {
-  Object.keys(dColumn).forEach(key => {
-    if (typeof dColumn[key] === 'object') {
-      initColumn(column[key], dColumn[key])
-    } else {
-      column[key] = dColumn[key]
-    }
+// 테이블 옵션 컬럼 리스트 반환
+export const getColumnOptions = (target, columns) => {
+  return columns.filter(column => {
+    return column.options[target]
   })
 }
 
-// PrimaryKey check
-export const tableIsPrimaryKey = columns => {
-  let isPK = false
-
-  for (let column of columns) {
-    if (column.options.primaryKey) {
-      isPK = true
-      break
-    }
-  }
-  return isPK
+// 컬럼 옵션 체크
+export const isColumnOption = (target, columns) => {
+  return columns.some(column => {
+    return column.options[target]
+  })
 }
 
-// 컬럼 데이터타입 동기체크
-export const columnIsRelationSync = (state, tableId, column) => {
-  let isSync = false
-
-  for (let line of state.lines) {
-    let isTarget = false
-
-    if (line.points[0].id === tableId) {
-      for (let i in line.points[0].columnIds) {
-        if (column.id === line.points[0].columnIds[i]) {
-          const targetTable = getData(state.tables, line.points[1].id)
-          const targetColumn = getData(targetTable.columns, line.points[1].columnIds[i])
-          isSync = column.dataType !== targetColumn.dataType
-          isTarget = true
-          break
-        }
+// 컬럼 데이터타입 동기화 여부 확인
+export const isRelationSync = (state, tableId, column) => {
+  return state.lines.some(line => {
+    return line.points.some((point, i) => {
+      if (point.id === tableId) {
+        return point.columnIds.some((columnId, j) => {
+          if (column.id === columnId) {
+            if (i === 0) {
+              const targetTable = getData(state.tables, line.points[1].id)
+              const targetColumn = getData(targetTable.columns, line.points[1].columnIds[j])
+              return column.dataType !== targetColumn.dataType
+            } else {
+              const targetTable = getData(state.tables, line.points[0].id)
+              const targetColumn = getData(targetTable.columns, line.points[0].columnIds[j])
+              return column.dataType !== targetColumn.dataType
+            }
+          } else {
+            return false
+          }
+        })
+      } else {
+        return false
       }
-    }
-    if (line.points[1].id === tableId) {
-      for (let i in line.points[1].columnIds) {
-        if (column.id === line.points[1].columnIds[i]) {
-          const targetTable = getData(state.tables, line.points[0].id)
-          const targetColumn = getData(targetTable.columns, line.points[0].columnIds[i])
-          isSync = column.dataType !== targetColumn.dataType
-          isTarget = true
-          break
-        }
+    })
+  })
+}
+
+// 탐색할 관계 있는지 확인
+function isLineSync (lines, tableId, column) {
+  return lines.some(line => {
+    return line.points.some(point => {
+      if (point.id === tableId) {
+        return point.columnIds.some(columnId => {
+          return column.id === columnId
+        })
+      } else {
+        return false
       }
-    }
-    if (isTarget) break
-  }
-  return isSync
+    })
+  })
 }
 
 // 동기화할 관계 컬럼 탐색
-export const getSyncColumns = (columns, lines, state, tableId, column) => {
+export const getColumnsSync = (columns, lines, state, tableId, column) => {
   let targetTable = null
   let targetColumn = null
   let targetIndex = null
@@ -168,67 +146,37 @@ export const getSyncColumns = (columns, lines, state, tableId, column) => {
     }
     if (isTarget) break
   }
-  // 탐색 완료 관계 목록 제거
-  lines.splice(targetIndex, 1)
 
-  if (isLineSync(columns, lines, state, tableId, column)) {
+  // 탐색 완료 관계 목록 제거
+  if (targetIndex !== null) {
+    lines.splice(targetIndex, 1)
+  }
+
+  if (isLineSync(lines, tableId, column)) {
     // 탐색한 컬럼 중첩 검색
-    getSyncColumns(columns, lines, state, tableId, column)
+    getColumnsSync(columns, lines, state, tableId, column)
   }
 
   // 관계 상대방 탐색
   if (targetTable !== null) {
     columns.push(targetColumn)
-    getSyncColumns(columns, lines, state, targetTable.id, targetColumn)
+    getColumnsSync(columns, lines, state, targetTable.id, targetColumn)
   }
-}
-
-// 탐색할 관계 있는지 확인
-function isLineSync (columns, lines, state, tableId, column) {
-  let isRelation = false
-
-  for (let i in lines) {
-    if (lines[i].points[0].id === tableId) {
-      for (let j in lines[i].points[0].columnIds) {
-        if (column.id === lines[i].points[0].columnIds[j]) {
-          isRelation = true
-          break
-        }
-      }
-      break
-    }
-    if (lines[i].points[1].id === tableId) {
-      for (let j in lines[i].points[1].columnIds) {
-        if (column.id === lines[i].points[1].columnIds[j]) {
-          isRelation = true
-          break
-        }
-      }
-      break
-    }
-  }
-
-  return isRelation
 }
 
 // 관계 식별, 비식별 변경
 export const changeIdentification = (state, table) => {
   for (let line of state.lines) {
     if (line.points[1].id === table.id) {
-      let isPk = true
-      for (let columnId of line.points[1].columnIds) {
-        for (let column of table.columns) {
-          if (column.id === columnId) {
-            if (!column.options.primaryKey) isPk = false
-            break
-          }
-        }
-        if (!isPk) break
-      }
+      const isPK = line.points[1].columnIds.some(columnId => {
+        return table.columns.some(column => {
+          return column.id === columnId && !column.options.primaryKey
+        })
+      })
       ERD.store().commit({
         type: 'lineChangeIdentification',
         id: line.id,
-        isIdentification: isPk
+        isIdentification: !isPK
       })
     }
   }

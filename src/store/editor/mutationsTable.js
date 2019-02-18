@@ -1,13 +1,18 @@
 import JSLog from '@/js/JSLog'
 import * as util from '@/js/editor/util'
 import ERD from '@/js/editor/ERD'
+import storeTable from './table'
 
 JSLog('store loaded', 'mutationsTable')
 
 export default {
   // 테이블 추가
-  add (state) {
+  add (state, data) {
     JSLog('mutations', 'table', 'add')
+    const undo = JSON.stringify(state)
+
+    ERD.core.event.isEdit = true
+
     const newTable = {
       id: util.guid(),
       name: '',
@@ -38,13 +43,23 @@ export default {
     this.commit({
       type: 'tableSelected',
       id: newTable.id,
-      onlyTableSelected: false,
-      isTableAdd: true
+      isNotRelation: true
+    })
+
+    // undo, redo 등록
+    ERD.core.undoRedo.add({
+      undo: undo,
+      redo: JSON.stringify(state)
     })
   },
   // 테이블 삭제
   delete (state, data) {
     JSLog('mutations', 'table', 'delete')
+    const undo = JSON.stringify(state)
+
+    // 테이블 상세 그리드 해제
+    storeTable.commit({ type: 'delete' })
+
     for (let i in state.tables) {
       if (data.id === state.tables[i].id) {
         state.tables.splice(i, 1)
@@ -94,6 +109,12 @@ export default {
         break
       }
     }
+
+    // undo, redo 등록
+    ERD.core.undoRedo.add({
+      undo: undo,
+      redo: JSON.stringify(state)
+    })
   },
   // 테이블 높이 리셋
   heightReset (state) {
@@ -108,9 +129,10 @@ export default {
     const table = util.getData(state.tables, data.id)
     // z-index 처리
     const zIndex = util.getZIndex()
-    if (table.ui.zIndex !== zIndex - 1) {
+    if (table && table.ui.zIndex !== zIndex - 1) {
       table.ui.zIndex = zIndex
     }
+
     // multi select
     if (data.ctrlKey) {
       table.ui.selected = true
@@ -120,12 +142,15 @@ export default {
       })
     }
     // column 선택 제거
-    if (data.onlyTableSelected) {
+    if (!data.isColumnSelected) {
       this.commit({
         type: 'tableSelectedAllNone',
         isTable: false,
         isColumn: true
       })
+    }
+
+    if (data.isEvent) {
       const tableIds = []
       for (let targetTable of state.tables) {
         if (targetTable.ui.selected) {
@@ -134,18 +159,13 @@ export default {
       }
       ERD.core.event.onDraggable('start', tableIds)
     }
+
     // 테이블추가에서 호출시 처리
-    if (data.isTableAdd) {
-      this.commit({
-        type: 'tableSelectedAllNone',
-        isTable: false,
-        isColumn: true
-      })
-    } else {
+    if (!data.isNotRelation) {
       // 관계 drawing 시작
       if (ERD.core.event.isCursor && !ERD.core.event.isDraw) {
         // table pk 컬럼이 있는지 체크 없으면 자동생성
-        if (!util.tableIsPrimaryKey(table.columns)) {
+        if (!util.isColumnOption('primaryKey', table.columns)) {
           this.commit({
             type: 'columnAdd',
             id: table.id,
@@ -173,6 +193,12 @@ export default {
         ERD.core.event.onDraw('stop', data.id)
       }
     }
+
+    // 테이블 상세 활성화
+    storeTable.commit({
+      type: 'active',
+      id: data.id
+    })
   },
   // 테이블 top, left 변경
   draggable (state, data) {
@@ -192,6 +218,10 @@ export default {
   },
   // 테이블 및 컬럼 selected All 해제
   selectedAllNone (state, data) {
+    JSLog('mutations', 'table', 'selectedAllNone')
+    // 테이블 상세 그리드 해제
+    storeTable.commit({ type: 'delete' })
+
     state.tables.forEach(table => {
       if (data.isTable) table.ui.selected = false
       table.columns.forEach(column => {
@@ -201,6 +231,7 @@ export default {
   },
   // 테이블 드래그 selected
   multiSelected (state, data) {
+    JSLog('mutations', 'table', 'multiSelected')
     state.tables.forEach(table => {
       const point = util.getPoint(table.ui)
       if (data.min.x <= point.top.x &&
@@ -215,6 +246,7 @@ export default {
   },
   // 테이블 전체 선택
   selectedAll (state) {
+    JSLog('mutations', 'table', 'selectedAll')
     state.tables.forEach(table => {
       table.ui.selected = true
     })

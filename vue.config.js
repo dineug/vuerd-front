@@ -1,7 +1,7 @@
 'use strict'
 
 module.exports = {
-  outputDir: '../vuerd-backend/public',
+  outputDir: './dist',
   devServer: {
     proxy: {
       '^/api': {

@@ -1,5 +1,7 @@
 import JSLog from '@/js/JSLog'
 import * as util from '@/js/editor/util'
+import storeTable from './table'
+import ERD from '@/js/editor/ERD'
 
 JSLog('store loaded', 'mutationsColumn')
 
@@ -7,6 +9,10 @@ export default {
   // 컬럼 추가
   add (state, data) {
     JSLog('mutations', 'column', 'add')
+    const undo = JSON.stringify(state)
+
+    ERD.core.event.isEdit = true
+
     for (let table of state.tables) {
       if (data.id === table.id) {
         table.ui.height += state.COLUMN_HEIGHT
@@ -21,8 +27,7 @@ export default {
             autoIncrement: false,
             primaryKey: false,
             unique: false,
-            notNull: false,
-            unsigned: false
+            notNull: false
           },
           ui: {
             selected: false,
@@ -34,21 +39,26 @@ export default {
           }
         }
         if (data.isInit) {
-          util.initColumn(column, data.column)
+          util.setData(column, data.column)
         }
         table.columns.push(column)
-        this.commit({
-          type: 'columnSelected',
-          tableId: data.id,
-          columnId: column.id
-        })
         break
       }
+    }
+
+    if (!data.isInit) {
+      // undo, redo 등록
+      ERD.core.undoRedo.add({
+        undo: undo,
+        redo: JSON.stringify(state)
+      })
     }
   },
   // 컬럼 삭제
   delete (state, data) {
     JSLog('mutations', 'column', 'delete')
+    const undo = JSON.stringify(state)
+
     const table = util.getData(state.tables, data.tableId)
     for (let i in table.columns) {
       if (data.columnId === table.columns[i].id) {
@@ -57,6 +67,7 @@ export default {
         break
       }
     }
+
     // 관계처리
     for (let i = 0; i < state.lines.length; i++) {
       if (state.lines[i].points[0].id === data.tableId || state.lines[i].points[1].id === data.tableId) {
@@ -95,13 +106,38 @@ export default {
         }
       }
     }
+
+    // 테이블 상세 활성화
+    storeTable.commit({
+      type: 'active',
+      id: data.tableId
+    })
+
+    // 마지막 컬럼 포커스
+    const isColumns = table.columns.length
+    if (isColumns !== 0) {
+      document.getElementById(`columnName_${table.columns[isColumns - 1].id}`).focus()
+    }
+    // undo, redo 등록
+    ERD.core.undoRedo.add({
+      undo: undo,
+      redo: JSON.stringify(state)
+    })
   },
   // 컬럼 NULL 조건 변경
   changeNull (state, data) {
     JSLog('mutations', 'column', 'changeNull')
+    const undo = JSON.stringify(state)
+
     const table = util.getData(state.tables, data.tableId)
     const column = util.getData(table.columns, data.columnId)
     column.options.notNull = !column.options.notNull
+
+    // undo, redo 등록
+    ERD.core.undoRedo.add({
+      undo: undo,
+      redo: JSON.stringify(state)
+    })
   },
   // 컬럼 선택
   selected (state, data) {
@@ -112,12 +148,22 @@ export default {
       isColumn: true
     })
     const table = util.getData(state.tables, data.tableId)
-    const column = util.getData(table.columns, data.columnId)
-    if (column) column.ui.selected = true
+    if (table) {
+      const column = util.getData(table.columns, data.columnId)
+      if (column) column.ui.selected = true
+    }
+
+    // 테이블 상세 활성화
+    storeTable.commit({
+      type: 'active',
+      id: data.tableId
+    })
   },
   // 컬럼 key active
   key (state, data) {
     JSLog('mutations', 'column', 'key')
+    const undo = JSON.stringify(state)
+
     for (let table of state.tables) {
       let check = false
       for (let column of table.columns) {
@@ -140,19 +186,45 @@ export default {
             column.ui[data.key] = !column.ui[data.key]
           }
           check = true
+
+          // 테이블 상세 활성화
+          storeTable.commit({
+            type: 'active',
+            id: table.id
+          })
         }
       }
       if (check) {
         break
       }
     }
+
+    // undo, redo 등록
+    ERD.core.undoRedo.add({
+      undo: undo,
+      redo: JSON.stringify(state)
+    })
   },
   // 컬럼 데이터변경
   changeDataType (state, data) {
     JSLog('mutations', 'column', 'changeDataType')
+    const undo = JSON.stringify(state)
+
     const table = util.getData(state.tables, data.tableId)
     const column = util.getData(table.columns, data.columnId)
     column.dataType = data.dataType
+
+    // 테이블 상세 활성화
+    storeTable.commit({
+      type: 'active',
+      id: data.tableId
+    })
+
+    // undo, redo 등록
+    ERD.core.undoRedo.add({
+      undo: undo,
+      redo: JSON.stringify(state)
+    })
   },
   // 컬럼 데이터타입 힌트 show/hide
   dataTypeHintVisible (state, data) {
@@ -175,11 +247,11 @@ export default {
     JSLog('mutations', 'column', 'relationSync')
     const table = util.getData(state.tables, data.tableId)
     const column = util.getData(table.columns, data.columnId)
-    if (util.columnIsRelationSync(state, data.tableId, column)) {
+    if (util.isRelationSync(state, data.tableId, column)) {
       // 동기화 컬럼 탐색
       const columns = []
       const lines = state.lines.slice()
-      util.getSyncColumns(columns, lines, state, data.tableId, column)
+      util.getColumnsSync(columns, lines, state, data.tableId, column)
       // 컬럼 데이터 동기화
       columns.forEach(v => {
         v.dataType = column.dataType

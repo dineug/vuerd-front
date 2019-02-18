@@ -1,5 +1,5 @@
 <template lang="pug">
-  ul#quick_menu(v-if="isShow"
+  ul.quick_menu(v-if="isShow"
   :style="`top: ${top}px; left: ${left}px; z-index: ${zIndex};`")
 
     li(v-for="menu in menus" :key="menu.id"
@@ -35,17 +35,17 @@ export default {
       menus: [
         {
           type: 'modelAdd',
-          icon: 'database',
+          icon: 'file-medical',
           isImg: false,
           name: 'New Model',
-          keymap: 'Ctrl + Alt + N'
+          keymap: 'Alt + N'
         },
         {
           type: 'tableAdd',
           icon: 'table',
           isImg: false,
           name: 'New Table',
-          keymap: 'Alt + N'
+          keymap: 'Alt + T'
         },
         {
           type: 'pk',
@@ -115,27 +115,29 @@ export default {
 
 <style lang="scss" scoped>
   $mbg: #191919;
-  #quick_menu {
+  $selected: #383d41;
+
+  .quick_menu {
     color: #a2a2a2;
     background-color: $mbg;
     position: fixed;
     opacity: 0.9;
-    width: 263px;
+    width: 168px;
 
     li {
       width: 100%;
       height: 100%;
       padding: 10px;
       cursor: pointer;
+      box-sizing: border-box;
 
       &:hover {
         color: white;
-        background-color: #383d41;
+        background-color: $selected;
       }
 
       & > span {
-        padding: 5px;
-        width: 100px;
+        width: 80px;
         display: inline-flex;
         vertical-align: middle;
         align-items: center;

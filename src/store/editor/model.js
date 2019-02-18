@@ -4,6 +4,7 @@ import Vuex from 'vuex'
 import * as util from '@/js/editor/util'
 import storeERD from '@/store/editor/erd'
 import ERD from '@/js/editor/ERD'
+import storeTable from './table'
 
 JSLog('store loaded', 'model')
 Vue.use(Vuex)
@@ -20,8 +21,15 @@ export default new Vuex.Store({
     ]
   },
   mutations: {
+    // 전체 import
+    importData (state, data) {
+      JSLog('mutations', 'importData')
+      Object.keys(state).forEach(key => {
+        state[key] = data.state[key]
+      })
+    },
     // 모델 추가
-    modelAdd (state, data) {
+    modelAdd (state) {
       JSLog('mutations', 'modelAdd')
       const tab = {
         id: util.guid(),
@@ -38,6 +46,7 @@ export default new Vuex.Store({
     // 모델 변경
     modelActive (state, data) {
       JSLog('mutations', 'modelActive')
+
       const isTab = util.getData(state.tabs, data.id)
       if (isTab) {
         state.tabs.forEach(tab => {
@@ -48,12 +57,16 @@ export default new Vuex.Store({
           }
         })
       }
+
       // 모든 이벤트 중지
       ERD.core.event.stop()
+      // 테이블 상세 그리드 해제
+      storeTable.commit({ type: 'delete' })
     },
     // 모델 변경 단축키
     modelActiveKeyMap (state, data) {
       JSLog('mutations', 'modelActiveKeyMap')
+
       let isActive = false
       for (let i = 0; i < state.tabs.length; i++) {
         if (data.index === i + 1) {
@@ -70,12 +83,16 @@ export default new Vuex.Store({
           }
         })
       }
+
       // 모든 이벤트 중지
       ERD.core.event.stop()
+      // 테이블 상세 그리드 해제
+      storeTable.commit({ type: 'delete' })
     },
     // 모델 삭제
     modelDelete (state, data) {
       JSLog('mutations', 'modelDelete')
+
       const tab = util.getData(state.tabs, data.id)
       for (let i in state.tabs) {
         if (data.id === state.tabs[i].id) {
@@ -88,14 +105,9 @@ export default new Vuex.Store({
           break
         }
       }
+
       // 모든 이벤트 중지
       ERD.core.event.stop()
-    },
-    // 전체 import
-    importData (state, data) {
-      Object.keys(state).forEach(key => {
-        state[key] = data.state[key]
-      })
     }
   }
 })

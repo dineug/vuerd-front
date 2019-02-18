@@ -5,7 +5,6 @@ import dataType from './dataType'
 import table from './mutationsTable'
 import column from './mutationsColumn'
 import line from './mutationsLine'
-import * as util from '@/js/editor/util'
 
 JSLog('store loaded', 'erd')
 Vue.use(Vuex)
@@ -14,13 +13,13 @@ Vue.use(Vuex)
 export default () => {
   return new Vuex.Store({
     state: {
+      TABLE_WIDTH: 460,
+      TABLE_HEIGHT: 98,
+      COLUMN_HEIGHT: 25,
       DBType: 'MySQL',
       dataTypes: dataType['MySQL'],
       tables: [],
-      lines: [],
-      TABLE_WIDTH: 630,
-      TABLE_HEIGHT: 88,
-      COLUMN_HEIGHT: 25
+      lines: []
     },
     mutations: {
       // DB 변경
@@ -32,10 +31,13 @@ export default () => {
       // 데이터타입 검색
       changeDataTypeHint (state, data) {
         JSLog('mutations', 'erd', 'changeDataTypeHint')
-        state.dataTypes = util.getDataTypeSearch(data.key)
+        state.dataTypes = dataType[state.DBType].filter(v => {
+          return v.name.toLowerCase().indexOf(data.key.toLowerCase()) !== -1
+        })
       },
       // 전체 import
       importData (state, data) {
+        JSLog('mutations', 'erd', 'importData')
         Object.keys(state).forEach(key => {
           state[key] = data.state[key]
         })
