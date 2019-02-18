@@ -1,5 +1,6 @@
 <template lang="pug">
-  .main_canvas(v-if="!isPreview")
+  .main_canvas(v-if="!isPreview"
+  :style="`width: ${CANVAS_WIDTH}px; height: ${CANVAS_HEIGHT}px;`")
     // mouse drag
     svg.svg_drag(v-if="svg.isDarg"
     :style="`top: ${svg.top}px; left: ${svg.left}px; width: ${svg.width}px; height: ${svg.height}px;`")
@@ -103,7 +104,8 @@
             font-awesome-icon(icon="times")
 
   // ========================================== 미리보기 영역 이벤트 중첩방지 ==========================================
-  .main_canvas(v-else)
+  .main_canvas(v-else
+  :style="`width: ${CANVAS_WIDTH}px; height: ${CANVAS_HEIGHT}px;`")
     svg.svg_drag(v-if="svg.isDarg" :style="`top: ${svg.top}px; left: ${svg.left}px; width: ${svg.width}px; height: ${svg.height}px;`")
       rect(:width="svg.width" :height="svg.height" stroke="#0098ff" stroke-width="1" stroke-opacity="0.9" stroke-dasharray="3" fill-opacity="0.3")
     .erd_table(v-for="table in tables" :key="table.id" :table_id="table.id" :class="{ selected: table.ui.selected}" :style="`width: ${TABLE_WIDTH}px; top: ${table.ui.top}px; left: ${table.ui.left}px; z-index: ${table.ui.zIndex};`")
@@ -178,6 +180,12 @@ export default {
     },
     COLUMN_HEIGHT () {
       return ERD.store().state.COLUMN_HEIGHT
+    },
+    CANVAS_WIDTH () {
+      return ERD.store().state.CANVAS_WIDTH
+    },
+    CANVAS_HEIGHT () {
+      return ERD.store().state.CANVAS_HEIGHT
     },
     dataTypes () {
       return ERD.store().state.dataTypes
@@ -437,6 +445,7 @@ export default {
     },
     // undo
     onDraggableUndo () {
+      ERD.core.event.onCursor('stop')
       ERD.core.undoRedo.setUndo('draggable')
     },
     // draggable event
@@ -505,8 +514,6 @@ export default {
   }
 
   .main_canvas {
-    width: 5000px;
-    height: 5000px;
     background-color: #282828;
 
     input:focus {

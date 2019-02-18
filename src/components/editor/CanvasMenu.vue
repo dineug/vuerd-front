@@ -5,7 +5,7 @@
       transition-group(type="transition" name="menu-top")
 
         li(v-for="(tab, i) in model.tabs" :key="tab.id")
-          input(v-model="tab.name" v-focus
+          input(v-model="tab.name"
           :class="{ tab_active: tab.active }"
           type="text" :title="i < 9 ? `Ctrl + ${i+1}` : ''"
           @click="modelActive(tab.id)")
@@ -26,11 +26,14 @@
           @click="changeDB(dbType)") {{ dbType }}
 
     // 메뉴 Preview Navigation
-    canvas-main.preview(:style="`top: ${preview.top}px; left: ${preview.left}px;`"
+    canvas-main.preview(:style="`top: ${preview.top}px; left: ${preview.left}px; transform: scale(${previewRatio}, ${previewRatio});`"
     :isPreview="true")
-    .preview_border(:style="`top: ${preview.y}px; left: ${preview.x}px;`")
+    .preview_border(:style="`top: ${preview.y}px; left: ${preview.x}px; width: ${PREVIEW_WIDTH}px; height: ${CANVAS_HEIGHT * previewRatio}px;`")
       .preview_target(:style="`top: ${preview.target.y}px; left: ${preview.target.x}px; width: ${preview.target.width}px; height: ${preview.target.height}px;`"
       @mousedown="onPreview")
+
+    // view 셋팅 팝업
+    modal(v-if="isModal" @close="onClose")
 </template>
 
 <script>
@@ -39,29 +42,23 @@ import model from '@/store/editor/model'
 import draggable from 'vuedraggable'
 import CanvasMain from './CanvasMain'
 import CanvasSvg from './CanvasSvg'
+import Modal from './Modal'
 
 export default {
   name: 'CanvasMenu',
   components: {
     draggable,
     CanvasMain,
-    CanvasSvg
-  },
-  directives: {
-    // focus 정의
-    focus: {
-      inserted (el) {
-        el.focus()
-      }
-    }
+    CanvasSvg,
+    Modal
   },
   data () {
     return {
       preview: {
-        top: (-1 * 5000 / 2) + (150 / 2) + 53,
+        top: 0,
         left: 0,
         x: 0,
-        y: 53,
+        y: 50,
         target: {
           x: 0,
           y: 0,
@@ -71,6 +68,7 @@ export default {
       },
       isUndo: false,
       isRedo: false,
+      isModal: false,
       DBTypes: [
         'MariaDB',
         'MSSQL',
@@ -90,6 +88,16 @@ export default {
           name: 'save'
         },
         {
+          type: 'import-json',
+          icon: 'file-import',
+          name: 'import-json'
+        },
+        {
+          type: 'export-json',
+          icon: 'file-export',
+          name: 'export-json'
+        },
+        {
           type: 'export-png',
           icon: 'file-image',
           name: 'export-png'
@@ -105,9 +113,9 @@ export default {
           name: 'export-sql'
         },
         {
-          type: 'import-json',
-          icon: 'file-import',
-          name: 'import-json'
+          type: 'view',
+          icon: 'eye',
+          name: 'view setting'
         },
         {
           type: 'undo',
@@ -128,6 +136,18 @@ export default {
     },
     DBType () {
       return ERD.store().state.DBType
+    },
+    previewRatio () {
+      return ERD.store().state.PREVIEW_WIDTH / ERD.store().state.CANVAS_WIDTH
+    },
+    CANVAS_WIDTH () {
+      return ERD.store().state.CANVAS_WIDTH
+    },
+    CANVAS_HEIGHT () {
+      return ERD.store().state.CANVAS_HEIGHT
+    },
+    PREVIEW_WIDTH () {
+      return ERD.store().state.PREVIEW_WIDTH
     }
   },
   methods: {
@@ -160,6 +180,10 @@ export default {
         case 'export-json':
           ERD.core.file.exportData('json')
           break
+        case 'view':
+          this.isModal = true
+          ERD.core.event.isStop = true
+          break
         case 'undo':
           if (this.isUndo) {
             ERD.core.undoRedo.undo()
@@ -182,19 +206,30 @@ export default {
         type: 'changeDB',
         DBType: DBType
       })
+    },
+    // 미리보기 셋팅
+    setPreview () {
+      const width = window.innerWidth
+      const height = window.innerHeight
+      this.preview.left = (-1 * this.CANVAS_WIDTH / 2) + (this.PREVIEW_WIDTH / 2) - this.PREVIEW_WIDTH - 20 + width
+      this.preview.top = (-1 * this.CANVAS_HEIGHT / 2) + (this.CANVAS_HEIGHT * this.previewRatio / 2) + 50
+      this.preview.x = width - this.PREVIEW_WIDTH - 20
+      this.preview.target.width = width * this.previewRatio
+      this.preview.target.height = height * this.previewRatio
+      this.preview.target.x = window.scrollX * this.previewRatio
+      this.preview.target.y = window.scrollY * this.previewRatio
+    },
+    // modal close
+    onClose () {
+      this.isModal = false
+      ERD.core.event.isStop = false
     }
   },
   mounted () {
     // 이벤트 핸들러에 컴포넌트 등록
     ERD.core.event.components.CanvasMenu = this
-    const width = window.innerWidth
-    const height = window.innerHeight
-    this.preview.left = (-1 * 5000 / 2) + (150 / 2) + width - 150 - 20
-    this.preview.x = width - 150 - 20
-    this.preview.target.width = width * 0.03
-    this.preview.target.height = height * 0.03
-    this.preview.target.x = window.scrollX / ERD.core.event.preview.ratio
-    this.preview.target.y = window.scrollY / ERD.core.event.preview.ratio
+    // 미리보기 셋팅
+    this.setPreview()
     // undo, redo 활성화 callback 등록
     ERD.core.undoRedo.callback = () => {
       this.isUndo = ERD.core.undoRedo.getManager().hasUndo()
@@ -202,13 +237,8 @@ export default {
     }
   },
   updated () {
-    // 단축키 활성화 포커스처리
-    for (let i in this.model.tabs) {
-      if (this.model.tabs[i].active) {
-        this.$el.querySelectorAll('.menu_top input')[i].focus()
-        break
-      }
-    }
+    // 미리보기 셋팅
+    this.setPreview()
     // undo, redo 활성화
     ERD.core.undoRedo.callback()
   }
@@ -228,7 +258,7 @@ export default {
       height: $menu_base_size;
       position: fixed;
       left: $menu_base_size;
-      z-index: 2147483647;
+      z-index: 2147483646;
       background-color: black;
 
       li {
@@ -283,7 +313,7 @@ export default {
       width: $menu_base_size;
       height: 100%;
       position: fixed;
-      z-index: 2147483647;
+      z-index: 2147483646;
       color: white;
       background-color: black;
 
@@ -330,21 +360,19 @@ export default {
 
     .preview {
       position: fixed;
-      z-index: 2147483647;
-      transform: scale(0.03, 0.03);
+      z-index: 2147483646;
       overflow: hidden;
     }
     .preview_border {
-      width: 150px;
-      height: 150px;
       position: fixed;
-      z-index: 2147483647;
+      z-index: 2147483646;
       box-shadow: 1px 1px 6px 2px #171717;
       .preview_target {
         position: absolute;
         border: solid orange 1px;
       }
     }
+
     /* 이동 animation */
     .menu-top-move {
       transition: transform 0.5s;

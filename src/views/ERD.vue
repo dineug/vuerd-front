@@ -1,5 +1,5 @@
 <template lang="pug">
-  #erd
+  #erd(:style="`width: ${CANVAS_WIDTH}px; height: ${CANVAS_HEIGHT}px;`")
     canvas-menu
     canvas-grid
     quick-menu
@@ -14,6 +14,7 @@ import CanvasGrid from '@/components/editor/CanvasGrid'
 import QuickMenu from '@/components/editor/QuickMenu'
 import CanvasMain from '@/components/editor/CanvasMain'
 import CanvasSvg from '@/components/editor/CanvasSvg'
+import ERD from '@/js/editor/ERD'
 
 export default {
   name: 'ERD',
@@ -23,6 +24,14 @@ export default {
     QuickMenu,
     CanvasMain,
     CanvasSvg
+  },
+  computed: {
+    CANVAS_WIDTH () {
+      return ERD.store().state.CANVAS_WIDTH
+    },
+    CANVAS_HEIGHT () {
+      return ERD.store().state.CANVAS_HEIGHT
+    }
   }
 }
 </script>
@@ -30,8 +39,6 @@ export default {
 <style lang="scss">
   #erd {
     display: flex;
-    width: 5000px;
-    height: 5000px;
     z-index: 2;
     background-color: #282828;
 

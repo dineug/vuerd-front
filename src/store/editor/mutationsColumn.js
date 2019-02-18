@@ -9,6 +9,7 @@ export default {
   // 컬럼 추가
   add (state, data) {
     JSLog('mutations', 'column', 'add')
+    ERD.core.event.onCursor('stop')
     const undo = JSON.stringify(state)
 
     ERD.core.event.isEdit = true
@@ -57,6 +58,7 @@ export default {
   // 컬럼 삭제
   delete (state, data) {
     JSLog('mutations', 'column', 'delete')
+    ERD.core.event.onCursor('stop')
     const undo = JSON.stringify(state)
 
     const table = util.getData(state.tables, data.tableId)
@@ -127,6 +129,7 @@ export default {
   // 컬럼 NULL 조건 변경
   changeNull (state, data) {
     JSLog('mutations', 'column', 'changeNull')
+    ERD.core.event.onCursor('stop')
     const undo = JSON.stringify(state)
 
     const table = util.getData(state.tables, data.tableId)
@@ -162,6 +165,7 @@ export default {
   // 컬럼 key active
   key (state, data) {
     JSLog('mutations', 'column', 'key')
+    ERD.core.event.onCursor('stop')
     const undo = JSON.stringify(state)
 
     for (let table of state.tables) {
@@ -208,6 +212,7 @@ export default {
   // 컬럼 데이터변경
   changeDataType (state, data) {
     JSLog('mutations', 'column', 'changeDataType')
+    ERD.core.event.onCursor('stop')
     const undo = JSON.stringify(state)
 
     const table = util.getData(state.tables, data.tableId)

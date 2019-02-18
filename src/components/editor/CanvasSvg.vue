@@ -1,5 +1,5 @@
 <template lang="pug">
-  svg.svg_canvas
+  svg.svg_canvas(:style="`width: ${CANVAS_WIDTH}px; height: ${CANVAS_HEIGHT}px;`")
     // relation
     g(v-for="data in toLines" :key="data.id"
     @mouseover="hover($event, data.id)"
@@ -66,6 +66,12 @@ import * as util from '@/js/editor/util'
 export default {
   name: 'CanvasSvg',
   computed: {
+    CANVAS_WIDTH () {
+      return ERD.store().state.CANVAS_WIDTH
+    },
+    CANVAS_HEIGHT () {
+      return ERD.store().state.CANVAS_HEIGHT
+    },
     lines () {
       return ERD.store().state.lines
     },
@@ -128,8 +134,6 @@ export default {
 
 <style lang="scss" scoped>
   .svg_canvas {
-    width: 5000px;
-    height: 5000px;
     position: absolute;
 
     .relation_active {

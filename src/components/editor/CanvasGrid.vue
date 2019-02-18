@@ -247,13 +247,14 @@ export default {
       position: fixed;
       bottom: 0;
       left: $menu_base_size;
-      z-index: 2147483647;
+      z-index: 2147483646;
       color: white;
       background-color: black;
 
       li {
         padding: 10px;
         cursor: pointer;
+        display: inline-block;
       }
     }
 

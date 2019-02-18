@@ -5,6 +5,7 @@ import dataType from './dataType'
 import table from './mutationsTable'
 import column from './mutationsColumn'
 import line from './mutationsLine'
+import * as util from '@/js/editor/util'
 
 JSLog('store loaded', 'erd')
 Vue.use(Vuex)
@@ -14,8 +15,12 @@ export default () => {
   return new Vuex.Store({
     state: {
       TABLE_WIDTH: 460,
+      // 345
       TABLE_HEIGHT: 98,
       COLUMN_HEIGHT: 25,
+      PREVIEW_WIDTH: 150,
+      CANVAS_WIDTH: 5000,
+      CANVAS_HEIGHT: 5000,
       DBType: 'MySQL',
       dataTypes: dataType['MySQL'],
       tables: [],
@@ -41,6 +46,10 @@ export default () => {
         Object.keys(state).forEach(key => {
           state[key] = data.state[key]
         })
+      },
+      // 환경설정
+      setConfig (state, data) {
+        util.setData(state, data.config)
       },
       // 테이블 추가
       tableAdd: table.add,
