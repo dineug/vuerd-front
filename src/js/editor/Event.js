@@ -229,19 +229,8 @@ class Event {
             this.stop()
             break
           case 46: // key: Delete
-            e.preventDefault()
             if (e.ctrlKey) {
-              // 모델 삭제
-              for (let tab of model.state.tabs) {
-                if (tab.active) {
-                  model.commit({
-                    type: 'modelDelete',
-                    id: tab.id
-                  })
-                  break
-                }
-              }
-            } else if (e.altKey) {
+              e.preventDefault()
               // 테이블 삭제
               const store = this.core.erd.store()
               for (let i = 0; i < store.state.tables.length; i++) {
@@ -253,7 +242,8 @@ class Event {
                   i--
                 }
               }
-            } else {
+            } else if (e.altKey) {
+              e.preventDefault()
               // 컬럼 삭제
               const store = this.core.erd.store()
               store.state.tables.forEach(table => {

@@ -11,12 +11,12 @@
     // 테이블
     .erd_table(v-for="table in tables" :key="table.id" :table_id="table.id"
     :class="{ selected: table.ui.selected}"
-    :style="`width: ${TABLE_WIDTH}px; top: ${table.ui.top}px; left: ${table.ui.left}px; z-index: ${table.ui.zIndex};`"
+    :style="`width: ${table.ui.width}px; top: ${table.ui.top}px; left: ${table.ui.left}px; z-index: ${table.ui.zIndex};`"
     @mousedown="tableSelected($event, table.id)")
 
       // 테이블 해더
       .erd_table_top
-        button(title="Alt + Delete"
+        button(title="Ctrl + Delete"
         @click="tableDelete(table.id)")
           font-awesome-icon(icon="times")
 
@@ -28,10 +28,13 @@
         input(v-model="table.name" v-focus
         type="text" placeholder="table"
         @keyup="onChangeTableGrid(table.id)"
+        @keydown="onChangeTableGrid(table.id)"
         @keyup.enter="onEnterMove($event, 'tableName')")
 
         input(v-model="table.comment"
         type="text" placeholder="comment"
+        @keyup="onChangeTableGrid(table.id)"
+        @keydown="onChangeTableGrid(table.id)"
         @keyup.enter="onEnterMove($event, 'tableComment', table.id)")
 
       draggable(v-model="table.columns" :options="{group:'table'}"
@@ -51,6 +54,7 @@
 
           // 컬럼 이름
           input(v-model="column.name" v-focus :id="`columnName_${column.id}`"
+          :style="`width: ${column.ui.widthName}px;`"
           type="text" placeholder="column"
           @keyup="onChangeTableGrid(table.id)"
           @keyup.enter="onEnterMove($event, 'columnName')"
@@ -60,6 +64,7 @@
           // 컬럼 데이터타입
           div
             input.erd_data_type(v-model="column.dataType"
+            :style="`width: ${column.ui.widthDataType}px;`"
             type="text" placeholder="dataType"
             @keyup="dataTypeHintVisible($event, table.id, column.id, true)"
             @keydown="dataTypeHintFocus($event, table.id, column.id)"
@@ -92,6 +97,7 @@
 
           // 컬럼 comment
           input(v-model="column.comment"
+          :style="`width: ${column.ui.widthComment}px;`"
           type="text" placeholder="comment"
           @keyup="onChangeTableGrid(table.id)"
           @keyup.enter="onEnterMove($event, 'columnComment', table.id, column.id)"
@@ -99,7 +105,7 @@
           @focus="columnSelected(table.id, column.id)")
 
           // 컬럼 삭제 버튼
-          button(title="Delete"
+          button(title="Alt + Delete"
           @click="columnDelete(table.id, column.id)")
             font-awesome-icon(icon="times")
 
@@ -108,7 +114,7 @@
   :style="`width: ${CANVAS_WIDTH}px; height: ${CANVAS_HEIGHT}px;`")
     svg.svg_drag(v-if="svg.isDarg" :style="`top: ${svg.top}px; left: ${svg.left}px; width: ${svg.width}px; height: ${svg.height}px;`")
       rect(:width="svg.width" :height="svg.height" stroke="#0098ff" stroke-width="1" stroke-opacity="0.9" stroke-dasharray="3" fill-opacity="0.3")
-    .erd_table(v-for="table in tables" :key="table.id" :table_id="table.id" :class="{ selected: table.ui.selected}" :style="`width: ${TABLE_WIDTH}px; top: ${table.ui.top}px; left: ${table.ui.left}px; z-index: ${table.ui.zIndex};`")
+    .erd_table(v-for="table in tables" :key="table.id" :table_id="table.id" :class="{ selected: table.ui.selected}" :style="`width: ${table.ui.width}px; top: ${table.ui.top}px; left: ${table.ui.left}px; z-index: ${table.ui.zIndex};`")
       .erd_table_top
         button
           font-awesome-icon(icon="times")
@@ -120,12 +126,12 @@
       .erd_column(v-for="column in table.columns" :key="column.id" :column_id="column.id" :class="{ selected: column.ui.selected, relation_active: column.ui.isHover}" :style="`height: ${COLUMN_HEIGHT}px;`")
         .erd_column_key(:class="{ pk: column.ui.pk, fk: column.ui.fk, pfk: column.ui.pfk }")
           font-awesome-icon(icon="key")
-        input(v-model="column.name" type="text" placeholder="column")
+        input(v-model="column.name" type="text" placeholder="column" :style="`width: ${column.ui.widthName}px;`")
         div
-          input.erd_data_type(v-model="column.dataType" type="text" placeholder="dataType")
+          input.erd_data_type(v-model="column.dataType" type="text" placeholder="dataType" :style="`width: ${column.ui.widthDataType}px;`")
         input.erd_column_not_null(v-if="column.options.notNull" type="text" readonly value="N-N")
         input.erd_column_not_null(v-else type="text" readonly value="NULL")
-        input(v-model="column.comment" type="text" placeholder="comment")
+        input(v-model="column.comment" type="text" placeholder="comment" :style="`width: ${column.ui.widthComment}px;`")
         button(title="Delete")
           font-awesome-icon(icon="times")
 </template>
@@ -344,6 +350,8 @@ export default {
           })
           this.onKeyArrowMove(e)
           break
+        default:
+          this.onKeyArrowMove(e)
       }
     },
     // 데이터변경
@@ -436,6 +444,8 @@ export default {
             $divColumns.eq(index).find('input').eq(rowIndex + 1 === 4 ? 0 : rowIndex + 1).focus()
           }
           break
+        default:
+          ERD.store().commit({ type: 'columnWidthReset' })
       }
     },
     // 마우스 hover addClass
@@ -459,11 +469,13 @@ export default {
       })
     },
     // 테이블 그리드 동기화
-    onChangeTableGrid (id) {
+    onChangeTableGrid (tableId) {
       storeTable.commit({
         type: 'active',
-        id: id
+        id: tableId
       })
+      // 동적 width 처리
+      ERD.store().commit({ type: 'columnWidthReset' })
     },
     // 데이터 타입 힌트 애니메이션
     onBeforeEnter (el) {
@@ -565,11 +577,12 @@ export default {
       .erd_table_header {
         box-sizing: border-box;
         margin-bottom: 15px;
+        display: inline-block;
 
         input {
-          width: 47%;
+          width: 120px;
           height: 100%;
-          font-size: 20px;
+          font-size: 12px;
           margin-right: 10px;
         }
       }
@@ -582,15 +595,14 @@ export default {
         vertical-align: middle;
         align-items: center;
 
-        input, div {
-          width: 100px;
+        input {
           float: left;
           margin-right: 10px;
-          font-size: 14px;
+          font-size: 12px;
         }
 
         .erd_column_not_null {
-          width: 45px;
+          width: 35px;
           cursor: pointer;
         }
 
@@ -614,7 +626,6 @@ export default {
         /* 데이터 타입 힌트 */
         .erd_data_type_list {
           position: absolute;
-          /*padding-left: 1px;*/
           color: #a2a2a2;
           background-color: #191919;
           opacity: 0.9;

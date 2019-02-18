@@ -14,9 +14,9 @@ Vue.use(Vuex)
 export default () => {
   return new Vuex.Store({
     state: {
-      TABLE_WIDTH: 460,
-      // 345
-      TABLE_HEIGHT: 98,
+      TABLE_WIDTH: 290,
+      TABLE_HEIGHT: 84,
+      COLUMN_WIDTH: 50,
       COLUMN_HEIGHT: 25,
       PREVIEW_WIDTH: 150,
       CANVAS_WIDTH: 5000,
@@ -85,6 +85,8 @@ export default () => {
       columnDataTypeHintVisibleAll: column.dataTypeHintVisibleAll,
       // 컬럼 데이터타입 관계 동기화
       columnRelationSync: column.relationSync,
+      // 컬럼 너비 리셋
+      columnWidthReset: column.widthReset,
       // 관계 생성
       lineAdd: line.add,
       // 관계 drawing

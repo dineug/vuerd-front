@@ -11,8 +11,7 @@
           @click="modelActive(tab.id)")
 
           span.buttons(:class="{ tab_active: tab.active }")
-            button(title="Ctrl + Delete"
-            @click="modelDelete(tab.id)")
+            button(@click="modelDelete(tab.id)")
               font-awesome-icon(icon="times")
 
     // 메뉴 sidebar left
