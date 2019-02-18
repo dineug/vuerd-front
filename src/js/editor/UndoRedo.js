@@ -9,6 +9,11 @@ class UndoRedo {
     JSLog('module loaded', 'UndoRedo')
     this.historys = {}
     this.callback = null
+
+    this.undoJson = {
+      draggable: null,
+      draw: null
+    }
   }
 
   // 종속성 초기화
@@ -54,6 +59,18 @@ class UndoRedo {
   // 앞전
   redo () {
     this.getManager().redo()
+  }
+
+  // undo 셋팅
+  setUndo (type) {
+    switch (type) {
+      case 'draggable':
+        this.undoJson.draggable = JSON.stringify(this.core.erd.store().state)
+        break
+      case 'draw':
+        this.undoJson.draw = JSON.stringify(this.core.erd.store().state)
+        break
+    }
   }
 }
 

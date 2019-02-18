@@ -7,6 +7,8 @@ JSLog('store loaded', 'mutationsLine')
 export default {
   // 관계 생성
   add (state, data) {
+    ERD.core.undoRedo.setUndo('draw')
+
     const line = {
       id: util.guid(),
       type: ERD.core.event.cursor,
@@ -135,7 +137,7 @@ export default {
 
     // undo, redo 등록
     ERD.core.undoRedo.add({
-      undo: JSON.stringify(state),
+      undo: ERD.core.undoRedo.undoJson.draggable,
       redo: JSON.stringify(state)
     })
   },

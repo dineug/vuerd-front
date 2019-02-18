@@ -34,8 +34,9 @@
         @keyup.enter="onEnterMove($event, 'tableComment', table.id)")
 
       draggable(v-model="table.columns" :options="{group:'table'}"
-      @update="draggableEnd"
-      @add="draggableEnd")
+      @start="onDraggableUndo"
+      @update="onDraggable"
+      @add="onDraggable")
 
         // 컬럼
         .erd_column(v-for="column in table.columns" :key="column.id" :column_id="column.id"
@@ -434,9 +435,12 @@ export default {
       $(e.target).parent('ul').find('li').removeClass('selected')
       $(e.target).addClass('selected')
     },
-    // draggableEnd event
-    draggableEnd (e) {
-      console.log('end')
+    // undo
+    onDraggableUndo () {
+      ERD.core.undoRedo.setUndo('draggable')
+    },
+    // draggable event
+    onDraggable (e) {
       ERD.store().commit({
         type: 'tableHeightReset'
       })

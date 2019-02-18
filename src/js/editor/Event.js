@@ -478,7 +478,7 @@ class Event {
 
             // undo, redo 등록
             this.core.undoRedo.add({
-              undo: JSON.stringify(this.core.erd.store().state),
+              undo: this.core.undoRedo.undoJson.draw,
               redo: JSON.stringify(this.core.erd.store().state)
             })
             this.onCursor('stop')
