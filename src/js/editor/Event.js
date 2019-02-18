@@ -187,10 +187,10 @@ class Event {
           case 90: // key: Z
             if (e.ctrlKey && e.shiftKey) {
               e.preventDefault()
-              this.core.undoRedo.getManager().redo()
+              this.core.undoRedo.redo()
             } else if (e.ctrlKey) {
               e.preventDefault()
-              this.core.undoRedo.getManager().undo()
+              this.core.undoRedo.undo()
             }
             break
           case 75: // key: K

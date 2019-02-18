@@ -52,6 +52,7 @@ export default new Vuex.Store({
     sync (state, data) {
       JSLog('mutations', 'table grid', 'sync')
       if (state.table) {
+        const undo = JSON.stringify(ERD.core.erd.store().state)
         if (data.isPK) {
           state.table.columns.forEach((column, i) => {
             if (i === data.rowKey) {
@@ -74,6 +75,12 @@ export default new Vuex.Store({
           })
           util.setData(state.table.columns[data.rowKey], data.column)
         }
+        ERD.core.erd.store().commit({ type: 'columnWidthReset' })
+        // undo, redo 등록
+        ERD.core.undoRedo.add({
+          undo: undo,
+          redo: JSON.stringify(ERD.core.erd.store().state)
+        })
       }
     }
   }
