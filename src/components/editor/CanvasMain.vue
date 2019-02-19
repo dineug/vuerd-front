@@ -29,14 +29,14 @@
         :class="{ edit: !table.ui.isReadName }"
         type="text" placeholder="table"
         @keyup="onChangeTableGrid(table.id)"
-        @keydown="onKeyArrowMoveHead($event, table.ui.isReadName, table.id)"
+        @keydown="onKeyArrowMoveHead($event, table.ui.isReadName, 'isReadName', table.id)"
         @keyup.enter="onEnterEditor($event, table.ui.isReadName, 'isReadName', table.id)")
 
         input(v-model="table.comment" :readonly="table.ui.isReadComment"
         :class="{ edit: !table.ui.isReadComment }"
         type="text" placeholder="comment"
         @keyup="onChangeTableGrid(table.id)"
-        @keydown="onKeyArrowMoveHead($event, table.ui.isReadComment, table.id)"
+        @keydown="onKeyArrowMoveHead($event, table.ui.isReadComment, 'isReadComment', table.id)"
         @keyup.enter="onEnterEditor($event, table.ui.isReadComment, 'isReadComment', table.id)")
 
       draggable(v-model="table.columns" :options="{group:'table'}"
@@ -88,13 +88,13 @@
           input.erd_column_not_null(v-if="column.options.notNull"
           type="text" readonly value="N-N"
           @click="columnChangeNull(table.id, column.id)"
-          @keyup.32="columnChangeNull(table.id, column.id)"
+          @keyup.13="columnChangeNull(table.id, column.id)"
           @keydown="onKeyArrowMove($event, true)"
           @focus="columnSelected(table.id, column.id)")
           input.erd_column_not_null(v-else
           type="text" readonly value="NULL"
           @click="columnChangeNull(table.id, column.id)"
-          @keyup.32="columnChangeNull(table.id, column.id)"
+          @keyup.13="columnChangeNull(table.id, column.id)"
           @keydown="onKeyArrowMove($event, true)"
           @focus="columnSelected(table.id, column.id)")
 
@@ -304,9 +304,7 @@ export default {
     },
     // 데이터 타입 힌트 포커스
     dataTypeHintFocus (e, tableId, columnId, isRead) {
-      if (isRead) {
-        this.onKeyArrowMove(e, isRead)
-      } else {
+      if (!isRead) {
         // 힌트 포커스 이동
         const $li = $(e.target).parent('div').find('li')
         const index = $li.filter('.selected').index()
@@ -351,6 +349,7 @@ export default {
         }
         ERD.store().commit({ type: 'columnWidthReset' })
       }
+      this.onKeyArrowMove(e, isRead, 'isReadDataType', tableId, columnId)
     },
     // 데이터변경
     columnChangeDataType (e, tableId, columnId, dataType) {
@@ -365,12 +364,12 @@ export default {
     // 컬럼 포커스 이동 이벤트
     onEnterEditor (e, isRead, current, tableId, columnId) {
       if (!e.altKey) {
-        if (typeof columnId === 'boolean') {
+        if (columnId === undefined) {
           ERD.store().commit({
             type: 'tableEdit',
             id: tableId,
             current: current,
-            isRead: !columnId
+            isRead: !isRead
           })
         } else {
           ERD.store().commit({
@@ -390,7 +389,7 @@ export default {
       }
     },
     // 테이블명, 코멘트 영역
-    onKeyArrowMoveHead (e, isRead, tableId) {
+    onKeyArrowMoveHead (e, isRead, current, tableId) {
       if (isRead) {
         const $divColumns = $(e.target).parents('.erd_table').find('.erd_column')
         const $input = $(e.target).parents('.erd_table_header').find('input')
@@ -424,6 +423,15 @@ export default {
               $divColumns.first().find('input')[0].focus()
             }
             break
+        }
+      } else {
+        if (e.keyCode === 9) {
+          ERD.store().commit({
+            type: 'tableEdit',
+            id: tableId,
+            current: current,
+            isRead: true
+          })
         }
       }
       this.onChangeTableGrid(tableId)
@@ -465,9 +473,27 @@ export default {
         }
       } else {
         if (e.keyCode === 9) {
-
+          ERD.store().commit({
+            type: 'columnEdit',
+            tableId: tableId,
+            columnId: columnId,
+            current: current,
+            isRead: true
+          })
         }
         ERD.store().commit({ type: 'columnWidthReset' })
+      }
+      if (e.keyCode === 9 && current === 'isReadComment') {
+        e.preventDefault()
+        const $tableInput = $(e.target).parents('.erd_table').find('.erd_table_header').find('input')
+        const $divColumns = $(e.target).parents('.erd_table').find('.erd_column')
+        const index = $divColumns.filter('.selected').index()
+        const len = $divColumns.length
+        if (index === len - 1) {
+          $tableInput[0].focus()
+        } else {
+          $divColumns.eq(index + 1).find('input:eq(0)').focus()
+        }
       }
     },
     // 마우스 hover addClass
