@@ -18,7 +18,7 @@ export default new Vuex.Store({
     active (state, data) {
       JSLog('mutations', 'table grid', 'active')
       if (ERD.core.event.isGrid.table) {
-        ERD.core.event.components.CanvasMenu.isTable = true
+        ERD.core.event.components.CanvasGrid.isTable = false
       }
       state.rows = []
       state.table = util.getData(ERD.store().state.tables, data.id)
@@ -42,7 +42,7 @@ export default new Vuex.Store({
     delete (state) {
       JSLog('mutations', 'table grid', 'delete')
       if (ERD.core.event.isGrid.table) {
-        ERD.core.event.components.CanvasMenu.isTable = false
+        ERD.core.event.components.CanvasGrid.isTable = false
       }
       state.rows = []
       state.table = null

@@ -234,6 +234,11 @@ export default {
   },
   mounted () {
     ERD.core.event.components.CanvasGrid = this
+  },
+  updated () {
+    if (ERD.core.event.isGrid.table) {
+      this.isTable = true
+    }
   }
 }
 </script>
