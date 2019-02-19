@@ -74,6 +74,14 @@ export default new Vuex.Store({
             }
           })
           util.setData(state.table.columns[data.rowKey], data.column)
+          if (data.column.dataType) {
+            // 컬럼 데이터타입 관계 동기화
+            ERD.store().commit({
+              type: 'columnRelationSync',
+              tableId: state.table.id,
+              columnId: state.table.columns[data.rowKey].id
+            })
+          }
         }
         ERD.core.erd.store().commit({ type: 'columnWidthReset' })
         // undo, redo 등록
