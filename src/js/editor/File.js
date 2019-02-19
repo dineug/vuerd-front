@@ -67,26 +67,22 @@ class File {
     switch (type) {
       case 'json':
         const json = JSON.parse(data)
-        const models = {
-          tabs: []
-        }
         for (let tab of json.tabs) {
           const newTab = {
-            id: tab.id,
             name: tab.name,
-            active: tab.active,
             store: storeERD()
           }
           newTab.store.commit({
             type: 'importData',
             state: tab.store
           })
-          models.tabs.push(newTab)
+          model.commit({
+            type: 'modelAdd',
+            isInit: true,
+            name: newTab.name,
+            store: newTab.store
+          })
         }
-        model.commit({
-          type: 'importData',
-          state: models
-        })
         break
     }
   }
@@ -176,6 +172,27 @@ class File {
     format = format.replace('mm', mm)
     format = format.replace('ss', ss)
     return format
+  }
+
+  // 현재 텝 복사 생성
+  clone () {
+    const tab = this.core.erd.active()
+    const json = JSON.stringify(this.core.erd.store().state)
+    const state = JSON.parse(json)
+    const newTab = {
+      name: tab.name,
+      store: storeERD()
+    }
+    newTab.store.commit({
+      type: 'importData',
+      state: state
+    })
+    model.commit({
+      type: 'modelAdd',
+      isInit: true,
+      name: newTab.name,
+      store: newTab.store
+    })
   }
 }
 

@@ -83,7 +83,7 @@ export default {
         },
         {
           type: 'save',
-          icon: 'save',
+          icon: 'cloud-upload-alt',
           name: 'save'
         },
         {
@@ -110,6 +110,11 @@ export default {
           type: 'export-sql',
           icon: 'file-download',
           name: 'export-sql'
+        },
+        {
+          type: 'clone',
+          icon: 'copy',
+          name: 'clone'
         },
         {
           type: 'view',
@@ -178,6 +183,9 @@ export default {
           break
         case 'export-json':
           ERD.core.file.exportData('json')
+          break
+        case 'clone':
+          ERD.core.file.clone()
           break
         case 'view':
           this.isModal = true

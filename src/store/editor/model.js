@@ -29,13 +29,17 @@ export default new Vuex.Store({
       })
     },
     // 모델 추가
-    modelAdd (state) {
+    modelAdd (state, data) {
       JSLog('mutations', 'modelAdd')
       const tab = {
         id: util.guid(),
         name: util.autoName(state.tabs, 'untitled'),
         active: false,
         store: storeERD()
+      }
+      if (data.isInit) {
+        tab.name = data.name
+        tab.store = data.store
       }
       state.tabs.push(tab)
       this.commit({
