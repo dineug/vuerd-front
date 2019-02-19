@@ -39,7 +39,10 @@ export default {
             isHover: false,
             widthName: state.COLUMN_WIDTH,
             widthDataType: state.COLUMN_WIDTH,
-            widthComment: state.COLUMN_WIDTH
+            widthComment: state.COLUMN_WIDTH,
+            isReadName: true,
+            isReadDataType: true,
+            isReadComment: true
           }
         }
         if (data.isInit) {
@@ -295,5 +298,12 @@ export default {
         table.ui.width = state.TABLE_WIDTH
       }
     })
+  },
+  // 컬럼 편집모드
+  edit (state, data) {
+    JSLog('mutations', 'column', 'edit')
+    const table = util.getData(state.tables, data.tableId)
+    const column = util.getData(table.columns, data.columnId)
+    column.ui[data.current] = data.isRead
   }
 }

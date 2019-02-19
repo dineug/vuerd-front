@@ -25,7 +25,9 @@ export default {
         left: document.documentElement.scrollLeft + 200,
         width: state.TABLE_WIDTH,
         height: state.TABLE_HEIGHT,
-        zIndex: util.getZIndex()
+        zIndex: util.getZIndex(),
+        isReadName: true,
+        isReadComment: true
       }
     }
     let isPosition = true
@@ -252,5 +254,11 @@ export default {
     state.tables.forEach(table => {
       table.ui.selected = true
     })
+  },
+  // 테이블 편집모드
+  edit (state, data) {
+    JSLog('mutations', 'table', 'edit')
+    const table = util.getData(state.tables, data.id)
+    table.ui[data.current] = data.isRead
   }
 }

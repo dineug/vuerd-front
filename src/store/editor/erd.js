@@ -67,6 +67,8 @@ export default () => {
       tableMultiSelected: table.multiSelected,
       // 테이블 전체 선택
       tableSelectedAll: table.selectedAll,
+      // 테이블 편집모드
+      tableEdit: table.edit,
       // 컬럼 추가
       columnAdd: column.add,
       // 컬럼 삭제
@@ -87,6 +89,8 @@ export default () => {
       columnRelationSync: column.relationSync,
       // 컬럼 너비 리셋
       columnWidthReset: column.widthReset,
+      // 컬럼 편집모드
+      columnEdit: column.edit,
       // 관계 생성
       lineAdd: line.add,
       // 관계 drawing
