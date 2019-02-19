@@ -30,14 +30,14 @@
         type="text" placeholder="table"
         @keyup="onChangeTableGrid(table.id)"
         @keydown="onKeyArrowMoveHead($event, table.ui.isReadName, table.id)"
-        @keyup.enter="onEnterEditor($event, 'isReadName', table.id, table.ui.isReadName)")
+        @keyup.enter="onEnterEditor($event, table.ui.isReadName, 'isReadName', table.id)")
 
         input(v-model="table.comment" :readonly="table.ui.isReadComment"
         :class="{ edit: !table.ui.isReadComment }"
         type="text" placeholder="comment"
         @keyup="onChangeTableGrid(table.id)"
         @keydown="onKeyArrowMoveHead($event, table.ui.isReadComment, table.id)"
-        @keyup.enter="onEnterEditor($event, 'isReadComment', table.id, table.ui.isReadComment)")
+        @keyup.enter="onEnterEditor($event, table.ui.isReadComment, 'isReadComment', table.id)")
 
       draggable(v-model="table.columns" :options="{group:'table'}"
       @start="onDraggableUndo"
@@ -60,8 +60,8 @@
           :style="`width: ${column.ui.widthName}px;`"
           type="text" placeholder="column"
           @keyup="onChangeTableGrid(table.id)"
-          @keyup.enter="onEnterEditor($event, 'isReadName', table.id, column.id, column.ui.isReadName)"
-          @keydown="onKeyArrowMove($event, column.ui.isReadName)"
+          @keyup.enter="onEnterEditor($event, column.ui.isReadName, 'isReadName', table.id, column.id)"
+          @keydown="onKeyArrowMove($event, column.ui.isReadName, 'isReadName', table.id, column.id)"
           @focus="columnSelected(table.id, column.id)")
 
           // 컬럼 데이터타입
@@ -71,7 +71,7 @@
             :style="`width: ${column.ui.widthDataType}px;`"
             type="text" placeholder="dataType"
             @keyup="dataTypeHintVisible($event, table.id, column.id, !column.ui.isReadDataType)"
-            @keyup.enter="onEnterEditor($event, 'isReadDataType', table.id, column.id, column.ui.isReadDataType)"
+            @keyup.enter="onEnterEditor($event, column.ui.isReadDataType, 'isReadDataType', table.id, column.id)"
             @keydown="dataTypeHintFocus($event, table.id, column.id, column.ui.isReadDataType)"
             @focus="columnSelected(table.id, column.id)")
 
@@ -104,8 +104,8 @@
           :style="`width: ${column.ui.widthComment}px;`"
           type="text" placeholder="comment"
           @keyup="onChangeTableGrid(table.id)"
-          @keyup.enter="onEnterEditor($event, 'isReadComment', table.id, column.id, column.ui.isReadComment)"
-          @keydown="onKeyArrowMove($event, column.ui.isReadComment)"
+          @keyup.enter="onEnterEditor($event, column.ui.isReadComment, 'isReadComment', table.id, column.id)"
+          @keydown="onKeyArrowMove($event, column.ui.isReadComment, 'isReadComment', table.id, column.id)"
           @focus="columnSelected(table.id, column.id)")
 
           // 컬럼 삭제 버튼
@@ -363,7 +363,7 @@ export default {
       e.target.parentNode.parentNode.childNodes[0].focus()
     },
     // 컬럼 포커스 이동 이벤트
-    onEnterEditor (e, current, tableId, columnId, isRead) {
+    onEnterEditor (e, isRead, current, tableId, columnId) {
       if (!e.altKey) {
         if (typeof columnId === 'boolean') {
           ERD.store().commit({
@@ -429,7 +429,7 @@ export default {
       this.onChangeTableGrid(tableId)
     },
     // 컬럼 화살표 이동
-    onKeyArrowMove (e, isRead) {
+    onKeyArrowMove (e, isRead, current, tableId, columnId) {
       if (isRead) {
         const $tableInput = $(e.target).parents('.erd_table').find('.erd_table_header').find('input')
         const $divColumns = $(e.target).parents('.erd_table').find('.erd_column')
@@ -464,6 +464,9 @@ export default {
             break
         }
       } else {
+        if (e.keyCode === 9) {
+
+        }
         ERD.store().commit({ type: 'columnWidthReset' })
       }
     },
