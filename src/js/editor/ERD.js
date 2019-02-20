@@ -49,6 +49,15 @@ class ERD {
       }
     }
   }
+
+  // 객체 제거
+  destroy () {
+    this.core.event.destroy()
+    this.core.file.destroy()
+    this.core.sql.destroy()
+    this.core.undoRedo.destroy()
+    delete this
+  }
 }
 
 export default new ERD()

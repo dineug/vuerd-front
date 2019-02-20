@@ -194,6 +194,11 @@ class File {
       store: newTab.store
     })
   }
+
+  // 객체 제거
+  destroy () {
+    delete this
+  }
 }
 
 export default new File()

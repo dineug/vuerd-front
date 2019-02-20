@@ -32,6 +32,10 @@ export default {
     CANVAS_HEIGHT () {
       return ERD.store().state.CANVAS_HEIGHT
     }
+  },
+  destroyed () {
+    // 객체 정리
+    ERD.destroy()
   }
 }
 </script>

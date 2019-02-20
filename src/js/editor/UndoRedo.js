@@ -74,6 +74,11 @@ class UndoRedo {
         break
     }
   }
+
+  // 객체 제거
+  destroy () {
+    delete this
+  }
 }
 
 export default new UndoRedo()

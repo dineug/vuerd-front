@@ -69,6 +69,8 @@ export default () => {
       tableSelectedAll: table.selectedAll,
       // 테이블 편집모드
       tableEdit: table.edit,
+      // 테이블 및 컬럼 edit all 해제
+      tableEditAllNone: table.editAllNone,
       // 컬럼 추가
       columnAdd: column.add,
       // 컬럼 삭제

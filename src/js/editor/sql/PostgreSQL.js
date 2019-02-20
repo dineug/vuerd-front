@@ -148,6 +148,11 @@ class PostgreSQL {
     buffer.push(`\t\tFOREIGN KEY (${this.sql.formatNames(columns.end, '"')})`)
     buffer.push(`\t\tREFERENCES "${name}"."${startTable.name}" (${this.sql.formatNames(columns.start, '"')});`)
   }
+
+  // 객체 제거
+  destroy () {
+    delete this
+  }
 }
 
 export default new PostgreSQL()

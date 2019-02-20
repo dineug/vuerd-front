@@ -260,5 +260,23 @@ export default {
     JSLog('mutations', 'table', 'edit')
     const table = util.getData(state.tables, data.id)
     table.ui[data.current] = data.isRead
+  },
+  // 테이블 및 컬럼 edit all 해제
+  editAllNone (state, data) {
+    JSLog('mutations', 'table', 'editAllNone')
+
+    state.tables.forEach(table => {
+      if (data.isTable) {
+        table.ui.isReadName = true
+        table.ui.isReadComment = true
+      }
+      table.columns.forEach(column => {
+        if (data.isColumn) {
+          column.ui.isReadName = true
+          column.ui.isReadDataType = true
+          column.ui.isReadComment = true
+        }
+      })
+    })
   }
 }

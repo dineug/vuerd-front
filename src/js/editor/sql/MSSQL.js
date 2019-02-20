@@ -161,6 +161,11 @@ class MSSQL {
     buffer.push(`\t\tFOREIGN KEY (${this.sql.formatNames(columns.end, '[', ']')})`)
     buffer.push(`\t\tREFERENCES [${name}].[${startTable.name}] (${this.sql.formatNames(columns.start, '[', ']')})\nGO`)
   }
+
+  // 객체 제거
+  destroy () {
+    delete this
+  }
 }
 
 export default new MSSQL()

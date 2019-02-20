@@ -93,6 +93,16 @@ class SQL {
     }
     return space
   }
+
+  // 객체 제거
+  destroy () {
+    mysql.destroy()
+    oracle.destroy()
+    mariadb.destroy()
+    mssql.destroy()
+    postgresql.destroy()
+    delete this
+  }
 }
 
 export default new SQL()

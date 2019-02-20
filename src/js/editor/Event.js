@@ -11,6 +11,7 @@ class Event {
     JSLog('module loaded', 'Event')
 
     this.core = null
+    this.eventListener = []
     this.rightClickListener = []
     this.components = {
       QuickMenu: null,
@@ -371,6 +372,10 @@ class Event {
 
   // 전역 이벤트 연결
   on (type, fn) {
+    this.eventListener.push({
+      type: type,
+      fn: fn
+    })
     window.addEventListener(type, fn)
     return this
   }
@@ -659,6 +664,14 @@ class Event {
       type: 'columnDataTypeHintVisibleAll',
       isDataTypeHint: false
     })
+  }
+
+  // 이벤트 해제 및 객체 제거
+  destroy () {
+    this.eventListener.forEach(target => {
+      window.removeEventListener(target.type, target.fn)
+    })
+    delete this
   }
 }
 
