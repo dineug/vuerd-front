@@ -17,6 +17,7 @@ import Grid from '@toast-ui/vue-grid/src/Grid'
 import storeTable from '@/store/editor/table'
 import ERD from '@/js/editor/ERD'
 import gridTableDetail from '@/js/editor/config/gridTableDetail'
+import $ from 'jquery'
 
 export default {
   name: 'CanvasGrid',
@@ -58,6 +59,11 @@ export default {
   updated () {
     if (ERD.core.event.isGrid.table) {
       this.isTable = true
+      if (storeTable.state.table) {
+        $('.tui-grid-head-area:eq(1)').find('tr:eq(0) > th').text(storeTable.state.table.name)
+      } else {
+        $('.tui-grid-head-area:eq(1)').find('tr:eq(0) > th').text('')
+      }
     }
   }
 }
