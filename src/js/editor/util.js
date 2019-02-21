@@ -44,7 +44,36 @@ export const getZIndex = () => {
       max = v.ui.zIndex
     }
   })
+  ERD.store().state.memos.forEach(v => {
+    if (v.ui.zIndex > max) {
+      max = v.ui.zIndex
+    }
+  })
   return ++max
+}
+
+// 생성위치
+export const setPosition = (target) => {
+  let isPosition = true
+  while (isPosition) {
+    isPosition = false
+    for (let table of ERD.store().state.tables) {
+      if (table.ui.top === target.ui.top && table.ui.left === target.ui.left) {
+        isPosition = true
+        target.ui.top += 50
+        target.ui.left += 50
+        break
+      }
+    }
+    for (let memo of ERD.store().state.memos) {
+      if (memo.ui.top === target.ui.top && memo.ui.left === target.ui.left) {
+        isPosition = true
+        target.ui.top += 50
+        target.ui.left += 50
+        break
+      }
+    }
+  }
 }
 
 // 자동 이름 생성

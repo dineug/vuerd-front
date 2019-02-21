@@ -5,6 +5,7 @@ import dataType from './dataType'
 import table from './mutationsTable'
 import column from './mutationsColumn'
 import line from './mutationsLine'
+import memo from './mutationsMemo'
 import * as util from '@/js/editor/util'
 
 JSLog('store loaded', 'erd')
@@ -21,10 +22,13 @@ export default () => {
       PREVIEW_WIDTH: 150,
       CANVAS_WIDTH: 5000,
       CANVAS_HEIGHT: 5000,
+      MEMO_WIDTH: 150,
+      MEMO_HEIGHT: 100,
       DBType: 'MySQL',
       dataTypes: dataType['MySQL'],
       tables: [],
-      lines: []
+      lines: [],
+      memos: []
     },
     mutations: {
       // DB 변경
@@ -104,7 +108,25 @@ export default () => {
       // 관계 컬럼 이동 유효성
       lineValidColumn: line.validColumn,
       // 관계 컬럼 hover 처리
-      lineHover: line.hover
+      lineHover: line.hover,
+      // 메모 추가
+      memoAdd: memo.add,
+      // 메모 삭제
+      memoDelete: memo.delete,
+      // 메모 크기 수정
+      memoSetWidthHeight: memo.setWidthHeight,
+      // 메모 선택
+      memoSelected: memo.selected,
+      // 메모 top, left 변경
+      memoDraggable: memo.draggable,
+      // 메모 선택 전체 해제
+      memoSelectedAllNone: memo.selectedAllNone,
+      // 메모 드래그 selected
+      memoMultiSelected: memo.multiSelected,
+      // 메모 전체 선택
+      memoSelectedAll: memo.selectedAll,
+      // 메모 리사이징
+      memoResize: memo.resize
     }
   })
 }

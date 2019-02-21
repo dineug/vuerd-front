@@ -129,6 +129,24 @@
           @click="columnDelete(table.id, column.id)")
             font-awesome-icon(icon="times")
 
+    // 메모
+    .erd_memo(v-for="memo in memos" :key="memo.id"
+    :class="{ selected: memo.ui.selected }"
+    :style="`top: ${memo.ui.top}px; left: ${memo.ui.left}px; z-index: ${memo.ui.zIndex};`"
+    @mousedown="memoSelected($event, memo.id)")
+      .erd_memo_top
+        button(title="Ctrl + Delete"
+        @click="memoDelete(memo.id)")
+          font-awesome-icon(icon="times")
+
+      textarea(v-model="memo.content"
+      :style="`width: ${memo.ui.width}px; height: ${memo.ui.height}px;`"
+      @mouseup="memoSize($event, memo.id)")
+
+      .erd_memo_bottom
+        button(@mousedown.stop="memoResize(memo.id)")
+          font-awesome-icon(icon="expand-arrows-alt")
+
   // ========================================== 미리보기 영역 이벤트 중첩방지 ==========================================
   .main_canvas(v-else
   :style="`width: ${CANVAS_WIDTH}px; height: ${CANVAS_HEIGHT}px;`")
@@ -154,6 +172,14 @@
         input(v-model="column.comment" type="text" placeholder="comment" :style="`width: ${column.ui.widthComment}px;`")
         button(title="Delete")
           font-awesome-icon(icon="times")
+    .erd_memo(v-for="memo in memos" :key="memo.id" :class="{ selected: memo.ui.selected }" :style="`top: ${memo.ui.top}px; left: ${memo.ui.left}px; z-index: ${memo.ui.zIndex};`")
+      .erd_memo_top
+        button(title="Ctrl + Delete")
+          font-awesome-icon(icon="times")
+      textarea(v-model="memo.content" :style="`width: ${memo.ui.width}px; height: ${memo.ui.height}px;`")
+      .erd_memo_bottom
+        button
+          font-awesome-icon(icon="expand-arrows-alt")
 </template>
 
 <script>
@@ -199,6 +225,9 @@ export default {
   computed: {
     tables () {
       return ERD.store().state.tables
+    },
+    memos () {
+      return ERD.store().state.memos
     },
     TABLE_WIDTH () {
       return ERD.store().state.TABLE_WIDTH
@@ -571,6 +600,35 @@ export default {
           { complete: done }
         )
       }, delay)
+    },
+    // 메모 선택
+    memoSelected (e, id) {
+      ERD.store().commit({
+        type: 'memoSelected',
+        id: id,
+        ctrlKey: e.ctrlKey,
+        isEvent: true
+      })
+    },
+    // 메모 현재 사이즈 반영
+    memoSize (e, id) {
+      ERD.store().commit({
+        type: 'memoSetWidthHeight',
+        id: id,
+        width: e.target.offsetWidth,
+        height: e.target.offsetHeight
+      })
+    },
+    // 메모 삭제
+    memoDelete (id) {
+      ERD.store().commit({
+        type: 'memoDelete',
+        id: id
+      })
+    },
+    // 메모 리사이징
+    memoResize (id) {
+      ERD.core.event.onMemoResize('start', id)
     }
   },
   mounted () {
@@ -590,7 +648,7 @@ export default {
   $key_fk: #dda8b1;
   $key_pfk: #60b9c4;
 
-  input {
+  input, textarea {
     background-color: #191919;
     color: white;
   }
@@ -741,14 +799,67 @@ export default {
         }
       }
 
-      /* 테이블 선택시 */
-      &.selected {
-        border: solid $table_selected 1px;
-        box-shadow: 0 1px 6px $table_selected;
-      }
-
       .edit {
         border-bottom: solid greenyellow 1px;
+      }
+    }
+
+    /* 테이블 선택시 */
+    .erd_table.selected, .erd_memo.selected {
+      border: solid $table_selected 1px;
+      box-shadow: 0 1px 6px $table_selected;
+    }
+
+    .erd_memo {
+      position: absolute;
+      box-sizing: border-box;
+      background-color: $table_background;
+      opacity: 0.9;
+      z-index: 1;
+
+      .erd_memo_top {
+        padding: 10px;
+        button {
+          width: 17px;
+          height: 17px;
+          font-size: .70em;
+          float: right;
+          margin-left: 5px;
+          border: none;
+          outline: none;
+          cursor: pointer;
+          border-radius: 50%;
+
+          &:first-child {
+            color: #9B0005;
+            background-color: #9B0005;
+          }
+          &:hover {
+            color: white;
+          }
+        }
+      }
+
+      .erd_memo_bottom {
+        button {
+          width: 17px;
+          height: 17px;
+          font-size: .70em;
+          float: right;
+          margin-left: 5px;
+          border: none;
+          outline: none;
+          cursor: nw-resize;
+          color: white;
+          background-color: $table_background;
+        }
+      }
+
+      textarea {
+        box-sizing: border-box;
+        padding: 10px;
+        border: none;
+        resize: none;
       }
     }
   }

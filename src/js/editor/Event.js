@@ -28,9 +28,10 @@ class Event {
     this.lineId = null
     this.cursor = null
 
-    // table Draggable
+    // table, memo Draggable
     this.isDraggable = false
     this.tableIds = []
+    this.memoIds = []
     this.move = {
       x: 0,
       y: 0
@@ -54,6 +55,10 @@ class Event {
     this.isGrid = {
       table: false
     }
+
+    // memo resize
+    this.isMemoResize = false
+    this.memoId = null
   }
 
   // 종속성 초기화
@@ -107,6 +112,7 @@ class Event {
         }
         // 테이블 및 컬럼 selected 해제
         if (!$(e.target).closest('.erd_table').length &&
+          !$(e.target).closest('.erd_memo').length &&
           !$(e.target).closest('.quick_menu_pk').length &&
           !$(e.target).closest('.table_detail').length &&
           !$(e.target).closest('.menu_bottom').length) {
@@ -116,6 +122,7 @@ class Event {
             isColumn: true
           })
           this.isSelectedColumn = false
+          this.core.erd.store().commit({ type: 'memoSelectedAllNone' })
         }
 
         if (!e.altKey &&
@@ -142,6 +149,7 @@ class Event {
       this.onDrag('stop', e)
       this.onPreview('stop')
       this.onMove('stop')
+      this.onMemoResize('stop')
     }).on('mousemove', e => {
       if (!this.isStop) {
         if (this.move.x === 0 && this.move.y === 0) {
@@ -152,7 +160,7 @@ class Event {
         // 관계 draw
         this.onDraw('update', null, e)
         // 테이블 draggable
-        this.onDraggable('update', null, e)
+        this.onDraggable('update', null, null, e)
         // 미리보기 이동
         this.onPreview('update', e)
         // 마우스 drag
@@ -161,6 +169,8 @@ class Event {
         }
         // 마우스 이동
         this.onMove('update', e)
+        // 메모 리사이징
+        this.onMemoResize('update', null, e)
 
         this.move.x = e.clientX + document.documentElement.scrollLeft
         this.move.y = e.clientY + document.documentElement.scrollTop
@@ -203,6 +213,12 @@ class Event {
               })
             }
             break
+          case 77: // key: M
+            if (e.altKey) {
+              e.preventDefault()
+              this.core.erd.store().commit({ type: 'memoAdd' })
+            }
+            break
           case 78: // key: N
             if (e.altKey) {
               e.preventDefault()
@@ -222,6 +238,7 @@ class Event {
               e.preventDefault()
               // 테이블 전체 선택
               this.core.erd.store().commit({ type: 'tableSelectedAll' })
+              this.core.erd.store().commit({ type: 'memoSelectedAll' })
             }
             break
           case 27: // key: ESC
@@ -238,6 +255,16 @@ class Event {
                   store.commit({
                     type: 'tableDelete',
                     id: store.state.tables[i].id
+                  })
+                  i--
+                }
+              }
+              // 메모 삭제
+              for (let i = 0; i < store.state.memos.length; i++) {
+                if (store.state.memos[i].ui.selected) {
+                  store.commit({
+                    type: 'memoDelete',
+                    id: store.state.memos[i].id
                   })
                   i--
                 }
@@ -502,11 +529,12 @@ class Event {
   }
 
   // 테이블 드래그 이벤트
-  onDraggable (type, ids, e) {
+  onDraggable (type, tableIds, memoIds, e) {
     switch (type) {
       case 'start':
         this.isDraggable = true
-        this.tableIds = ids
+        this.tableIds = tableIds
+        this.memoIds = memoIds
         break
       case 'update':
         if (this.isDraggable) {
@@ -519,12 +547,21 @@ class Event {
               y: e.clientY + document.documentElement.scrollTop - this.move.y
             })
           })
+          this.memoIds.forEach(memoId => {
+            this.core.erd.store().commit({
+              type: 'memoDraggable',
+              id: memoId,
+              x: e.clientX + document.documentElement.scrollLeft - this.move.x,
+              y: e.clientY + document.documentElement.scrollTop - this.move.y
+            })
+          })
         }
         break
       case 'stop':
         if (this.isDraggable) {
           this.isDraggable = false
           this.tableIds = []
+          this.memoIds = []
         }
         break
     }
@@ -566,6 +603,11 @@ class Event {
           })
           this.core.erd.store().commit({
             type: 'tableMultiSelected',
+            min: min,
+            max: max
+          })
+          this.core.erd.store().commit({
+            type: 'memoMultiSelected',
             min: min,
             max: max
           })
@@ -640,6 +682,33 @@ class Event {
     }
   }
 
+  // 메모 리사이징
+  onMemoResize (type, id, e) {
+    switch (type) {
+      case 'start':
+        this.memoId = id
+        this.isMemoResize = true
+        break
+      case 'update':
+        if (this.isMemoResize) {
+          e.preventDefault()
+          this.core.erd.store().commit({
+            type: 'memoResize',
+            id: this.memoId,
+            x: e.clientX + document.documentElement.scrollLeft - this.move.x,
+            y: e.clientY + document.documentElement.scrollTop - this.move.y
+          })
+        }
+        break
+      case 'stop':
+        if (this.isMemoResize) {
+          this.isMemoResize = false
+          this.memoId = false
+        }
+        break
+    }
+  }
+
   // 모든 이벤트 중지
   stop () {
     this.onCursor('stop')
@@ -647,6 +716,7 @@ class Event {
     this.onDraggable('stop')
     this.onDrag('stop')
     this.onMove('stop')
+    this.onMemoResize('stop')
     this.components.QuickMenu.isShow = false
     this.components.CanvasGrid.isTable = false
     this.components.CanvasMenu.isModal = false
@@ -659,6 +729,8 @@ class Event {
       isTable: true,
       isColumn: true
     })
+    this.core.erd.store().commit({ type: 'memoSelectedAllNone' })
+    // 데이터힌트 hide
     this.core.erd.store().commit({
       type: 'columnDataTypeHintVisibleAll',
       isDataTypeHint: false

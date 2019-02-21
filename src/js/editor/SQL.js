@@ -14,7 +14,7 @@ class SQL {
     JSLog('module loaded', 'SQL')
 
     this.core = null
-    this.db = {
+    this.DB = {
       mysql: mysql.init(this),
       oracle: oracle.init(this),
       mariadb: mariadb.init(this),
@@ -45,15 +45,15 @@ class SQL {
   ddl (database) {
     switch (database.store.state.DBType) {
       case 'MySQL':
-        return this.db.mysql.ddl(database)
+        return this.DB.mysql.ddl(database)
       case 'Oracle':
-        return this.db.oracle.ddl(database)
+        return this.DB.oracle.ddl(database)
       case 'MariaDB':
-        return this.db.mariadb.ddl(database)
+        return this.DB.mariadb.ddl(database)
       case 'MSSQL':
-        return this.db.mssql.ddl(database)
+        return this.DB.mssql.ddl(database)
       case 'PostgreSQL':
-        return this.db.postgresql.ddl(database)
+        return this.DB.postgresql.ddl(database)
     }
   }
 
@@ -100,9 +100,9 @@ class SQL {
 
   // 객체 정리
   destroy () {
-    Object.keys(this.db).forEach(key => {
-      if (typeof this.db[key].destroy === 'function') {
-        this.db[key].destroy()
+    Object.keys(this.DB).forEach(key => {
+      if (typeof this.DB[key].destroy === 'function') {
+        this.DB[key].destroy()
       }
     })
   }

@@ -30,18 +30,8 @@ export default {
         isReadComment: true
       }
     }
-    let isPosition = true
-    while (isPosition) {
-      isPosition = false
-      for (let table of state.tables) {
-        if (table.ui.top === newTable.ui.top && table.ui.left === newTable.ui.left) {
-          isPosition = true
-          newTable.ui.top += 50
-          newTable.ui.left += 50
-          break
-        }
-      }
-    }
+
+    util.setPosition(newTable)
     state.tables.push(newTable)
     this.commit({
       type: 'tableSelected',
@@ -144,6 +134,7 @@ export default {
       state.tables.forEach(v => {
         v.ui.selected = data.id === v.id
       })
+      this.commit({ type: 'memoSelectedAllNone' })
     }
     // column 선택 제거
     if (!data.isColumnSelected) {
@@ -156,12 +147,18 @@ export default {
 
     if (data.isEvent) {
       const tableIds = []
+      const memoIds = []
       for (let targetTable of state.tables) {
         if (targetTable.ui.selected) {
           tableIds.push(targetTable.id)
         }
       }
-      ERD.core.event.onDraggable('start', tableIds)
+      for (let targetMemo of state.memos) {
+        if (targetMemo.ui.selected) {
+          memoIds.push(targetMemo.id)
+        }
+      }
+      ERD.core.event.onDraggable('start', tableIds, memoIds)
     }
 
     // 테이블추가에서 호출시 처리

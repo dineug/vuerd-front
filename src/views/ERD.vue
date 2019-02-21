@@ -119,6 +119,25 @@ export default {
   }
   /* Handle : hover*/
   body::-webkit-scrollbar-thumb:hover {
-    background: #a0a0a0;
+    background: white;
+  }
+
+  /* width */
+  textarea::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  /* Track */
+  textarea::-webkit-scrollbar-track {
+    background: #191919;
+    border-left: 1px solid  #191919;
+  }
+  /* Handle */
+  textarea::-webkit-scrollbar-thumb {
+    background: #aaa;
+  }
+  /* Handle : hover*/
+  textarea::-webkit-scrollbar-thumb:hover {
+    background: white;
   }
 </style>
