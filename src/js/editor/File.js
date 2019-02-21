@@ -11,6 +11,7 @@ class File {
   constructor () {
     JSLog('module loaded', 'File')
 
+    this.core = null
     this.setImport()
   }
 
@@ -28,7 +29,7 @@ class File {
         const reader = new FileReader()
         reader.readAsText(f)
         reader.onload = () => {
-          this.load('json', reader.result)
+          this.load('json', reader.result, true)
           this.importJSONTag.val('')
         }
       } else {
@@ -41,7 +42,7 @@ class File {
         const reader = new FileReader()
         reader.readAsText(f)
         reader.onload = () => {
-          this.load('sql', reader.result)
+          this.load('sql', reader.result, true)
           this.importSQLTag.val('')
         }
       } else {
@@ -63,13 +64,11 @@ class File {
   }
 
   // load
-  load (type, data) {
+  load (type, data, isAdd) {
     switch (type) {
       case 'json':
         const json = JSON.parse(data)
-        const models = {
-          tabs: []
-        }
+        const tabs = []
         for (let tab of json.tabs) {
           const newTab = {
             id: tab.id,
@@ -81,12 +80,25 @@ class File {
             type: 'importData',
             state: tab.store
           })
-          models.tabs.push(newTab)
+          if (isAdd) {
+            model.commit({
+              type: 'modelAdd',
+              isInit: true,
+              name: newTab.name,
+              store: newTab.store
+            })
+          } else {
+            tabs.push(newTab)
+          }
         }
-        model.commit({
-          type: 'importData',
-          state: models
-        })
+        if (!isAdd) {
+          model.commit({
+            type: 'importData',
+            state: {
+              tabs: tabs
+            }
+          })
+        }
         break
     }
   }
@@ -177,6 +189,30 @@ class File {
     format = format.replace('ss', ss)
     return format
   }
+
+  // 현재 텝 복사 생성
+  clone () {
+    const tab = this.core.erd.active()
+    const json = JSON.stringify(this.core.erd.store().state)
+    const state = JSON.parse(json)
+    const newTab = {
+      name: tab.name,
+      store: storeERD()
+    }
+    newTab.store.commit({
+      type: 'importData',
+      state: state
+    })
+    model.commit({
+      type: 'modelAdd',
+      isInit: true,
+      name: newTab.name,
+      store: newTab.store
+    })
+  }
+
+  // 객체 정리
+  destroy () {}
 }
 
 export default new File()

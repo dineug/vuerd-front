@@ -12,11 +12,15 @@ import postgresql from './sql/PostgreSQL'
 class SQL {
   constructor () {
     JSLog('module loaded', 'SQL')
-    mysql.init(this)
-    oracle.init(this)
-    mariadb.init(this)
-    mssql.init(this)
-    postgresql.init(this)
+
+    this.core = null
+    this.DB = {
+      mysql: mysql.init(this),
+      oracle: oracle.init(this),
+      mariadb: mariadb.init(this),
+      mssql: mssql.init(this),
+      postgresql: postgresql.init(this)
+    }
   }
 
   // 종속성 초기화
@@ -41,15 +45,15 @@ class SQL {
   ddl (database) {
     switch (database.store.state.DBType) {
       case 'MySQL':
-        return mysql.ddl(database)
+        return this.DB.mysql.ddl(database)
       case 'Oracle':
-        return oracle.ddl(database)
+        return this.DB.oracle.ddl(database)
       case 'MariaDB':
-        return mariadb.ddl(database)
+        return this.DB.mariadb.ddl(database)
       case 'MSSQL':
-        return mssql.ddl(database)
+        return this.DB.mssql.ddl(database)
       case 'PostgreSQL':
-        return postgresql.ddl(database)
+        return this.DB.postgresql.ddl(database)
     }
   }
 
@@ -92,6 +96,15 @@ class SQL {
       space += ' '
     }
     return space
+  }
+
+  // 객체 정리
+  destroy () {
+    Object.keys(this.DB).forEach(key => {
+      if (typeof this.DB[key].destroy === 'function') {
+        this.DB[key].destroy()
+      }
+    })
   }
 }
 

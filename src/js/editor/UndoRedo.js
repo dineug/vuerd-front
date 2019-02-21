@@ -7,6 +7,8 @@ import UndoManager from 'undo-manager'
 class UndoRedo {
   constructor () {
     JSLog('module loaded', 'UndoRedo')
+
+    this.core = null
     this.historys = {}
     this.callback = null
 
@@ -74,6 +76,9 @@ class UndoRedo {
         break
     }
   }
+
+  // 객체 정리
+  destroy () {}
 }
 
 export default new UndoRedo()

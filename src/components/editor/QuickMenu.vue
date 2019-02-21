@@ -48,6 +48,13 @@ export default {
           keymap: 'Alt + T'
         },
         {
+          type: 'memoAdd',
+          icon: 'sticky-note',
+          isImg: false,
+          name: 'New Memo',
+          keymap: 'Alt + M'
+        },
+        {
           type: 'pk',
           icon: 'key',
           isImg: false,
@@ -76,10 +83,11 @@ export default {
     menuAction (type) {
       switch (type) {
         case 'modelAdd':
-          model.commit({ type: 'modelAdd' })
+          model.commit({ type: type })
           break
         case 'tableAdd':
-          ERD.store().commit({ type: 'tableAdd' })
+        case 'memoAdd':
+          ERD.store().commit({ type: type })
           break
         case 'pk':
           ERD.store().commit({
@@ -122,7 +130,7 @@ export default {
     background-color: $mbg;
     position: fixed;
     opacity: 0.9;
-    width: 168px;
+    width: 170px;
 
     li {
       width: 100%;

@@ -5,6 +5,8 @@ import dataType from './dataType'
 import table from './mutationsTable'
 import column from './mutationsColumn'
 import line from './mutationsLine'
+import memo from './mutationsMemo'
+import domain from './mutationsDomain'
 import * as util from '@/js/editor/util'
 
 JSLog('store loaded', 'erd')
@@ -14,17 +16,22 @@ Vue.use(Vuex)
 export default () => {
   return new Vuex.Store({
     state: {
-      TABLE_WIDTH: 290,
+      TABLE_WIDTH: 350,
       TABLE_HEIGHT: 84,
       COLUMN_WIDTH: 50,
       COLUMN_HEIGHT: 25,
       PREVIEW_WIDTH: 150,
       CANVAS_WIDTH: 5000,
       CANVAS_HEIGHT: 5000,
+      MEMO_WIDTH: 150,
+      MEMO_HEIGHT: 100,
       DBType: 'MySQL',
       dataTypes: dataType['MySQL'],
       tables: [],
-      lines: []
+      lines: [],
+      memos: [],
+      domains: [],
+      searchDomains: []
     },
     mutations: {
       // DB 변경
@@ -37,6 +44,13 @@ export default () => {
       changeDataTypeHint (state, data) {
         JSLog('mutations', 'erd', 'changeDataTypeHint')
         state.dataTypes = dataType[state.DBType].filter(v => {
+          return v.name.toLowerCase().indexOf(data.key.toLowerCase()) !== -1
+        })
+      },
+      // 도메인 검색
+      changeDomainHint (state, data) {
+        JSLog('mutations', 'erd', 'changeDomainHint')
+        state.searchDomains = state.domains.filter(v => {
           return v.name.toLowerCase().indexOf(data.key.toLowerCase()) !== -1
         })
       },
@@ -67,6 +81,10 @@ export default () => {
       tableMultiSelected: table.multiSelected,
       // 테이블 전체 선택
       tableSelectedAll: table.selectedAll,
+      // 테이블 편집모드
+      tableEdit: table.edit,
+      // 테이블 및 컬럼 edit all 해제
+      tableEditAllNone: table.editAllNone,
       // 컬럼 추가
       columnAdd: column.add,
       // 컬럼 삭제
@@ -87,6 +105,18 @@ export default () => {
       columnRelationSync: column.relationSync,
       // 컬럼 너비 리셋
       columnWidthReset: column.widthReset,
+      // 컬럼 편집모드
+      columnEdit: column.edit,
+      // 컬럼 도메인 힌트 show/hide
+      columnDomainHintVisible: column.domainHintVisible,
+      // 컬럼 도메인 힌트 show/hide ALL
+      columnDomainHintVisibleAll: column.domainHintVisibleAll,
+      // 컬럼 도메인 변경
+      columnChangeDomain: column.changeDomain,
+      // 컬럼 도메인 유효성
+      columnValidDomain: column.validDomain,
+      // 컬럼 도메인 동기화
+      columnDomainSync: column.domainSync,
       // 관계 생성
       lineAdd: line.add,
       // 관계 drawing
@@ -98,7 +128,31 @@ export default () => {
       // 관계 컬럼 이동 유효성
       lineValidColumn: line.validColumn,
       // 관계 컬럼 hover 처리
-      lineHover: line.hover
+      lineHover: line.hover,
+      // 메모 추가
+      memoAdd: memo.add,
+      // 메모 삭제
+      memoDelete: memo.delete,
+      // 메모 크기 수정
+      memoSetWidthHeight: memo.setWidthHeight,
+      // 메모 선택
+      memoSelected: memo.selected,
+      // 메모 top, left 변경
+      memoDraggable: memo.draggable,
+      // 메모 선택 전체 해제
+      memoSelectedAllNone: memo.selectedAllNone,
+      // 메모 드래그 selected
+      memoMultiSelected: memo.multiSelected,
+      // 메모 전체 선택
+      memoSelectedAll: memo.selectedAll,
+      // 메모 리사이징
+      memoResize: memo.resize,
+      // 도메인 추가
+      domainAdd: domain.add,
+      // 도메인 삭제
+      domainDelete: domain.delete,
+      // 도메인값 변경
+      domainChange: domain.change
     }
   })
 }

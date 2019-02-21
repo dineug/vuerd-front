@@ -22,6 +22,7 @@ export default {
           name: '',
           comment: '',
           dataType: '',
+          domain: '',
           domainId: '',
           default: '',
           options: {
@@ -36,10 +37,16 @@ export default {
             fk: false,
             pfk: false,
             isDataTypeHint: false,
+            isDomainHint: false,
             isHover: false,
             widthName: state.COLUMN_WIDTH,
             widthDataType: state.COLUMN_WIDTH,
-            widthComment: state.COLUMN_WIDTH
+            widthComment: state.COLUMN_WIDTH,
+            widthDomain: state.COLUMN_WIDTH,
+            isReadName: true,
+            isReadDataType: true,
+            isReadComment: true,
+            isReadDomain: true
           }
         }
         if (data.isInit) {
@@ -49,6 +56,7 @@ export default {
           column.ui.widthName = table.columns[0].ui.widthName
           column.ui.widthDataType = table.columns[0].ui.widthDataType
           column.ui.widthComment = table.columns[0].ui.widthComment
+          column.ui.widthDomain = table.columns[0].ui.widthDomain
         }
         table.columns.push(column)
         break
@@ -235,6 +243,18 @@ export default {
       id: data.tableId
     })
 
+    if (column.domainId.trim() !== '') {
+      this.commit({
+        type: 'domainChange',
+        id: column.domainId,
+        domain: {
+          name: column.domain,
+          dataType: column.dataType,
+          default: column.default
+        }
+      })
+    }
+
     this.commit({ type: 'columnWidthReset' })
     // undo, redo 등록
     ERD.core.undoRedo.add({
@@ -271,6 +291,9 @@ export default {
       // 컬럼 데이터 동기화
       columns.forEach(v => {
         v.dataType = column.dataType
+        v.domain = column.domain
+        v.domainId = column.domainId
+        v.default = column.default
       })
     }
   },
@@ -283,11 +306,15 @@ export default {
         column.ui.widthName = max.name
         column.ui.widthDataType = max.dataType
         column.ui.widthComment = max.comment
+        column.ui.widthDomain = max.domain
       })
       if (table.columns.length !== 0) {
-        let width = table.columns[0].ui.widthName + table.columns[0].ui.widthDataType + table.columns[0].ui.widthComment
-        if (width > state.COLUMN_WIDTH * 3) {
-          table.ui.width = state.TABLE_WIDTH + width - state.COLUMN_WIDTH * 3
+        let width = table.columns[0].ui.widthName +
+          table.columns[0].ui.widthDataType +
+          table.columns[0].ui.widthComment +
+          table.columns[0].ui.widthDomain
+        if (width > state.COLUMN_WIDTH * 4) {
+          table.ui.width = state.TABLE_WIDTH + width - state.COLUMN_WIDTH * 4
         } else {
           table.ui.width = state.TABLE_WIDTH
         }
@@ -295,5 +322,88 @@ export default {
         table.ui.width = state.TABLE_WIDTH
       }
     })
+  },
+  // 컬럼 편집모드
+  edit (state, data) {
+    JSLog('mutations', 'column', 'edit')
+    const table = util.getData(state.tables, data.tableId)
+    const column = util.getData(table.columns, data.columnId)
+    column.ui[data.current] = data.isRead
+    this.commit({ type: 'columnValidDomain' })
+  },
+  // 컬럼 도메인 힌트 show/hide
+  domainHintVisible (state, data) {
+    JSLog('mutations', 'column', 'domainHintVisible')
+    const table = util.getData(state.tables, data.tableId)
+    const column = util.getData(table.columns, data.columnId)
+    column.ui.isDomainHint = data.isDomainHint
+  },
+  // 컬럼 도메인 힌트 show/hide ALL
+  domainHintVisibleAll (state, data) {
+    JSLog('mutations', 'column', 'domainHintVisibleAll')
+    for (let table of state.tables) {
+      for (let column of table.columns) {
+        column.ui.isDomainHint = data.isDomainHint
+      }
+    }
+  },
+  // 컬럼 도메인 변경
+  changeDomain (state, data) {
+    JSLog('mutations', 'column', 'changeDomain')
+    ERD.core.event.onCursor('stop')
+    const undo = JSON.stringify(state)
+
+    const table = util.getData(state.tables, data.tableId)
+    const column = util.getData(table.columns, data.columnId)
+    const domain = util.getData(state.domains, data.domainId)
+    column.domain = domain.name
+    column.domainId = data.domainId
+    column.dataType = domain.dataType
+    column.default = domain.default
+
+    // 컬럼 데이터타입 관계 동기화
+    this.commit({
+      type: 'columnRelationSync',
+      tableId: data.tableId,
+      columnId: data.columnId
+    })
+
+    this.commit({ type: 'columnWidthReset' })
+    // undo, redo 등록
+    ERD.core.undoRedo.add({
+      undo: undo,
+      redo: JSON.stringify(state)
+    })
+  },
+  // 컬럼 도메인 유효성
+  validDomain (state) {
+    JSLog('mutations', 'column', 'validDomain')
+
+    state.tables.forEach(table => {
+      table.columns.forEach(column => {
+        if (column.domainId.trim() === '') {
+          column.domain = ''
+        }
+      })
+    })
+    this.commit({ type: 'columnWidthReset' })
+  },
+  // 컬럼 도메인 동기화
+  domainSync (state, data) {
+    JSLog('mutations', 'column', 'domainSync')
+    const table = util.getData(state.tables, data.tableId)
+    const column = util.getData(table.columns, data.columnId)
+    if (column.domainId.trim() !== '') {
+      this.commit({
+        type: 'domainChange',
+        isUpdated: true,
+        id: column.domainId,
+        domain: {
+          name: column.domain,
+          dataType: column.dataType,
+          default: column.default
+        }
+      })
+    }
   }
 }

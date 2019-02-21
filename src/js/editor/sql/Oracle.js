@@ -15,6 +15,7 @@ class Oracle {
 
   init (sql) {
     this.sql = sql
+    return this
   }
 
   ddl (database) {
@@ -177,6 +178,9 @@ class Oracle {
     buffer.push(`\t\tFOREIGN KEY (${this.sql.formatNames(columns.end)})`)
     buffer.push(`\t\tREFERENCES ${name}.${startTable.name} (${this.sql.formatNames(columns.start)});`)
   }
+
+  // 객체 정리
+  destroy () {}
 }
 
 export default new Oracle()

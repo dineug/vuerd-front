@@ -44,7 +44,36 @@ export const getZIndex = () => {
       max = v.ui.zIndex
     }
   })
+  ERD.store().state.memos.forEach(v => {
+    if (v.ui.zIndex > max) {
+      max = v.ui.zIndex
+    }
+  })
   return ++max
+}
+
+// 생성위치
+export const setPosition = (target) => {
+  let isPosition = true
+  while (isPosition) {
+    isPosition = false
+    for (let table of ERD.store().state.tables) {
+      if (table.ui.top === target.ui.top && table.ui.left === target.ui.left) {
+        isPosition = true
+        target.ui.top += 50
+        target.ui.left += 50
+        break
+      }
+    }
+    for (let memo of ERD.store().state.memos) {
+      if (memo.ui.top === target.ui.top && memo.ui.left === target.ui.left) {
+        isPosition = true
+        target.ui.top += 50
+        target.ui.left += 50
+        break
+      }
+    }
+  }
 }
 
 // 자동 이름 생성
@@ -190,12 +219,14 @@ export const columnMaxWidth = (state, columns) => {
   const max = {
     name: state.COLUMN_WIDTH,
     dataType: state.COLUMN_WIDTH,
-    comment: state.COLUMN_WIDTH
+    comment: state.COLUMN_WIDTH,
+    domain: state.COLUMN_WIDTH
   }
   columns.forEach(column => {
     const widthName = textWidthTag.text(column.name).width()
     const widthDataType = textWidthTag.text(column.dataType).width()
     const widthComment = textWidthTag.text(column.comment).width()
+    const widthDomain = textWidthTag.text(column.domain).width()
     if (max.name < widthName) {
       max.name = widthName
     }
@@ -204,6 +235,9 @@ export const columnMaxWidth = (state, columns) => {
     }
     if (max.comment < widthComment) {
       max.comment = widthComment
+    }
+    if (max.domain < widthDomain) {
+      max.domain = widthDomain
     }
   })
   return max

@@ -23,19 +23,23 @@ export default new Vuex.Store({
   mutations: {
     // 전체 import
     importData (state, data) {
-      JSLog('mutations', 'importData')
+      JSLog('mutations', 'model importData')
       Object.keys(state).forEach(key => {
         state[key] = data.state[key]
       })
     },
     // 모델 추가
-    modelAdd (state) {
+    modelAdd (state, data) {
       JSLog('mutations', 'modelAdd')
       const tab = {
         id: util.guid(),
         name: util.autoName(state.tabs, 'untitled'),
         active: false,
         store: storeERD()
+      }
+      if (data.isInit) {
+        tab.name = data.name
+        tab.store = data.store
       }
       state.tabs.push(tab)
       this.commit({

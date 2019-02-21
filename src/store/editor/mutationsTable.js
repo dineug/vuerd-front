@@ -25,21 +25,13 @@ export default {
         left: document.documentElement.scrollLeft + 200,
         width: state.TABLE_WIDTH,
         height: state.TABLE_HEIGHT,
-        zIndex: util.getZIndex()
+        zIndex: util.getZIndex(),
+        isReadName: true,
+        isReadComment: true
       }
     }
-    let isPosition = true
-    while (isPosition) {
-      isPosition = false
-      for (let table of state.tables) {
-        if (table.ui.top === newTable.ui.top && table.ui.left === newTable.ui.left) {
-          isPosition = true
-          newTable.ui.top += 50
-          newTable.ui.left += 50
-          break
-        }
-      }
-    }
+
+    util.setPosition(newTable)
     state.tables.push(newTable)
     this.commit({
       type: 'tableSelected',
@@ -57,6 +49,7 @@ export default {
   delete (state, data) {
     JSLog('mutations', 'table', 'delete')
     ERD.core.event.onCursor('stop')
+    ERD.core.event.onDraggable('stop')
     const undo = JSON.stringify(state)
 
     // 테이블 상세 그리드 해제
@@ -142,6 +135,7 @@ export default {
       state.tables.forEach(v => {
         v.ui.selected = data.id === v.id
       })
+      this.commit({ type: 'memoSelectedAllNone' })
     }
     // column 선택 제거
     if (!data.isColumnSelected) {
@@ -154,12 +148,18 @@ export default {
 
     if (data.isEvent) {
       const tableIds = []
+      const memoIds = []
       for (let targetTable of state.tables) {
         if (targetTable.ui.selected) {
           tableIds.push(targetTable.id)
         }
       }
-      ERD.core.event.onDraggable('start', tableIds)
+      for (let targetMemo of state.memos) {
+        if (targetMemo.ui.selected) {
+          memoIds.push(targetMemo.id)
+        }
+      }
+      ERD.core.event.onDraggable('start', tableIds, memoIds)
     }
 
     // 테이블추가에서 호출시 처리
@@ -222,7 +222,9 @@ export default {
   selectedAllNone (state, data) {
     JSLog('mutations', 'table', 'selectedAllNone')
     // 테이블 상세 그리드 해제
-    storeTable.commit({ type: 'delete' })
+    if (data.isTable) {
+      storeTable.commit({ type: 'delete' })
+    }
 
     state.tables.forEach(table => {
       if (data.isTable) table.ui.selected = false
@@ -252,5 +254,32 @@ export default {
     state.tables.forEach(table => {
       table.ui.selected = true
     })
+  },
+  // 테이블 편집모드
+  edit (state, data) {
+    JSLog('mutations', 'table', 'edit')
+    const table = util.getData(state.tables, data.id)
+    table.ui[data.current] = data.isRead
+  },
+  // 테이블 및 컬럼 edit all 해제
+  editAllNone (state, data) {
+    JSLog('mutations', 'table', 'editAllNone')
+
+    state.tables.forEach(table => {
+      if (data.isTable) {
+        table.ui.isReadName = true
+        table.ui.isReadComment = true
+      }
+      table.columns.forEach(column => {
+        if (data.isColumn) {
+          column.ui.isReadName = true
+          column.ui.isReadDataType = true
+          column.ui.isReadComment = true
+          column.ui.isReadDomain = true
+        }
+      })
+    })
+
+    this.commit({ type: 'columnValidDomain' })
   }
 }

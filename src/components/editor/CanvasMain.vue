@@ -25,17 +25,24 @@
           font-awesome-icon(icon="plus")
 
       .erd_table_header
-        input(v-model="table.name" v-focus
+        input(v-model="table.name" v-focus :readonly="table.ui.isReadName"
+        :class="{ edit: !table.ui.isReadName }"
         type="text" placeholder="table"
-        @keyup="onChangeTableGrid(table.id)"
-        @keydown="onChangeTableGrid(table.id)"
-        @keyup.enter="onEnterMove($event, 'tableName')")
+        @input="onChangeTableGrid(table.id)"
+        @keydown="onKeyArrowMoveHead($event, table.ui.isReadName)"
+        @keyup.enter="onEnterEditor($event, table.ui.isReadName, 'isReadName', table.id)"
+        @dblclick="onEnterEditor($event, table.ui.isReadName, 'isReadName', table.id)"
+        @focus="onFocus(table.id)"
+        @blur="onBlur")
 
-        input(v-model="table.comment"
+        input(v-model="table.comment" :readonly="table.ui.isReadComment"
+        :class="{ edit: !table.ui.isReadComment }"
         type="text" placeholder="comment"
-        @keyup="onChangeTableGrid(table.id)"
-        @keydown="onChangeTableGrid(table.id)"
-        @keyup.enter="onEnterMove($event, 'tableComment', table.id)")
+        @keydown="onKeyArrowMoveHead($event, table.ui.isReadComment)"
+        @keyup.enter="onEnterEditor($event, table.ui.isReadComment, 'isReadComment', table.id)"
+        @dblclick="onEnterEditor($event, table.ui.isReadComment, 'isReadComment', table.id)"
+        @focus="onFocus(table.id)"
+        @blur="onBlur")
 
       draggable(v-model="table.columns" :options="{group:'table'}"
       @start="onDraggableUndo"
@@ -53,22 +60,53 @@
             font-awesome-icon(icon="key")
 
           // 컬럼 이름
-          input(v-model="column.name" v-focus :id="`columnName_${column.id}`"
+          input(v-model="column.name" v-focus :id="`columnName_${column.id}`" :readonly="column.ui.isReadName"
+          :class="{ edit: !column.ui.isReadName }"
           :style="`width: ${column.ui.widthName}px;`"
           type="text" placeholder="column"
-          @keyup="onChangeTableGrid(table.id)"
-          @keyup.enter="onEnterMove($event, 'columnName')"
-          @keydown="onKeyArrowMove"
-          @focus="columnSelected(table.id, column.id)")
+          @input="onChangeTableGrid(table.id)"
+          @keyup.enter="onEnterEditor($event, column.ui.isReadName, 'isReadName', table.id, column.id)"
+          @dblclick="onEnterEditor($event, column.ui.isReadName, 'isReadName', table.id, column.id)"
+          @keydown="onKeyArrowMove($event, column.ui.isReadName)"
+          @focus="onFocus(table.id, column.id)"
+          @blur="onBlur")
+
+          // 도메인
+          div
+            input.erd_domain(v-model="column.domain" :readonly="column.ui.isReadDomain"
+            :class="{ edit: !column.ui.isReadDomain }"
+            :style="`width: ${column.ui.widthDomain}px;`"
+            type="text" placeholder="domain"
+            @input="onChangeTableGrid(table.id, column.id)"
+            @keyup="domainHintVisible($event, table.id, column.id, !column.ui.isReadDomain)"
+            @keyup.enter="onEnterEditor($event, column.ui.isReadDomain, 'isReadDomain', table.id, column.id)"
+            @dblclick="onEnterEditor($event, column.ui.isReadDomain, 'isReadDomain', table.id, column.id)"
+            @keydown="hintFocus($event, table.id, column.id, column.ui.isReadDomain, 'domain')"
+            @focus="onFocus(table.id, column.id)"
+            @blur="onBlur")
+
+            transition-group.erd_domain_list(v-if="column.ui.isDomainHint"
+            tag="ul"
+            @before-enter="onBeforeEnter"
+            @enter="onEnter"
+            @leave="onLeave")
+              li(v-for="domain in domains" :key="domain.id" :domain_id="domain.id"
+              @click="columnChangeDomain($event, table.id, column.id, domain.id)"
+              @mouseover="hintAddClass") {{ domain.name }}
 
           // 컬럼 데이터타입
           div
-            input.erd_data_type(v-model="column.dataType"
+            input.erd_data_type(v-model="column.dataType" :readonly="column.ui.isReadDataType"
+            :class="{ edit: !column.ui.isReadDataType }"
             :style="`width: ${column.ui.widthDataType}px;`"
             type="text" placeholder="dataType"
-            @keyup="dataTypeHintVisible($event, table.id, column.id, true)"
-            @keydown="dataTypeHintFocus($event, table.id, column.id)"
-            @focus="columnSelected(table.id, column.id)")
+            @input="onChangeTableGrid(table.id, column.id)"
+            @keyup="dataTypeHintVisible($event, table.id, column.id, !column.ui.isReadDataType)"
+            @keyup.enter="onEnterEditor($event, column.ui.isReadDataType, 'isReadDataType', table.id, column.id)"
+            @dblclick="onEnterEditor($event, column.ui.isReadDataType, 'isReadDataType', table.id, column.id)"
+            @keydown="hintFocus($event, table.id, column.id, column.ui.isReadDataType, 'dataType')"
+            @focus="onFocus(table.id, column.id)"
+            @blur="onBlur")
 
             transition-group.erd_data_type_list(v-if="column.ui.isDataTypeHint"
             tag="ul"
@@ -77,37 +115,59 @@
             @leave="onLeave")
               li(v-for="dataType in dataTypes" :key="dataType.name"
               @click="columnChangeDataType($event, table.id, column.id, dataType.name)"
-              @mouseover="dataTypeHintAddClass") {{ dataType.name }}
+              @mouseover="hintAddClass") {{ dataType.name }}
 
           // 컬럼 not-null
           input.erd_column_not_null(v-if="column.options.notNull"
           type="text" readonly value="N-N"
           @click="columnChangeNull(table.id, column.id)"
-          @keyup.32="columnChangeNull(table.id, column.id)"
-          @keyup.enter="onEnterMove($event, 'columnNotNull')"
-          @keydown="onKeyArrowMove"
-          @focus="columnSelected(table.id, column.id)")
+          @keyup.13="columnChangeNull(table.id, column.id)"
+          @keydown="onKeyArrowMove($event, true)"
+          @focus="onFocus(table.id, column.id)"
+          @blur="onBlur")
           input.erd_column_not_null(v-else
           type="text" readonly value="NULL"
           @click="columnChangeNull(table.id, column.id)"
-          @keyup.32="columnChangeNull(table.id, column.id)"
-          @keyup.enter="onEnterMove($event, 'columnNotNull')"
-          @keydown="onKeyArrowMove"
-          @focus="columnSelected(table.id, column.id)")
+          @keyup.13="columnChangeNull(table.id, column.id)"
+          @keydown="onKeyArrowMove($event, true)"
+          @focus="onFocus(table.id, column.id)"
+          @blur="onBlur")
 
           // 컬럼 comment
-          input(v-model="column.comment"
+          input(v-model="column.comment" :readonly="column.ui.isReadComment"
+          :class="{ edit: !column.ui.isReadComment }"
           :style="`width: ${column.ui.widthComment}px;`"
           type="text" placeholder="comment"
-          @keyup="onChangeTableGrid(table.id)"
-          @keyup.enter="onEnterMove($event, 'columnComment', table.id, column.id)"
-          @keydown="onKeyArrowMove"
-          @focus="columnSelected(table.id, column.id)")
+          @input="onChangeTableGrid(table.id)"
+          @keyup.enter="onEnterEditor($event, column.ui.isReadComment, 'isReadComment', table.id, column.id)"
+          @dblclick="onEnterEditor($event, column.ui.isReadComment, 'isReadComment', table.id, column.id)"
+          @keydown="onKeyArrowMove($event, column.ui.isReadComment)"
+          @keydown.9="columnLastTabFocus"
+          @focus="onFocus(table.id, column.id)"
+          @blur="onBlur")
 
           // 컬럼 삭제 버튼
           button(title="Alt + Delete"
           @click="columnDelete(table.id, column.id)")
             font-awesome-icon(icon="times")
+
+    // 메모
+    .erd_memo(v-for="memo in memos" :key="memo.id"
+    :class="{ selected: memo.ui.selected }"
+    :style="`top: ${memo.ui.top}px; left: ${memo.ui.left}px; z-index: ${memo.ui.zIndex};`"
+    @mousedown="memoSelected($event, memo.id)")
+      .erd_memo_top
+        button(title="Ctrl + Delete"
+        @click="memoDelete(memo.id)")
+          font-awesome-icon(icon="times")
+
+      textarea(v-model="memo.content"
+      :style="`width: ${memo.ui.width}px; height: ${memo.ui.height}px;`"
+      @mouseup="memoSize($event, memo.id)")
+
+      .erd_memo_bottom
+        button(@mousedown.stop="memoResize(memo.id)")
+          font-awesome-icon(icon="expand-arrows-alt")
 
   // ========================================== 미리보기 영역 이벤트 중첩방지 ==========================================
   .main_canvas(v-else
@@ -128,12 +188,22 @@
           font-awesome-icon(icon="key")
         input(v-model="column.name" type="text" placeholder="column" :style="`width: ${column.ui.widthName}px;`")
         div
+          input.erd_domain(v-model="column.domain" :class="{ edit: !column.ui.isReadDomain }" :style="`width: ${column.ui.widthDomain}px;`" type="text" placeholder="domain")
+        div
           input.erd_data_type(v-model="column.dataType" type="text" placeholder="dataType" :style="`width: ${column.ui.widthDataType}px;`")
         input.erd_column_not_null(v-if="column.options.notNull" type="text" readonly value="N-N")
         input.erd_column_not_null(v-else type="text" readonly value="NULL")
         input(v-model="column.comment" type="text" placeholder="comment" :style="`width: ${column.ui.widthComment}px;`")
         button(title="Delete")
           font-awesome-icon(icon="times")
+    .erd_memo(v-for="memo in memos" :key="memo.id" :class="{ selected: memo.ui.selected }" :style="`top: ${memo.ui.top}px; left: ${memo.ui.left}px; z-index: ${memo.ui.zIndex};`")
+      .erd_memo_top
+        button(title="Ctrl + Delete")
+          font-awesome-icon(icon="times")
+      textarea(v-model="memo.content" :style="`width: ${memo.ui.width}px; height: ${memo.ui.height}px;`")
+      .erd_memo_bottom
+        button
+          font-awesome-icon(icon="expand-arrows-alt")
 </template>
 
 <script>
@@ -142,7 +212,6 @@ import ERD from '@/js/editor/ERD'
 import storeTable from '@/store/editor/table'
 import draggable from 'vuedraggable'
 import Velocity from 'velocity-animate'
-import * as util from '@/js/editor/util'
 
 export default {
   name: 'CanvasMain',
@@ -181,6 +250,9 @@ export default {
     tables () {
       return ERD.store().state.tables
     },
+    memos () {
+      return ERD.store().state.memos
+    },
     TABLE_WIDTH () {
       return ERD.store().state.TABLE_WIDTH
     },
@@ -195,6 +267,9 @@ export default {
     },
     dataTypes () {
       return ERD.store().state.dataTypes
+    },
+    domains () {
+      return ERD.store().state.searchDomains
     }
   },
   methods: {
@@ -239,6 +314,28 @@ export default {
         isEvent: true
       })
     },
+    // 포커스 이벤트
+    onFocus (tableId, columnId) {
+      if (columnId) {
+        this.columnSelected(tableId, columnId)
+      } else {
+        // 컬럼 selected 해제
+        ERD.store().commit({
+          type: 'tableSelectedAllNone',
+          isTable: false,
+          isColumn: true
+        })
+      }
+    },
+    // 포커스 out
+    onBlur () {
+      // 전체 수정모드 해제
+      ERD.store().commit({
+        type: 'tableEditAllNone',
+        isTable: true,
+        isColumn: true
+      })
+    },
     // 컬럼 선택 전역
     onColumnSelected (e, tableId, columnId) {
       // 데이터 타입 힌트 hide
@@ -251,6 +348,7 @@ export default {
       ERD.store().commit({
         type: 'tableSelected',
         id: tableId,
+        ctrlKey: e.ctrlKey,
         isColumnSelected: true
       })
       this.columnSelected(tableId, columnId)
@@ -296,63 +394,70 @@ export default {
         tableId: tableId,
         columnId: columnId
       })
-
-      this.onChangeTableGrid(tableId)
     },
-    // 데이터 타입 힌트 포커스
-    dataTypeHintFocus (e, tableId, columnId) {
-      // 힌트 포커스 이동
-      const $li = $(e.target).parent('div').find('li')
-      const index = $li.filter('.selected').index()
-      const len = $li.length
-      switch (e.keyCode) {
-        case 38: // key: Arrow up
-          e.preventDefault()
-          if (index === -1) {
-            $li.eq(len - 1).addClass('selected')
-          } else {
-            $li.eq(index).removeClass('selected')
-            $li.eq(index - 1).addClass('selected')
-          }
-          break
-        case 40: // key: Arrow down
-          e.preventDefault()
-          if (index === -1) {
-            $li.eq(0).addClass('selected')
-          } else {
-            $li.eq(index).removeClass('selected')
-            $li.eq(index + 1 === len ? 0 : index + 1).addClass('selected')
-          }
-          break
-        case 13: // key: Enter
-          if (e.altKey) {
-            ERD.store().commit({
-              type: 'columnDataTypeHintVisibleAll',
-              isDataTypeHint: false
-            })
-          } else {
-            if (index !== -1) {
-              ERD.store().commit({
-                type: 'columnChangeDataType',
-                tableId: tableId,
-                columnId: columnId,
-                dataType: $li.filter('.selected').text()
-              })
+    // 데이터 타입, 도메인 힌트 포커스
+    hintFocus (e, tableId, columnId, isRead, type) {
+      if (!isRead) {
+        // 힌트 포커스 이동
+        const $li = $(e.target).parent('div').find('li')
+        const index = $li.filter('.selected').index()
+        const len = $li.length
+        switch (e.keyCode) {
+          case 38: // key: Arrow up
+            e.preventDefault()
+            if (index === -1) {
+              $li.eq(len - 1).addClass('selected')
+            } else {
+              $li.eq(index).removeClass('selected')
+              $li.eq(index - 1).addClass('selected')
             }
-          }
-          break
-        case 37: // key: Arrow left
-        case 39: // key: Arrow right
-        case 9: // key: Tab
-          ERD.store().commit({
-            type: 'columnDataTypeHintVisibleAll',
-            isDataTypeHint: false
-          })
-          this.onKeyArrowMove(e)
-          break
-        default:
-          this.onKeyArrowMove(e)
+            break
+          case 40: // key: Arrow down
+            e.preventDefault()
+            if (index === -1) {
+              $li.eq(0).addClass('selected')
+            } else {
+              $li.eq(index).removeClass('selected')
+              $li.eq(index + 1 === len ? 0 : index + 1).addClass('selected')
+            }
+            break
+          case 39: // key: Arrow right
+            e.preventDefault()
+            if (e.altKey) {
+              if (type === 'dataType') {
+                ERD.store().commit({
+                  type: 'columnDataTypeHintVisibleAll',
+                  isDataTypeHint: false
+                })
+              } else if (type === 'domain') {
+                ERD.store().commit({
+                  type: 'columnDomainHintVisibleAll',
+                  isDomainHint: false
+                })
+              }
+            } else {
+              if (index !== -1) {
+                if (type === 'dataType') {
+                  ERD.store().commit({
+                    type: 'columnChangeDataType',
+                    tableId: tableId,
+                    columnId: columnId,
+                    dataType: $li.filter('.selected').text()
+                  })
+                } else if (type === 'domain') {
+                  ERD.store().commit({
+                    type: 'columnChangeDomain',
+                    tableId: tableId,
+                    columnId: columnId,
+                    domainId: $li.filter('.selected').attr('domain_id')
+                  })
+                }
+              }
+            }
+            break
+        }
       }
+      this.onKeyArrowMove(e, isRead)
     },
     // 데이터변경
     columnChangeDataType (e, tableId, columnId, dataType) {
@@ -362,94 +467,179 @@ export default {
         columnId: columnId,
         dataType: dataType
       })
-      e.target.parentNode.parentNode.childNodes[0].focus()
+      $(e.target).parents('div').find('.erd_data_type').focus()
+      ERD.store().commit({
+        type: 'columnEdit',
+        tableId: tableId,
+        columnId: columnId,
+        current: 'isReadDataType',
+        isRead: false
+      })
+    },
+    // 도메인변경
+    columnChangeDomain (e, tableId, columnId, domainId) {
+      ERD.store().commit({
+        type: 'columnChangeDomain',
+        tableId: tableId,
+        columnId: columnId,
+        domainId: domainId
+      })
+      $(e.target).parents('div').find('.erd_domain').focus()
+      ERD.store().commit({
+        type: 'columnEdit',
+        tableId: tableId,
+        columnId: columnId,
+        current: 'isReadDomain',
+        isRead: false
+      })
+    },
+    // 도메인 힌트 show/hide
+    domainHintVisible (e, tableId, columnId, isDomainHint) {
+      if (e.keyCode === 27) { // key: ESC
+        ERD.store().commit({
+          type: 'columnDomainHintVisibleAll',
+          isDomainHint: false
+        })
+      } else {
+        ERD.store().commit({
+          type: 'columnDomainHintVisible',
+          tableId: tableId,
+          columnId: columnId,
+          isDomainHint: isDomainHint
+        })
+      }
+
+      if (e.keyCode !== 38 && e.keyCode !== 40) {
+        // 도메인 검색 정렬
+        if (isDomainHint) {
+          ERD.store().commit({
+            type: 'changeDomainHint',
+            key: e.target.value
+          })
+        }
+      }
     },
     // 컬럼 포커스 이동 이벤트
-    onEnterMove (e, current, tableId, columnId) {
+    onEnterEditor (e, isRead, current, tableId, columnId) {
       if (!e.altKey) {
-        switch (current) {
-          case 'tableName':
-            $(e.target).parent('.erd_table_header').find('input:eq(1)').focus()
+        if (columnId === undefined) {
+          ERD.store().commit({
+            type: 'tableEdit',
+            id: tableId,
+            current: current,
+            isRead: !isRead
+          })
+        } else {
+          ERD.store().commit({
+            type: 'columnEdit',
+            tableId: tableId,
+            columnId: columnId,
+            current: current,
+            isRead: !isRead
+          })
+        }
+      }
+      if (!isRead) {
+        ERD.store().commit({
+          type: 'columnDataTypeHintVisibleAll',
+          isDataTypeHint: false
+        })
+        ERD.store().commit({
+          type: 'columnDomainHintVisibleAll',
+          isDomainHint: false
+        })
+      }
+    },
+    // 테이블명, 코멘트 영역
+    onKeyArrowMoveHead (e, isRead) {
+      if (isRead) {
+        const $divColumns = $(e.target).parents('.erd_table').find('.erd_column')
+        const $input = $(e.target).parents('.erd_table_header').find('input')
+        const rowIndex = $input.index(e.target)
+        switch (e.keyCode) {
+          case 37: // key: Arrow left
+            e.preventDefault()
+            if (rowIndex === 0) {
+              $input[1].focus()
+            } else {
+              $input[0].focus()
+            }
             break
-          case 'tableComment':
-            const $divColumns = $(e.target).parents('.erd_table').find('.erd_column')
+          case 39: // key: Arrow right
+            e.preventDefault()
+            if (rowIndex === 0) {
+              $input[1].focus()
+            } else {
+              $input[0].focus()
+            }
+            break
+          case 38: // key: Arrow up
+            e.preventDefault()
             if ($divColumns.length !== 0) {
-              $divColumns.first().find('input:eq(0)').focus()
-            } else {
-              ERD.store().commit({
-                type: 'columnAdd',
-                id: tableId
-              })
+              $divColumns.last().find('input')[0].focus()
             }
             break
-          case 'columnName':
-            if (!e.altKey) {
-              $(e.target).parent('.erd_column').find('input:eq(1)').focus()
-            }
-            break
-          case 'columnNotNull':
-            $(e.target).parent('.erd_column').find('input:eq(3)').focus()
-            break
-          case 'columnComment':
-            const table = util.getData(ERD.store().state.tables, tableId)
-            if (table.columns[table.columns.length - 1].id === columnId) {
-              ERD.store().commit({
-                type: 'columnAdd',
-                id: tableId
-              })
-            } else {
-              $(e.target).parent('.erd_column').next().find('input:eq(0)').focus()
+          case 40: // key: Arrow down
+            e.preventDefault()
+            if ($divColumns.length !== 0) {
+              $divColumns.first().find('input')[0].focus()
             }
             break
         }
       }
     },
     // 컬럼 화살표 이동
-    onKeyArrowMove (e) {
-      const $divColumns = $(e.target).parents('.erd_table').find('.erd_column')
-      const $input = $(e.target).parents('.erd_column').find('input')
-      const rowIndex = $input.index(e.target)
-      const index = $divColumns.filter('.selected').index()
-      const len = $divColumns.length
-      switch (e.keyCode) {
-        case 38: // key: Arrow up
-          e.preventDefault()
-          if (index === -1) {
-            $divColumns.eq(len - 1).find('input').eq(rowIndex).focus()
-          } else {
-            $divColumns.eq(index - 1).find('input').eq(rowIndex).focus()
-          }
-          break
-        case 40: // key: Arrow down
-          e.preventDefault()
-          if (index === -1) {
-            $divColumns.eq(0).find('input').eq(rowIndex).focus()
-          } else {
-            $divColumns.eq(index + 1 === len ? 0 : index + 1).find('input').eq(rowIndex).focus()
-          }
-          break
-        case 37: // key: Arrow left
-          e.preventDefault()
-          if (rowIndex === -1) {
-            $divColumns.eq(index).find('input').eq(2).focus()
-          } else {
+    onKeyArrowMove (e, isRead) {
+      if (isRead) {
+        const $tableInput = $(e.target).parents('.erd_table').find('.erd_table_header').find('input')
+        const $divColumns = $(e.target).parents('.erd_table').find('.erd_column')
+        const $input = $(e.target).parents('.erd_column').find('input')
+        const rowIndex = $input.index(e.target)
+        const index = $divColumns.filter('.selected').index()
+        const len = $divColumns.length
+        switch (e.keyCode) {
+          case 38: // key: Arrow up
+            e.preventDefault()
+            if (index === 0) {
+              $tableInput[0].focus()
+            } else {
+              $divColumns.eq(index - 1).find('input').eq(rowIndex).focus()
+            }
+            break
+          case 40: // key: Arrow down
+            e.preventDefault()
+            if (index === len - 1) {
+              $tableInput[0].focus()
+            } else {
+              $divColumns.eq(index + 1 === len ? 0 : index + 1).find('input').eq(rowIndex).focus()
+            }
+            break
+          case 37: // key: Arrow left
+            e.preventDefault()
             $divColumns.eq(index).find('input').eq(rowIndex - 1).focus()
-          }
-          break
-        case 39: // key: Arrow right
-          e.preventDefault()
-          if (rowIndex === -1) {
-            $divColumns.eq(index).find('input').eq(0).focus()
-          } else {
-            $divColumns.eq(index).find('input').eq(rowIndex + 1 === 4 ? 0 : rowIndex + 1).focus()
-          }
-          break
-        default:
-          ERD.store().commit({ type: 'columnWidthReset' })
+            break
+          case 39: // key: Arrow right
+            e.preventDefault()
+            $divColumns.eq(index).find('input').eq(rowIndex + 1 === $input.length ? 0 : rowIndex + 1).focus()
+            break
+        }
       }
     },
-    // 마우스 hover addClass
-    dataTypeHintAddClass (e) {
+    // 컬럼 마지막 tab 포커스처리
+    columnLastTabFocus (e) {
+      e.preventDefault()
+      const $tableInput = $(e.target).parents('.erd_table').find('.erd_table_header').find('input')
+      const $divColumns = $(e.target).parents('.erd_table').find('.erd_column')
+      const index = $divColumns.filter('.selected').index()
+      const len = $divColumns.length
+      if (index === len - 1) {
+        $tableInput[0].focus()
+      } else {
+        $divColumns.eq(index + 1).find('input:eq(0)').focus()
+      }
+    },
+    // 힌트 hover addClass
+    hintAddClass (e) {
       $(e.target).parent('ul').find('li').removeClass('selected')
       $(e.target).addClass('selected')
     },
@@ -469,12 +659,18 @@ export default {
       })
     },
     // 테이블 그리드 동기화
-    onChangeTableGrid (tableId) {
+    onChangeTableGrid (tableId, columnId) {
       storeTable.commit({
         type: 'active',
         id: tableId
       })
-      // 동적 width 처리
+      if (columnId) {
+        ERD.store().commit({
+          type: 'columnDomainSync',
+          tableId: tableId,
+          columnId: columnId
+        })
+      }
       ERD.store().commit({ type: 'columnWidthReset' })
     },
     // 데이터 타입 힌트 애니메이션
@@ -501,6 +697,35 @@ export default {
           { complete: done }
         )
       }, delay)
+    },
+    // 메모 선택
+    memoSelected (e, id) {
+      ERD.store().commit({
+        type: 'memoSelected',
+        id: id,
+        ctrlKey: e.ctrlKey,
+        isEvent: true
+      })
+    },
+    // 메모 현재 사이즈 반영
+    memoSize (e, id) {
+      ERD.store().commit({
+        type: 'memoSetWidthHeight',
+        id: id,
+        width: e.target.offsetWidth,
+        height: e.target.offsetHeight
+      })
+    },
+    // 메모 삭제
+    memoDelete (id) {
+      ERD.store().commit({
+        type: 'memoDelete',
+        id: id
+      })
+    },
+    // 메모 리사이징
+    memoResize (id) {
+      ERD.core.event.onMemoResize('start', id)
     }
   },
   mounted () {
@@ -520,7 +745,7 @@ export default {
   $key_fk: #dda8b1;
   $key_pfk: #60b9c4;
 
-  input {
+  input, textarea {
     background-color: #191919;
     color: white;
   }
@@ -578,9 +803,10 @@ export default {
         box-sizing: border-box;
         margin-bottom: 15px;
         display: inline-block;
+        width: 100%;
 
         input {
-          width: 120px;
+          width: 46%;
           height: 100%;
           font-size: 12px;
           margin-right: 10px;
@@ -641,6 +867,24 @@ export default {
           }
         }
 
+        /* 도메인 힌트 */
+        .erd_domain_list {
+          position: absolute;
+          color: #a2a2a2;
+          background-color: #191919;
+          opacity: 0.9;
+          margin-top: 25px;
+
+          li {
+            cursor: pointer;
+
+            &.selected {
+              color: white;
+              background-color: $selected;
+            }
+          }
+        }
+
         /* column key */
         .erd_column_key {
           width: 16px;
@@ -670,10 +914,67 @@ export default {
         }
       }
 
-      /* 테이블 선택시 */
-      &.selected {
-        border: solid $table_selected 1px;
-        box-shadow: 0 1px 6px $table_selected;
+      .edit {
+        border-bottom: solid greenyellow 1px;
+      }
+    }
+
+    /* 테이블 선택시 */
+    .erd_table.selected, .erd_memo.selected {
+      border: solid $table_selected 1px;
+      box-shadow: 0 1px 6px $table_selected;
+    }
+
+    .erd_memo {
+      position: absolute;
+      box-sizing: border-box;
+      background-color: $table_background;
+      opacity: 0.9;
+      z-index: 1;
+
+      .erd_memo_top {
+        padding: 10px;
+        button {
+          width: 17px;
+          height: 17px;
+          font-size: .70em;
+          float: right;
+          margin-left: 5px;
+          border: none;
+          outline: none;
+          cursor: pointer;
+          border-radius: 50%;
+
+          &:first-child {
+            color: #9B0005;
+            background-color: #9B0005;
+          }
+          &:hover {
+            color: white;
+          }
+        }
+      }
+
+      .erd_memo_bottom {
+        button {
+          width: 17px;
+          height: 17px;
+          font-size: .70em;
+          float: right;
+          margin-left: 5px;
+          border: none;
+          outline: none;
+          cursor: nw-resize;
+          color: white;
+          background-color: $table_background;
+        }
+      }
+
+      textarea {
+        box-sizing: border-box;
+        padding: 10px;
+        border: none;
+        resize: none;
       }
     }
   }
