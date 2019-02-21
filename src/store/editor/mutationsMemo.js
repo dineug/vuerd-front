@@ -41,6 +41,8 @@ export default {
   delete (state, data) {
     JSLog('mutations', 'memo', 'delete')
     ERD.core.event.onCursor('stop')
+    ERD.core.event.onDraggable('stop')
+    ERD.core.event.onMemoResize('stop')
     const undo = JSON.stringify(state)
 
     for (let i in state.memos) {

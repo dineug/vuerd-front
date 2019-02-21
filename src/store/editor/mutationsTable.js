@@ -49,6 +49,7 @@ export default {
   delete (state, data) {
     JSLog('mutations', 'table', 'delete')
     ERD.core.event.onCursor('stop')
+    ERD.core.event.onDraggable('stop')
     const undo = JSON.stringify(state)
 
     // 테이블 상세 그리드 해제
