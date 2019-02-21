@@ -222,7 +222,9 @@ export default {
   selectedAllNone (state, data) {
     JSLog('mutations', 'table', 'selectedAllNone')
     // 테이블 상세 그리드 해제
-    storeTable.commit({ type: 'delete' })
+    if (data.isTable) {
+      storeTable.commit({ type: 'delete' })
+    }
 
     state.tables.forEach(table => {
       if (data.isTable) table.ui.selected = false
