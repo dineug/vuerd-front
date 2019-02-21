@@ -293,7 +293,6 @@ export default {
         type: 'tableSelected',
         id: tableId,
         ctrlKey: e.ctrlKey,
-        isEvent: true,
         isColumnSelected: true
       })
       this.columnSelected(tableId, columnId)
@@ -396,7 +395,14 @@ export default {
         columnId: columnId,
         dataType: dataType
       })
-      e.target.parentNode.parentNode.childNodes[0].focus()
+      $(e.target).parents('div').find('.erd_data_type').focus()
+      ERD.store().commit({
+        type: 'columnEdit',
+        tableId: tableId,
+        columnId: columnId,
+        current: 'isReadDataType',
+        isRead: false
+      })
     },
     // 컬럼 포커스 이동 이벤트
     onEnterEditor (e, isRead, current, tableId, columnId) {
@@ -642,9 +648,10 @@ export default {
         box-sizing: border-box;
         margin-bottom: 15px;
         display: inline-block;
+        width: 100%;
 
         input {
-          width: 120px;
+          width: 46%;
           height: 100%;
           font-size: 12px;
           margin-right: 10px;
