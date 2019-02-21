@@ -422,7 +422,7 @@ export default {
               $li.eq(index + 1 === len ? 0 : index + 1).addClass('selected')
             }
             break
-          case 39: // key: Arrow right
+          case 13: // key: Enter
             e.preventDefault()
             if (e.altKey) {
               if (type === 'dataType') {
@@ -437,7 +437,7 @@ export default {
                 })
               }
             } else {
-              if (index !== -1) {
+              if (e.ctrlKey && index !== -1) {
                 if (type === 'dataType') {
                   ERD.store().commit({
                     type: 'columnChangeDataType',
@@ -520,7 +520,7 @@ export default {
         }
       }
     },
-    // 컬럼 포커스 이동 이벤트
+    // 컬럼 수정 이벤트
     onEnterEditor (e, isRead, current, tableId, columnId) {
       if (!e.altKey) {
         if (columnId === undefined) {
@@ -531,16 +531,18 @@ export default {
             isRead: !isRead
           })
         } else {
-          ERD.store().commit({
-            type: 'columnEdit',
-            tableId: tableId,
-            columnId: columnId,
-            current: current,
-            isRead: !isRead
-          })
+          if (!e.ctrlKey) {
+            ERD.store().commit({
+              type: 'columnEdit',
+              tableId: tableId,
+              columnId: columnId,
+              current: current,
+              isRead: !isRead
+            })
+          }
         }
       }
-      if (!isRead) {
+      if (!e.ctrlKey && !isRead) {
         ERD.store().commit({
           type: 'columnDataTypeHintVisibleAll',
           isDataTypeHint: false
