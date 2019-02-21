@@ -110,6 +110,13 @@ class Event {
             isDataTypeHint: false
           })
         }
+        // 도메인 힌트 hide
+        if (!$(e.target).closest('.erd_domain_list').length) {
+          this.core.erd.store().commit({
+            type: 'columnDomainHintVisibleAll',
+            isDomainHint: false
+          })
+        }
         // 테이블 및 컬럼 selected 해제
         if (!$(e.target).closest('.erd_table').length &&
           !$(e.target).closest('.erd_memo').length &&
@@ -489,6 +496,8 @@ class Event {
                   name: util.autoName(table.columns, v.name),
                   comment: v.comment,
                   dataType: v.dataType,
+                  domain: v.domain,
+                  domainId: v.domainId,
                   options: {
                     notNull: true
                   },
@@ -734,6 +743,17 @@ class Event {
     this.core.erd.store().commit({
       type: 'columnDataTypeHintVisibleAll',
       isDataTypeHint: false
+    })
+    // 도메인 hide
+    this.core.erd.store().commit({
+      type: 'columnDomainHintVisibleAll',
+      isDomainHint: false
+    })
+    // edit 해제
+    this.core.erd.store().commit({
+      type: 'tableEditAllNone',
+      isTable: true,
+      isColumn: true
     })
   }
 

@@ -219,12 +219,14 @@ export const columnMaxWidth = (state, columns) => {
   const max = {
     name: state.COLUMN_WIDTH,
     dataType: state.COLUMN_WIDTH,
-    comment: state.COLUMN_WIDTH
+    comment: state.COLUMN_WIDTH,
+    domain: state.COLUMN_WIDTH
   }
   columns.forEach(column => {
     const widthName = textWidthTag.text(column.name).width()
     const widthDataType = textWidthTag.text(column.dataType).width()
     const widthComment = textWidthTag.text(column.comment).width()
+    const widthDomain = textWidthTag.text(column.domain).width()
     if (max.name < widthName) {
       max.name = widthName
     }
@@ -233,6 +235,9 @@ export const columnMaxWidth = (state, columns) => {
     }
     if (max.comment < widthComment) {
       max.comment = widthComment
+    }
+    if (max.domain < widthDomain) {
+      max.domain = widthDomain
     }
   })
   return max

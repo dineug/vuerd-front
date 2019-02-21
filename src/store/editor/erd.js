@@ -6,6 +6,7 @@ import table from './mutationsTable'
 import column from './mutationsColumn'
 import line from './mutationsLine'
 import memo from './mutationsMemo'
+import domain from './mutationsDomain'
 import * as util from '@/js/editor/util'
 
 JSLog('store loaded', 'erd')
@@ -15,7 +16,7 @@ Vue.use(Vuex)
 export default () => {
   return new Vuex.Store({
     state: {
-      TABLE_WIDTH: 290,
+      TABLE_WIDTH: 350,
       TABLE_HEIGHT: 84,
       COLUMN_WIDTH: 50,
       COLUMN_HEIGHT: 25,
@@ -28,7 +29,9 @@ export default () => {
       dataTypes: dataType['MySQL'],
       tables: [],
       lines: [],
-      memos: []
+      memos: [],
+      domains: [],
+      searchDomains: []
     },
     mutations: {
       // DB 변경
@@ -41,6 +44,13 @@ export default () => {
       changeDataTypeHint (state, data) {
         JSLog('mutations', 'erd', 'changeDataTypeHint')
         state.dataTypes = dataType[state.DBType].filter(v => {
+          return v.name.toLowerCase().indexOf(data.key.toLowerCase()) !== -1
+        })
+      },
+      // 도메인 검색
+      changeDomainHint (state, data) {
+        JSLog('mutations', 'erd', 'changeDomainHint')
+        state.searchDomains = state.domains.filter(v => {
           return v.name.toLowerCase().indexOf(data.key.toLowerCase()) !== -1
         })
       },
@@ -97,6 +107,16 @@ export default () => {
       columnWidthReset: column.widthReset,
       // 컬럼 편집모드
       columnEdit: column.edit,
+      // 컬럼 도메인 힌트 show/hide
+      columnDomainHintVisible: column.domainHintVisible,
+      // 컬럼 도메인 힌트 show/hide ALL
+      columnDomainHintVisibleAll: column.domainHintVisibleAll,
+      // 컬럼 도메인 변경
+      columnChangeDomain: column.changeDomain,
+      // 컬럼 도메인 유효성
+      columnValidDomain: column.validDomain,
+      // 컬럼 도메인 동기화
+      columnDomainSync: column.domainSync,
       // 관계 생성
       lineAdd: line.add,
       // 관계 drawing
@@ -126,7 +146,13 @@ export default () => {
       // 메모 전체 선택
       memoSelectedAll: memo.selectedAll,
       // 메모 리사이징
-      memoResize: memo.resize
+      memoResize: memo.resize,
+      // 도메인 추가
+      domainAdd: domain.add,
+      // 도메인 삭제
+      domainDelete: domain.delete,
+      // 도메인값 변경
+      domainChange: domain.change
     }
   })
 }

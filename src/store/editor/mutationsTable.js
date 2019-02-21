@@ -273,8 +273,11 @@ export default {
           column.ui.isReadName = true
           column.ui.isReadDataType = true
           column.ui.isReadComment = true
+          column.ui.isReadDomain = true
         }
       })
     })
+
+    this.commit({ type: 'columnValidDomain' })
   }
 }

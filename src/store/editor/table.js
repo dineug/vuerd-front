@@ -24,6 +24,7 @@ export default new Vuex.Store({
       if (state.table) {
         state.table.columns.forEach(column => {
           state.rows.push({
+            id: column.id,
             name: column.name,
             dataType: column.dataType,
             primaryKey: column.options.primaryKey,
@@ -54,13 +55,13 @@ export default new Vuex.Store({
           state.table.columns.forEach((column, i) => {
             if (i === data.rowKey) {
               column.ui.selected = true
-              ERD.store().commit({
-                type: 'columnKey',
-                key: 'pk'
-              })
             } else {
               column.ui.selected = false
             }
+          })
+          ERD.store().commit({
+            type: 'columnKey',
+            key: 'pk'
           })
         } else {
           state.table.columns.forEach((column, i) => {
@@ -75,6 +76,14 @@ export default new Vuex.Store({
             // 컬럼 데이터타입 관계 동기화
             ERD.store().commit({
               type: 'columnRelationSync',
+              tableId: state.table.id,
+              columnId: state.table.columns[data.rowKey].id
+            })
+          }
+          // 도메인 동기화
+          if (data.column.dataType || data.column.default) {
+            ERD.store().commit({
+              type: 'columnDomainSync',
               tableId: state.table.id,
               columnId: state.table.columns[data.rowKey].id
             })

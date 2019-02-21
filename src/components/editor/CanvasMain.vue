@@ -38,7 +38,6 @@
         input(v-model="table.comment" :readonly="table.ui.isReadComment"
         :class="{ edit: !table.ui.isReadComment }"
         type="text" placeholder="comment"
-        @input="onChangeTableGrid(table.id)"
         @keydown="onKeyArrowMoveHead($event, table.ui.isReadComment)"
         @keyup.enter="onEnterEditor($event, table.ui.isReadComment, 'isReadComment', table.id)"
         @dblclick="onEnterEditor($event, table.ui.isReadComment, 'isReadComment', table.id)"
@@ -72,17 +71,40 @@
           @focus="onFocus(table.id, column.id)"
           @blur="onBlur")
 
+          // 도메인
+          div
+            input.erd_domain(v-model="column.domain" :readonly="column.ui.isReadDomain"
+            :class="{ edit: !column.ui.isReadDomain }"
+            :style="`width: ${column.ui.widthDomain}px;`"
+            type="text" placeholder="domain"
+            @input="onChangeTableGrid(table.id, column.id)"
+            @keyup="domainHintVisible($event, table.id, column.id, !column.ui.isReadDomain)"
+            @keyup.enter="onEnterEditor($event, column.ui.isReadDomain, 'isReadDomain', table.id, column.id)"
+            @dblclick="onEnterEditor($event, column.ui.isReadDomain, 'isReadDomain', table.id, column.id)"
+            @keydown="hintFocus($event, table.id, column.id, column.ui.isReadDomain, 'domain')"
+            @focus="onFocus(table.id, column.id)"
+            @blur="onBlur")
+
+            transition-group.erd_domain_list(v-if="column.ui.isDomainHint"
+            tag="ul"
+            @before-enter="onBeforeEnter"
+            @enter="onEnter"
+            @leave="onLeave")
+              li(v-for="domain in domains" :key="domain.id" :domain_id="domain.id"
+              @click="columnChangeDomain($event, table.id, column.id, domain.id)"
+              @mouseover="hintAddClass") {{ domain.name }}
+
           // 컬럼 데이터타입
           div
             input.erd_data_type(v-model="column.dataType" :readonly="column.ui.isReadDataType"
             :class="{ edit: !column.ui.isReadDataType }"
             :style="`width: ${column.ui.widthDataType}px;`"
             type="text" placeholder="dataType"
-            @input="onChangeTableGrid(table.id)"
+            @input="onChangeTableGrid(table.id, column.id)"
             @keyup="dataTypeHintVisible($event, table.id, column.id, !column.ui.isReadDataType)"
             @keyup.enter="onEnterEditor($event, column.ui.isReadDataType, 'isReadDataType', table.id, column.id)"
             @dblclick="onEnterEditor($event, column.ui.isReadDataType, 'isReadDataType', table.id, column.id)"
-            @keydown="dataTypeHintFocus($event, table.id, column.id, column.ui.isReadDataType)"
+            @keydown="hintFocus($event, table.id, column.id, column.ui.isReadDataType, 'dataType')"
             @focus="onFocus(table.id, column.id)"
             @blur="onBlur")
 
@@ -93,7 +115,7 @@
             @leave="onLeave")
               li(v-for="dataType in dataTypes" :key="dataType.name"
               @click="columnChangeDataType($event, table.id, column.id, dataType.name)"
-              @mouseover="dataTypeHintAddClass") {{ dataType.name }}
+              @mouseover="hintAddClass") {{ dataType.name }}
 
           // 컬럼 not-null
           input.erd_column_not_null(v-if="column.options.notNull"
@@ -165,6 +187,8 @@
         .erd_column_key(:class="{ pk: column.ui.pk, fk: column.ui.fk, pfk: column.ui.pfk }")
           font-awesome-icon(icon="key")
         input(v-model="column.name" type="text" placeholder="column" :style="`width: ${column.ui.widthName}px;`")
+        div
+          input.erd_domain(v-model="column.domain" :class="{ edit: !column.ui.isReadDomain }" :style="`width: ${column.ui.widthDomain}px;`" type="text" placeholder="domain")
         div
           input.erd_data_type(v-model="column.dataType" type="text" placeholder="dataType" :style="`width: ${column.ui.widthDataType}px;`")
         input.erd_column_not_null(v-if="column.options.notNull" type="text" readonly value="N-N")
@@ -243,6 +267,9 @@ export default {
     },
     dataTypes () {
       return ERD.store().state.dataTypes
+    },
+    domains () {
+      return ERD.store().state.searchDomains
     }
   },
   methods: {
@@ -368,8 +395,8 @@ export default {
         columnId: columnId
       })
     },
-    // 데이터 타입 힌트 포커스
-    dataTypeHintFocus (e, tableId, columnId, isRead) {
+    // 데이터 타입, 도메인 힌트 포커스
+    hintFocus (e, tableId, columnId, isRead, type) {
       if (!isRead) {
         // 힌트 포커스 이동
         const $li = $(e.target).parent('div').find('li')
@@ -397,18 +424,34 @@ export default {
           case 39: // key: Arrow right
             e.preventDefault()
             if (e.altKey) {
-              ERD.store().commit({
-                type: 'columnDataTypeHintVisibleAll',
-                isDataTypeHint: false
-              })
+              if (type === 'dataType') {
+                ERD.store().commit({
+                  type: 'columnDataTypeHintVisibleAll',
+                  isDataTypeHint: false
+                })
+              } else if (type === 'domain') {
+                ERD.store().commit({
+                  type: 'columnDomainHintVisibleAll',
+                  isDomainHint: false
+                })
+              }
             } else {
               if (index !== -1) {
-                ERD.store().commit({
-                  type: 'columnChangeDataType',
-                  tableId: tableId,
-                  columnId: columnId,
-                  dataType: $li.filter('.selected').text()
-                })
+                if (type === 'dataType') {
+                  ERD.store().commit({
+                    type: 'columnChangeDataType',
+                    tableId: tableId,
+                    columnId: columnId,
+                    dataType: $li.filter('.selected').text()
+                  })
+                } else if (type === 'domain') {
+                  ERD.store().commit({
+                    type: 'columnChangeDomain',
+                    tableId: tableId,
+                    columnId: columnId,
+                    domainId: $li.filter('.selected').attr('domain_id')
+                  })
+                }
               }
             }
             break
@@ -432,6 +475,49 @@ export default {
         current: 'isReadDataType',
         isRead: false
       })
+    },
+    // 도메인변경
+    columnChangeDomain (e, tableId, columnId, domainId) {
+      ERD.store().commit({
+        type: 'columnChangeDomain',
+        tableId: tableId,
+        columnId: columnId,
+        domainId: domainId
+      })
+      $(e.target).parents('div').find('.erd_domain').focus()
+      ERD.store().commit({
+        type: 'columnEdit',
+        tableId: tableId,
+        columnId: columnId,
+        current: 'isReadDomain',
+        isRead: false
+      })
+    },
+    // 도메인 힌트 show/hide
+    domainHintVisible (e, tableId, columnId, isDomainHint) {
+      if (e.keyCode === 27) { // key: ESC
+        ERD.store().commit({
+          type: 'columnDomainHintVisibleAll',
+          isDomainHint: false
+        })
+      } else {
+        ERD.store().commit({
+          type: 'columnDomainHintVisible',
+          tableId: tableId,
+          columnId: columnId,
+          isDomainHint: isDomainHint
+        })
+      }
+
+      if (e.keyCode !== 38 && e.keyCode !== 40) {
+        // 도메인 검색 정렬
+        if (isDomainHint) {
+          ERD.store().commit({
+            type: 'changeDomainHint',
+            key: e.target.value
+          })
+        }
+      }
     },
     // 컬럼 포커스 이동 이벤트
     onEnterEditor (e, isRead, current, tableId, columnId) {
@@ -457,6 +543,10 @@ export default {
         ERD.store().commit({
           type: 'columnDataTypeHintVisibleAll',
           isDataTypeHint: false
+        })
+        ERD.store().commit({
+          type: 'columnDomainHintVisibleAll',
+          isDomainHint: false
         })
       }
     },
@@ -548,8 +638,8 @@ export default {
         $divColumns.eq(index + 1).find('input:eq(0)').focus()
       }
     },
-    // 마우스 hover addClass
-    dataTypeHintAddClass (e) {
+    // 힌트 hover addClass
+    hintAddClass (e) {
       $(e.target).parent('ul').find('li').removeClass('selected')
       $(e.target).addClass('selected')
     },
@@ -569,11 +659,18 @@ export default {
       })
     },
     // 테이블 그리드 동기화
-    onChangeTableGrid (tableId) {
+    onChangeTableGrid (tableId, columnId) {
       storeTable.commit({
         type: 'active',
         id: tableId
       })
+      if (columnId) {
+        ERD.store().commit({
+          type: 'columnDomainSync',
+          tableId: tableId,
+          columnId: columnId
+        })
+      }
       ERD.store().commit({ type: 'columnWidthReset' })
     },
     // 데이터 타입 힌트 애니메이션
@@ -754,6 +851,24 @@ export default {
 
         /* 데이터 타입 힌트 */
         .erd_data_type_list {
+          position: absolute;
+          color: #a2a2a2;
+          background-color: #191919;
+          opacity: 0.9;
+          margin-top: 25px;
+
+          li {
+            cursor: pointer;
+
+            &.selected {
+              color: white;
+              background-color: $selected;
+            }
+          }
+        }
+
+        /* 도메인 힌트 */
+        .erd_domain_list {
           position: absolute;
           color: #a2a2a2;
           background-color: #191919;
