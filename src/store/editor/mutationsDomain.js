@@ -81,6 +81,8 @@ export default {
       state.domains = state.domains.slice()
     }
 
+    this.commit({ type: 'columnWidthReset' })
+
     // undo, redo 등록
     ERD.core.undoRedo.add({
       undo: undo,

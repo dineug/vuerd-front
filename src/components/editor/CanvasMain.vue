@@ -77,7 +77,8 @@
             :class="{ edit: !column.ui.isReadDomain }"
             :style="`width: ${column.ui.widthDomain}px;`"
             type="text" placeholder="domain"
-            @input="onChangeTableGrid(table.id, column.id)"
+            @input="onChangeTableGrid(table.id)"
+            @change="changeDomain(table.id, column.id)"
             @keyup="domainHintVisible($event, table.id, column.id, !column.ui.isReadDomain)"
             @keyup.enter="onEnterEditor($event, column.ui.isReadDomain, 'isReadDomain', table.id, column.id)"
             @dblclick="onEnterEditor($event, column.ui.isReadDomain, 'isReadDomain', table.id, column.id)"
@@ -672,6 +673,14 @@ export default {
         })
       }
       ERD.store().commit({ type: 'columnWidthReset' })
+    },
+    // 도메인 변경 처리
+    changeDomain (tableId, columnId) {
+      ERD.store().commit({
+        type: 'columnDomainSync',
+        tableId: tableId,
+        columnId: columnId
+      })
     },
     // 데이터 타입 힌트 애니메이션
     onBeforeEnter (el) {
