@@ -15,6 +15,7 @@ class Oracle {
 
   init (sql) {
     this.sql = sql
+    return this
   }
 
   ddl (database) {
@@ -178,10 +179,8 @@ class Oracle {
     buffer.push(`\t\tREFERENCES ${name}.${startTable.name} (${this.sql.formatNames(columns.start)});`)
   }
 
-  // 객체 제거
-  destroy () {
-    delete this
-  }
+  // 객체 정리
+  destroy () {}
 }
 
 export default new Oracle()

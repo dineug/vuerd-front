@@ -99,8 +99,7 @@ class Event {
           this.components.QuickMenu.isShow = false
         }
         // 데이터 타입 힌트 hide
-        if (!$(e.target).closest('.erd_data_type_list').length &&
-          !$(e.target).closest('.menu_sidebar').length) {
+        if (!$(e.target).closest('.erd_data_type_list').length) {
           this.core.erd.store().commit({
             type: 'columnDataTypeHintVisibleAll',
             isDataTypeHint: false
@@ -666,12 +665,12 @@ class Event {
     })
   }
 
-  // 이벤트 해제 및 객체 제거
+  // 객체 정리
   destroy () {
+    this.stop()
     this.eventListener.forEach(target => {
       window.removeEventListener(target.type, target.fn)
     })
-    delete this
   }
 }
 

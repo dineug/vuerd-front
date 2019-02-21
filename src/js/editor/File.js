@@ -11,6 +11,7 @@ class File {
   constructor () {
     JSLog('module loaded', 'File')
 
+    this.core = null
     this.setImport()
   }
 
@@ -28,7 +29,7 @@ class File {
         const reader = new FileReader()
         reader.readAsText(f)
         reader.onload = () => {
-          this.load('json', reader.result)
+          this.load('json', reader.result, true)
           this.importJSONTag.val('')
         }
       } else {
@@ -41,7 +42,7 @@ class File {
         const reader = new FileReader()
         reader.readAsText(f)
         reader.onload = () => {
-          this.load('sql', reader.result)
+          this.load('sql', reader.result, true)
           this.importSQLTag.val('')
         }
       } else {
@@ -63,24 +64,39 @@ class File {
   }
 
   // load
-  load (type, data) {
+  load (type, data, isAdd) {
     switch (type) {
       case 'json':
         const json = JSON.parse(data)
+        const tabs = []
         for (let tab of json.tabs) {
           const newTab = {
+            id: tab.id,
             name: tab.name,
+            active: tab.active,
             store: storeERD()
           }
           newTab.store.commit({
             type: 'importData',
             state: tab.store
           })
+          if (isAdd) {
+            model.commit({
+              type: 'modelAdd',
+              isInit: true,
+              name: newTab.name,
+              store: newTab.store
+            })
+          } else {
+            tabs.push(newTab)
+          }
+        }
+        if (!isAdd) {
           model.commit({
-            type: 'modelAdd',
-            isInit: true,
-            name: newTab.name,
-            store: newTab.store
+            type: 'importData',
+            state: {
+              tabs: tabs
+            }
           })
         }
         break
@@ -195,10 +211,8 @@ class File {
     })
   }
 
-  // 객체 제거
-  destroy () {
-    delete this
-  }
+  // 객체 정리
+  destroy () {}
 }
 
 export default new File()

@@ -27,7 +27,7 @@ class ERD {
   // 종속성 초기화
   setInit (core) {
     JSLog('module dependency init', 'ERD')
-    Object.keys(core).forEach(function (v) {
+    Object.keys(core).forEach(v => {
       if (typeof core[v].init === 'function') core[v].init(core)
     })
   }
@@ -50,13 +50,13 @@ class ERD {
     }
   }
 
-  // 객체 제거
+  // 객체 정리
   destroy () {
-    this.core.event.destroy()
-    this.core.file.destroy()
-    this.core.sql.destroy()
-    this.core.undoRedo.destroy()
-    delete this
+    Object.keys(this.core).forEach(key => {
+      if (key !== 'erd' && typeof this.core[key].destroy === 'function') {
+        this.core[key].destroy()
+      }
+    })
   }
 }
 

@@ -23,7 +23,7 @@ export default new Vuex.Store({
   mutations: {
     // 전체 import
     importData (state, data) {
-      JSLog('mutations', 'importData')
+      JSLog('mutations', 'model importData')
       Object.keys(state).forEach(key => {
         state[key] = data.state[key]
       })
