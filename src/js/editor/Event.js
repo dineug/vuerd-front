@@ -441,7 +441,7 @@ class Event {
   onCursor (type, cursor) {
     switch (type) {
       case 'start':
-        document.body.setAttribute('style', `cursor: url("/img/erd/${cursor}.png") 16 16, auto;`)
+        document.body.setAttribute('style', `cursor: url("./img/erd/${cursor}.png") 16 16, auto;`)
         this.isCursor = true
         this.cursor = cursor
         break
