@@ -246,7 +246,13 @@ class Event {
             this.stop()
             break
           case 46: // key: Delete
-            if (e.ctrlKey) {
+            if (e.ctrlKey && e.shiftKey) {
+              e.preventDefault()
+              model.commit({
+                type: 'modelDelete',
+                id: this.core.erd.active().id
+              })
+            } else if (e.ctrlKey) {
               e.preventDefault()
               // 테이블 삭제
               const store = this.core.erd.store()
@@ -719,10 +725,12 @@ class Event {
     this.onDrag('stop')
     this.onMove('stop')
     this.onMemoResize('stop')
-    this.components.QuickMenu.isShow = false
-    this.components.CanvasGrid.isTable = false
-    this.components.CanvasMenu.isModalView = false
-    this.components.CanvasMenu.isModalHelp = false
+    if (this.components.QuickMenu) this.components.QuickMenu.isShow = false
+    if (this.components.CanvasGrid) this.components.CanvasGrid.isTable = false
+    if (this.components.CanvasMenu) {
+      this.components.CanvasMenu.isModalView = false
+      this.components.CanvasMenu.isModalHelp = false
+    }
     this.isSelectedColumn = false
     this.isGrid.table = false
     this.isStop = false
@@ -749,6 +757,7 @@ class Event {
       isTable: true,
       isColumn: true
     })
+    model.commit({ type: 'modelEditAllNone' })
   }
 
   // 객체 정리

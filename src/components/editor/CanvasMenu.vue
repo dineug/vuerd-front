@@ -5,13 +5,17 @@
       transition-group(type="transition" name="menu-top")
 
         li(v-for="(tab, i) in model.tabs" :key="tab.id")
-          input(v-model="tab.name"
-          :class="{ tab_active: tab.active }"
+          input(v-model="tab.name" :readonly="tab.ui.isReadName" v-focus :id="`tab_${tab.id}`"
+          :class="{ tab_active: tab.active, edit: !tab.ui.isReadName }"
           type="text" :title="i < 9 ? `Ctrl + ${i+1}` : ''"
-          @click="modelActive(tab.id)")
+          @keydown="onKeyArrowMove($event, tab.ui.isReadName)"
+          @keyup.enter="onEnterEditor($event, tab.ui.isReadName, tab.id)"
+          @dblclick="onEnterEditor($event, tab.ui.isReadName, tab.id)"
+          @focus="modelActive(tab.id)"
+          @blur="onBlur")
 
           span.buttons(:class="{ tab_active: tab.active }")
-            button(@click="modelDelete(tab.id)")
+            button(@click="modelDelete(tab.id)" title="Ctrl + Shift + Delete")
               font-awesome-icon(icon="times")
 
     // 메뉴 sidebar left
@@ -43,6 +47,7 @@ import draggable from 'vuedraggable'
 import CanvasMain from './CanvasMain'
 import CanvasSvg from './CanvasSvg'
 import Modal from './Modal'
+import $ from 'jquery'
 
 export default {
   name: 'CanvasMenu',
@@ -51,6 +56,14 @@ export default {
     CanvasMain,
     CanvasSvg,
     Modal
+  },
+  directives: {
+    // focus 정의
+    focus: {
+      inserted (el) {
+        el.focus()
+      }
+    }
   },
   data () {
     return {
@@ -241,6 +254,41 @@ export default {
     onClose (type) {
       this[type] = false
       ERD.core.event.isStop = false
+    },
+    // edit on/off
+    onEnterEditor (e, isRead, id) {
+      model.commit({
+        type: 'modelEdit',
+        id: id,
+        isRead: !isRead
+      })
+    },
+    // 포커스 out
+    onBlur (e) {
+      model.commit({ type: 'modelEditAllNone' })
+    },
+    // 포커스 move
+    onKeyArrowMove (e, isRead) {
+      if (isRead) {
+        const $input = $(e.target).parents('.menu_top').find('input')
+        const index = $input.index(e.target)
+        switch (e.keyCode) {
+          case 37: // key: Arrow left
+            e.preventDefault()
+            $input.eq(index - 1).focus()
+            break
+          case 39: // key: Arrow right
+            e.preventDefault()
+            $input.eq(index + 1 === $input.length ? 0 : index + 1).focus()
+            break
+        }
+      }
+      if (e.keyCode === 9) {
+        const $input = $(e.target).parents('.menu_top').find('input')
+        const index = $input.index(e.target)
+        e.preventDefault()
+        $input.eq(index + 1 === $input.length ? 0 : index + 1).focus()
+      }
     }
   },
   mounted () {
@@ -268,8 +316,17 @@ export default {
   $tab_active: #282828;
   $selected: #383d41;
   $menu_base_size: 30px;
+  $column_selected: #00a9ff;
 
   .menu_canvas {
+
+    input:focus {
+      border-bottom: solid $column_selected 1px;
+    }
+
+    input.edit {
+      border-bottom: solid greenyellow 1px;
+    }
 
     .menu_top {
       width: 100%;

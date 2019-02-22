@@ -75,7 +75,10 @@ class File {
               id: tab.id,
               name: tab.name,
               active: tab.active,
-              store: storeERD()
+              store: storeERD(),
+              ui: {
+                isReadName: true
+              }
             }
             newTab.store.commit({
               type: 'importData',
