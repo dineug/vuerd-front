@@ -726,7 +726,10 @@ class Event {
     this.onMove('stop')
     this.onMemoResize('stop')
     if (this.components.QuickMenu) this.components.QuickMenu.isShow = false
-    if (this.components.CanvasGrid) this.components.CanvasGrid.isTable = false
+    if (this.components.CanvasGrid) {
+      this.components.CanvasGrid.isTable = false
+      this.components.CanvasGrid.isDomain = false
+    }
     if (this.components.CanvasMenu) {
       this.components.CanvasMenu.isModalView = false
       this.components.CanvasMenu.isModalHelp = false
