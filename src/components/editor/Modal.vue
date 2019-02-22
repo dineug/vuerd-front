@@ -26,9 +26,12 @@
           .modal_content.help(v-if="type === 'help'")
             span Event All stop - ESC
             span Model Choice - Ctrl + 1 ~ 9
+          .modal_content.help(v-if="type === 'help'")
+            span Undo - Ctrl + Z
+            span Redo - Ctrl + Shift + Z
           .modal_title.help(v-if="type === 'help'") table, memo
           .modal_content.help(v-if="type === 'help'")
-            span multi selected - Ctrl + mouse drag
+            span multi selected - Ctrl + drag
             span multi selected - Ctrl + click
           .modal_content.help(v-if="type === 'help'")
             span selected All - Ctrl + A
@@ -39,6 +42,10 @@
           .modal_content.help(v-if="type === 'help'")
             span edit on/off - Enter
             span focus move - Arrow key
+          .modal_title.help(v-if="type === 'help'") Canvas
+          .modal_content.help(v-if="type === 'help'")
+            span move - drag
+            span move - preview drag
           .modal_title.help(v-if="type === 'help'") QuickMenu
           .modal_content.help(v-if="type === 'help'")
             span New Model - Alt + N
