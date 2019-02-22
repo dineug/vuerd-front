@@ -63,14 +63,14 @@ export default {
         },
         {
           type: 'erd-0-1',
-          icon: './img/erd/erd-0-1.png',
+          icon: '/img/erd/erd-0-1.png',
           isImg: true,
           name: '1 : 1',
           keymap: 'Alt + 1'
         },
         {
           type: 'erd-0-1-N',
-          icon: './img/erd/erd-0-1-N.png',
+          icon: '/img/erd/erd-0-1-N.png',
           isImg: true,
           name: '1 : N',
           keymap: 'Alt + 2'
