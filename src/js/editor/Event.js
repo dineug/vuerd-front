@@ -81,8 +81,8 @@ class Event {
       // 미리보기 창크기 동적 위치
       const width = window.innerWidth
       const height = window.innerHeight
-      this.components.CanvasMenu.preview.left = (-1 * this.components.CanvasMenu.CANVAS_WIDTH / 2) + (this.components.CanvasMenu.PREVIEW_WIDTH / 2) - this.components.CanvasMenu.PREVIEW_WIDTH - 20 + width
-      this.components.CanvasMenu.preview.x = width - this.components.CanvasMenu.PREVIEW_WIDTH - 20
+      this.components.CanvasMenu.preview.left = (-1 * this.components.CanvasMenu.CANVAS_WIDTH / 2) + (this.components.CanvasMenu.PREVIEW_WIDTH / 2) - this.components.CanvasMenu.PREVIEW_WIDTH - 50 + width
+      this.components.CanvasMenu.preview.x = width - this.components.CanvasMenu.PREVIEW_WIDTH - 50
       this.components.CanvasMenu.preview.target.width = this.components.CanvasMenu.previewRatio * width
       this.components.CanvasMenu.preview.target.height = this.components.CanvasMenu.previewRatio * height
     }).on('scroll', e => {

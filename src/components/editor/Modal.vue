@@ -31,7 +31,9 @@
             span Model Choice - Ctrl + 1 ~ 9
           .modal_content.help(v-if="type === 'help'")
             span model delete - Ctrl + Shift + Delete
-            span model move - Arrow key
+            span model focus move - Arrow key
+          .modal_content.help(v-if="type === 'help'")
+            span model move - drag
           .modal_title.help(v-if="type === 'help'") table, memo
           .modal_content.help(v-if="type === 'help'")
             span multi selected - Ctrl + drag

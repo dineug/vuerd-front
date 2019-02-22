@@ -28,6 +28,13 @@
           li(v-for="dbType in DBTypes" :class="{ db_active: DBType === dbType }"
           @click="changeDB(dbType)") {{ dbType }}
 
+    // 메뉴 sidebar right
+    <!--ui.menu_sidebar_right-->
+      <!--li(v-for="menu in menus" :key="menu.id" :title="menu.name"-->
+      <!--:class="{ undo_none: menu.type === 'undo' && !isUndo, redo_none: menu.type === 'redo' && !isRedo }"-->
+      <!--@click="menuAction(menu.type)")-->
+        <!--font-awesome-icon(:icon="menu.icon")-->
+
     // 메뉴 Preview Navigation
     canvas-main.preview(:style="`top: ${preview.top}px; left: ${preview.left}px; transform: scale(${previewRatio}, ${previewRatio});`"
     :isPreview="true")
@@ -242,9 +249,9 @@ export default {
     setPreview () {
       const width = window.innerWidth
       const height = window.innerHeight
-      this.preview.left = (-1 * this.CANVAS_WIDTH / 2) + (this.PREVIEW_WIDTH / 2) - this.PREVIEW_WIDTH - 20 + width
+      this.preview.left = (-1 * this.CANVAS_WIDTH / 2) + (this.PREVIEW_WIDTH / 2) - this.PREVIEW_WIDTH - 50 + width
       this.preview.top = (-1 * this.CANVAS_HEIGHT / 2) + (this.CANVAS_HEIGHT * this.previewRatio / 2) + 50
-      this.preview.x = width - this.PREVIEW_WIDTH - 20
+      this.preview.x = width - this.PREVIEW_WIDTH - 50
       this.preview.target.width = width * this.previewRatio
       this.preview.target.height = height * this.previewRatio
       this.preview.target.x = window.scrollX * this.previewRatio
@@ -430,6 +437,23 @@ export default {
           cursor: default;
           color: #a2a2a2;
         }
+      }
+    }
+
+    .menu_sidebar_right {
+      width: $menu_base_size;
+      height: 100%;
+      position: fixed;
+      right: 0;
+      z-index: 2147483646;
+      color: white;
+      background-color: black;
+      list-style: none;
+
+      & > li {
+        text-align: center;
+        padding: 10px;
+        cursor: pointer;
       }
     }
 
