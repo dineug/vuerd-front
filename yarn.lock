@@ -703,13 +703,6 @@
   resolved "https://registry.yarnpkg.com/@nodelib/fs.stat/-/fs.stat-1.1.3.tgz#2b5a3ab3f918cca48a8c754c08168e3f03eba61b"
   integrity sha512-shAmDyaQC4H92APFoIaVDHCx5bStIocgvbwQyxPRrbUY20V1EYTbSDchWbuwlMG3V17cprZhA6+78JfB+3DTPw==
 
-"@toast-ui/vue-grid@^1.0.4":
-  version "1.0.4"
-  resolved "https://registry.yarnpkg.com/@toast-ui/vue-grid/-/vue-grid-1.0.4.tgz#1287b972c8cb4d61cd2795fff28df1d57b0f2969"
-  integrity sha512-Jq+IZb4L5fw2rmiNCJ05Z6JOkoAgpX2IvFElRgqRU4vM3ccak/v1KjHPlvElyUfV2/7ba9MHvy8SBxBJeDG4Lw==
-  dependencies:
-    tui-grid "^3.5.0"
-
 "@types/babel-types@*", "@types/babel-types@^7.0.0":
   version "7.0.4"
   resolved "https://registry.yarnpkg.com/@types/babel-types/-/babel-types-7.0.4.tgz#bfd5b0d0d1ba13e351dff65b6e52783b816826c8"

@@ -5,13 +5,17 @@
       transition-group(type="transition" name="menu-top")
 
         li(v-for="(tab, i) in model.tabs" :key="tab.id")
-          input(v-model="tab.name"
-          :class="{ tab_active: tab.active }"
+          input(v-model="tab.name" :readonly="tab.ui.isReadName" v-focus :id="`tab_${tab.id}`"
+          :class="{ tab_active: tab.active, edit: !tab.ui.isReadName }"
           type="text" :title="i < 9 ? `Ctrl + ${i+1}` : ''"
-          @click="modelActive(tab.id)")
+          @keydown="onKeyArrowMove($event, tab.ui.isReadName)"
+          @keyup.enter="onEnterEditor($event, tab.ui.isReadName, tab.id)"
+          @dblclick="onEnterEditor($event, tab.ui.isReadName, tab.id)"
+          @focus="modelActive(tab.id)"
+          @blur="onBlur")
 
           span.buttons(:class="{ tab_active: tab.active }")
-            button(@click="modelDelete(tab.id)")
+            button(@click="modelDelete(tab.id)" title="Ctrl + Shift + Delete")
               font-awesome-icon(icon="times")
 
     // 메뉴 sidebar left
@@ -24,6 +28,13 @@
           li(v-for="dbType in DBTypes" :class="{ db_active: DBType === dbType }"
           @click="changeDB(dbType)") {{ dbType }}
 
+    // 메뉴 sidebar right
+    <!--ui.menu_sidebar_right-->
+      <!--li(v-for="menu in menus" :key="menu.id" :title="menu.name"-->
+      <!--:class="{ undo_none: menu.type === 'undo' && !isUndo, redo_none: menu.type === 'redo' && !isRedo }"-->
+      <!--@click="menuAction(menu.type)")-->
+        <!--font-awesome-icon(:icon="menu.icon")-->
+
     // 메뉴 Preview Navigation
     canvas-main.preview(:style="`top: ${preview.top}px; left: ${preview.left}px; transform: scale(${previewRatio}, ${previewRatio});`"
     :isPreview="true")
@@ -32,7 +43,8 @@
       @mousedown="onPreview")
 
     // view 셋팅 팝업
-    modal(v-if="isModal" @close="onClose")
+    modal(v-if="isModalView" type="view" @close="onClose('isModalView')")
+    modal(v-if="isModalHelp" type="help" @close="onClose('isModalHelp')")
 </template>
 
 <script>
@@ -42,6 +54,7 @@ import draggable from 'vuedraggable'
 import CanvasMain from './CanvasMain'
 import CanvasSvg from './CanvasSvg'
 import Modal from './Modal'
+import $ from 'jquery'
 
 export default {
   name: 'CanvasMenu',
@@ -50,6 +63,14 @@ export default {
     CanvasMain,
     CanvasSvg,
     Modal
+  },
+  directives: {
+    // focus 정의
+    focus: {
+      inserted (el) {
+        el.focus()
+      }
+    }
   },
   data () {
     return {
@@ -67,7 +88,8 @@ export default {
       },
       isUndo: false,
       isRedo: false,
-      isModal: false,
+      isModalView: false,
+      isModalHelp: false,
       DBTypes: [
         'MariaDB',
         'MSSQL',
@@ -130,6 +152,11 @@ export default {
           type: 'redo',
           icon: 'redo',
           name: 'redo(Ctrl + Shift + Z)'
+        },
+        {
+          type: 'help',
+          icon: 'question',
+          name: 'help'
         }
       ]
     }
@@ -188,7 +215,7 @@ export default {
           ERD.core.file.clone()
           break
         case 'view':
-          this.isModal = true
+          this.isModalView = true
           ERD.core.event.isStop = true
           break
         case 'undo':
@@ -200,6 +227,10 @@ export default {
           if (this.isRedo) {
             ERD.core.undoRedo.redo()
           }
+          break
+        case 'help':
+          this.isModalHelp = true
+          ERD.core.event.isStop = true
           break
       }
     },
@@ -218,18 +249,53 @@ export default {
     setPreview () {
       const width = window.innerWidth
       const height = window.innerHeight
-      this.preview.left = (-1 * this.CANVAS_WIDTH / 2) + (this.PREVIEW_WIDTH / 2) - this.PREVIEW_WIDTH - 20 + width
+      this.preview.left = (-1 * this.CANVAS_WIDTH / 2) + (this.PREVIEW_WIDTH / 2) - this.PREVIEW_WIDTH - 50 + width
       this.preview.top = (-1 * this.CANVAS_HEIGHT / 2) + (this.CANVAS_HEIGHT * this.previewRatio / 2) + 50
-      this.preview.x = width - this.PREVIEW_WIDTH - 20
+      this.preview.x = width - this.PREVIEW_WIDTH - 50
       this.preview.target.width = width * this.previewRatio
       this.preview.target.height = height * this.previewRatio
       this.preview.target.x = window.scrollX * this.previewRatio
       this.preview.target.y = window.scrollY * this.previewRatio
     },
     // modal close
-    onClose () {
-      this.isModal = false
+    onClose (type) {
+      this[type] = false
       ERD.core.event.isStop = false
+    },
+    // edit on/off
+    onEnterEditor (e, isRead, id) {
+      model.commit({
+        type: 'modelEdit',
+        id: id,
+        isRead: !isRead
+      })
+    },
+    // 포커스 out
+    onBlur (e) {
+      model.commit({ type: 'modelEditAllNone' })
+    },
+    // 포커스 move
+    onKeyArrowMove (e, isRead) {
+      if (isRead) {
+        const $input = $(e.target).parents('.menu_top').find('input')
+        const index = $input.index(e.target)
+        switch (e.keyCode) {
+          case 37: // key: Arrow left
+            e.preventDefault()
+            $input.eq(index - 1).focus()
+            break
+          case 39: // key: Arrow right
+            e.preventDefault()
+            $input.eq(index + 1 === $input.length ? 0 : index + 1).focus()
+            break
+        }
+      }
+      if (e.keyCode === 9) {
+        const $input = $(e.target).parents('.menu_top').find('input')
+        const index = $input.index(e.target)
+        e.preventDefault()
+        $input.eq(index + 1 === $input.length ? 0 : index + 1).focus()
+      }
     }
   },
   mounted () {
@@ -257,8 +323,17 @@ export default {
   $tab_active: #282828;
   $selected: #383d41;
   $menu_base_size: 30px;
+  $column_selected: #00a9ff;
 
   .menu_canvas {
+
+    input:focus {
+      border-bottom: solid $column_selected 1px;
+    }
+
+    input.edit {
+      border-bottom: solid greenyellow 1px;
+    }
 
     .menu_top {
       width: 100%;
@@ -362,6 +437,23 @@ export default {
           cursor: default;
           color: #a2a2a2;
         }
+      }
+    }
+
+    .menu_sidebar_right {
+      width: $menu_base_size;
+      height: 100%;
+      position: fixed;
+      right: 0;
+      z-index: 2147483646;
+      color: white;
+      background-color: black;
+      list-style: none;
+
+      & > li {
+        text-align: center;
+        padding: 10px;
+        cursor: pointer;
       }
     }
 

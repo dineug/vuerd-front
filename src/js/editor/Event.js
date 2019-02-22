@@ -69,13 +69,6 @@ class Event {
   }
 
   setEvent () {
-    // 페이지 이동시 경고창
-    // window.onbeforeunload = e => {
-    //   const dialogText = 'Dialog text here';
-    //   e.returnValue = dialogText;
-    //   return dialogText;
-    // }
-
     // 전역 이벤트
     this.on('contextmenu', e => {
       // 오른쪽 클릭 이벤트
@@ -88,8 +81,8 @@ class Event {
       // 미리보기 창크기 동적 위치
       const width = window.innerWidth
       const height = window.innerHeight
-      this.components.CanvasMenu.preview.left = (-1 * this.components.CanvasMenu.CANVAS_WIDTH / 2) + (this.components.CanvasMenu.PREVIEW_WIDTH / 2) - this.components.CanvasMenu.PREVIEW_WIDTH - 20 + width
-      this.components.CanvasMenu.preview.x = width - this.components.CanvasMenu.PREVIEW_WIDTH - 20
+      this.components.CanvasMenu.preview.left = (-1 * this.components.CanvasMenu.CANVAS_WIDTH / 2) + (this.components.CanvasMenu.PREVIEW_WIDTH / 2) - this.components.CanvasMenu.PREVIEW_WIDTH - 50 + width
+      this.components.CanvasMenu.preview.x = width - this.components.CanvasMenu.PREVIEW_WIDTH - 50
       this.components.CanvasMenu.preview.target.width = this.components.CanvasMenu.previewRatio * width
       this.components.CanvasMenu.preview.target.height = this.components.CanvasMenu.previewRatio * height
     }).on('scroll', e => {
@@ -253,7 +246,13 @@ class Event {
             this.stop()
             break
           case 46: // key: Delete
-            if (e.ctrlKey) {
+            if (e.ctrlKey && e.shiftKey) {
+              e.preventDefault()
+              model.commit({
+                type: 'modelDelete',
+                id: this.core.erd.active().id
+              })
+            } else if (e.ctrlKey) {
               e.preventDefault()
               // 테이블 삭제
               const store = this.core.erd.store()
@@ -726,9 +725,12 @@ class Event {
     this.onDrag('stop')
     this.onMove('stop')
     this.onMemoResize('stop')
-    this.components.QuickMenu.isShow = false
-    this.components.CanvasGrid.isTable = false
-    this.components.CanvasMenu.isModal = false
+    if (this.components.QuickMenu) this.components.QuickMenu.isShow = false
+    if (this.components.CanvasGrid) this.components.CanvasGrid.isTable = false
+    if (this.components.CanvasMenu) {
+      this.components.CanvasMenu.isModalView = false
+      this.components.CanvasMenu.isModalHelp = false
+    }
     this.isSelectedColumn = false
     this.isGrid.table = false
     this.isStop = false
@@ -755,6 +757,7 @@ class Event {
       isTable: true,
       isColumn: true
     })
+    model.commit({ type: 'modelEditAllNone' })
   }
 
   // 객체 정리

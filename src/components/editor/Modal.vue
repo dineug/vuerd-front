@@ -7,16 +7,63 @@
           @click="onClose")
             font-awesome-icon(icon="times")
         .modal_head
-          h3 view setting
+          h3(v-if="type === 'view'") view setting
+          h3(v-if="type === 'help'") help
         .modal_body
-          .modal_title canvas size
-          .modal_content
+          .modal_title(v-if="type === 'view'") canvas size
+          .modal_content(v-if="type === 'view'")
             span x
             input(type="text" v-model="CANVAS_WIDTH"
             @change="onChangeCanvasWidth")
             span y
             input(type="text" v-model="CANVAS_HEIGHT"
             @change="onChangeCanvasHeight")
+
+          .modal_title.help(v-if="type === 'help'") base
+          .modal_content.help(v-if="type === 'help'")
+            span QuickMenu - mouse right click
+            span Hint Choice - Ctrl + Enter
+          .modal_content.help(v-if="type === 'help'")
+            span Undo - Ctrl + Z
+            span Redo - Ctrl + Shift + Z
+          .modal_content.help(v-if="type === 'help'")
+            span Event All stop - ESC
+            span Model Choice - Ctrl + 1 ~ 9
+          .modal_content.help(v-if="type === 'help'")
+            span model delete - Ctrl + Shift + Delete
+            span model focus move - Arrow key
+          .modal_content.help(v-if="type === 'help'")
+            span model move - drag
+          .modal_title.help(v-if="type === 'help'") table, memo
+          .modal_content.help(v-if="type === 'help'")
+            span multi selected - Ctrl + drag
+            span multi selected - Ctrl + click
+          .modal_content.help(v-if="type === 'help'")
+            span selected All - Ctrl + A
+            span delete - Ctrl + Delete
+          .modal_content.help(v-if="type === 'help'")
+            span move - drag
+            span focus move - Arrow key
+          .modal_content.help(v-if="type === 'help'")
+            span edit on/off - Enter
+            span column add - Alt + Enter
+          .modal_content.help(v-if="type === 'help'")
+            span column delete - Alt + Delete
+            span column move - drag
+          .modal_title.help(v-if="type === 'help'") Canvas
+          .modal_content.help(v-if="type === 'help'")
+            span move - drag
+            span move - preview drag
+          .modal_title.help(v-if="type === 'help'") QuickMenu
+          .modal_content.help(v-if="type === 'help'")
+            span New Model - Alt + N
+            span New Table - Alt + T
+          .modal_content.help(v-if="type === 'help'")
+            span New Memo - Alt + M
+            span Primary key - Alt + K
+          .modal_content.help(v-if="type === 'help'")
+            span 1 : 1 - Alt + 1
+            span 1 : N - Alt + 2
 </template>
 
 <script>
@@ -24,6 +71,12 @@ import ERD from '@/js/editor/ERD'
 
 export default {
   name: 'Modal',
+  props: {
+    type: {
+      type: String,
+      default: 'view'
+    }
+  },
   data () {
     return {
       CANVAS_WIDTH: ERD.store().state.CANVAS_WIDTH,
@@ -130,6 +183,11 @@ export default {
         .modal_title {
           font-size: 20px;
           padding: 5px;
+
+          &.help {
+            margin-top: 20px;
+            margin-bottom: 5px;
+          }
         }
         .modal_content {
           padding: 5px;
@@ -140,6 +198,13 @@ export default {
           }
           input {
             width: 100px;
+          }
+
+          &.help {
+            span {
+              display: inline-block;
+              width: 240px;
+            }
           }
         }
       }

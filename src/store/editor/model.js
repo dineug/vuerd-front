@@ -5,6 +5,7 @@ import * as util from '@/js/editor/util'
 import storeERD from '@/store/editor/erd'
 import ERD from '@/js/editor/ERD'
 import storeTable from './table'
+import $ from 'jquery'
 
 JSLog('store loaded', 'model')
 Vue.use(Vuex)
@@ -16,7 +17,10 @@ export default new Vuex.Store({
         id: util.guid(),
         name: 'untitled',
         active: true,
-        store: storeERD()
+        store: storeERD(),
+        ui: {
+          isReadName: true
+        }
       }
     ]
   },
@@ -35,7 +39,10 @@ export default new Vuex.Store({
         id: util.guid(),
         name: util.autoName(state.tabs, 'untitled'),
         active: false,
-        store: storeERD()
+        store: storeERD(),
+        ui: {
+          isReadName: true
+        }
       }
       if (data.isInit) {
         tab.name = data.name
@@ -54,11 +61,7 @@ export default new Vuex.Store({
       const isTab = util.getData(state.tabs, data.id)
       if (isTab) {
         state.tabs.forEach(tab => {
-          if (tab.id === data.id) {
-            tab.active = true
-          } else {
-            tab.active = false
-          }
+          tab.active = tab.id === data.id
         })
       }
 
@@ -80,11 +83,7 @@ export default new Vuex.Store({
       }
       if (isActive) {
         state.tabs.forEach((tab, i) => {
-          if (data.index === i + 1) {
-            tab.active = true
-          } else {
-            tab.active = false
-          }
+          tab.active = data.index === i + 1
         })
       }
 
@@ -105,6 +104,7 @@ export default new Vuex.Store({
             this.commit({ type: 'modelAdd' })
           } else if (tab && tab.active) {
             state.tabs[state.tabs.length - 1].active = true
+            $(`#tab_${state.tabs[state.tabs.length - 1].id}`).focus()
           }
           break
         }
@@ -112,6 +112,20 @@ export default new Vuex.Store({
 
       // 모든 이벤트 중지
       ERD.core.event.stop()
+    },
+    // edit on/off
+    modelEdit (state, data) {
+      JSLog('mutations', 'modelEdit')
+
+      const tab = util.getData(state.tabs, data.id)
+      tab.ui.isReadName = data.isRead
+    },
+    // edit 전체 해제
+    modelEditAllNone (state) {
+      JSLog('mutations', 'modelEditAllNone')
+      state.tabs.forEach(tab => {
+        tab.ui.isReadName = true
+      })
     }
   }
 })

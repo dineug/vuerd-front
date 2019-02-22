@@ -27,7 +27,7 @@
       .erd_table_header
         input(v-model="table.name" v-focus :readonly="table.ui.isReadName"
         :class="{ edit: !table.ui.isReadName }"
-        type="text" placeholder="table"
+        type="text" placeholder="table" spellcheck="false"
         @input="onChangeTableGrid(table.id)"
         @keydown="onKeyArrowMoveHead($event, table.ui.isReadName)"
         @keyup.enter="onEnterEditor($event, table.ui.isReadName, 'isReadName', table.id)"
@@ -37,7 +37,7 @@
 
         input(v-model="table.comment" :readonly="table.ui.isReadComment"
         :class="{ edit: !table.ui.isReadComment }"
-        type="text" placeholder="comment"
+        type="text" placeholder="comment" spellcheck="false"
         @keydown="onKeyArrowMoveHead($event, table.ui.isReadComment)"
         @keyup.enter="onEnterEditor($event, table.ui.isReadComment, 'isReadComment', table.id)"
         @dblclick="onEnterEditor($event, table.ui.isReadComment, 'isReadComment', table.id)"
@@ -63,7 +63,7 @@
           input(v-model="column.name" v-focus :id="`columnName_${column.id}`" :readonly="column.ui.isReadName"
           :class="{ edit: !column.ui.isReadName }"
           :style="`width: ${column.ui.widthName}px;`"
-          type="text" placeholder="column"
+          type="text" placeholder="column" spellcheck="false"
           @input="onChangeTableGrid(table.id)"
           @keyup.enter="onEnterEditor($event, column.ui.isReadName, 'isReadName', table.id, column.id)"
           @dblclick="onEnterEditor($event, column.ui.isReadName, 'isReadName', table.id, column.id)"
@@ -76,8 +76,9 @@
             input.erd_domain(v-model="column.domain" :readonly="column.ui.isReadDomain"
             :class="{ edit: !column.ui.isReadDomain }"
             :style="`width: ${column.ui.widthDomain}px;`"
-            type="text" placeholder="domain"
-            @input="onChangeTableGrid(table.id, column.id)"
+            type="text" placeholder="domain" spellcheck="false"
+            @input="onChangeTableGrid(table.id)"
+            @change="changeDomain(table.id, column.id)"
             @keyup="domainHintVisible($event, table.id, column.id, !column.ui.isReadDomain)"
             @keyup.enter="onEnterEditor($event, column.ui.isReadDomain, 'isReadDomain', table.id, column.id)"
             @dblclick="onEnterEditor($event, column.ui.isReadDomain, 'isReadDomain', table.id, column.id)"
@@ -99,7 +100,7 @@
             input.erd_data_type(v-model="column.dataType" :readonly="column.ui.isReadDataType"
             :class="{ edit: !column.ui.isReadDataType }"
             :style="`width: ${column.ui.widthDataType}px;`"
-            type="text" placeholder="dataType"
+            type="text" placeholder="dataType" spellcheck="false"
             @input="onChangeTableGrid(table.id, column.id)"
             @keyup="dataTypeHintVisible($event, table.id, column.id, !column.ui.isReadDataType)"
             @keyup.enter="onEnterEditor($event, column.ui.isReadDataType, 'isReadDataType', table.id, column.id)"
@@ -137,7 +138,7 @@
           input(v-model="column.comment" :readonly="column.ui.isReadComment"
           :class="{ edit: !column.ui.isReadComment }"
           :style="`width: ${column.ui.widthComment}px;`"
-          type="text" placeholder="comment"
+          type="text" placeholder="comment" spellcheck="false"
           @input="onChangeTableGrid(table.id)"
           @keyup.enter="onEnterEditor($event, column.ui.isReadComment, 'isReadComment', table.id, column.id)"
           @dblclick="onEnterEditor($event, column.ui.isReadComment, 'isReadComment', table.id, column.id)"
@@ -161,7 +162,7 @@
         @click="memoDelete(memo.id)")
           font-awesome-icon(icon="times")
 
-      textarea(v-model="memo.content"
+      textarea(v-model="memo.content" spellcheck="false"
       :style="`width: ${memo.ui.width}px; height: ${memo.ui.height}px;`"
       @mouseup="memoSize($event, memo.id)")
 
@@ -181,26 +182,26 @@
         button
           font-awesome-icon(icon="plus")
       .erd_table_header
-        input(v-model="table.name" type="text" placeholder="table")
-        input(v-model="table.comment" type="text" placeholder="comment")
+        input(v-model="table.name" type="text" placeholder="table" spellcheck="false")
+        input(v-model="table.comment" type="text" placeholder="comment" spellcheck="false")
       .erd_column(v-for="column in table.columns" :key="column.id" :column_id="column.id" :class="{ selected: column.ui.selected, relation_active: column.ui.isHover}" :style="`height: ${COLUMN_HEIGHT}px;`")
         .erd_column_key(:class="{ pk: column.ui.pk, fk: column.ui.fk, pfk: column.ui.pfk }")
           font-awesome-icon(icon="key")
-        input(v-model="column.name" type="text" placeholder="column" :style="`width: ${column.ui.widthName}px;`")
+        input(v-model="column.name" type="text" placeholder="column" spellcheck="false" :style="`width: ${column.ui.widthName}px;`")
         div
-          input.erd_domain(v-model="column.domain" :class="{ edit: !column.ui.isReadDomain }" :style="`width: ${column.ui.widthDomain}px;`" type="text" placeholder="domain")
+          input.erd_domain(v-model="column.domain" :class="{ edit: !column.ui.isReadDomain }" :style="`width: ${column.ui.widthDomain}px;`" type="text" placeholder="domain" spellcheck="false")
         div
-          input.erd_data_type(v-model="column.dataType" type="text" placeholder="dataType" :style="`width: ${column.ui.widthDataType}px;`")
+          input.erd_data_type(v-model="column.dataType" type="text" placeholder="dataType" spellcheck="false" :style="`width: ${column.ui.widthDataType}px;`")
         input.erd_column_not_null(v-if="column.options.notNull" type="text" readonly value="N-N")
         input.erd_column_not_null(v-else type="text" readonly value="NULL")
-        input(v-model="column.comment" type="text" placeholder="comment" :style="`width: ${column.ui.widthComment}px;`")
+        input(v-model="column.comment" type="text" placeholder="comment" spellcheck="false" :style="`width: ${column.ui.widthComment}px;`")
         button(title="Delete")
           font-awesome-icon(icon="times")
     .erd_memo(v-for="memo in memos" :key="memo.id" :class="{ selected: memo.ui.selected }" :style="`top: ${memo.ui.top}px; left: ${memo.ui.left}px; z-index: ${memo.ui.zIndex};`")
       .erd_memo_top
         button(title="Ctrl + Delete")
           font-awesome-icon(icon="times")
-      textarea(v-model="memo.content" :style="`width: ${memo.ui.width}px; height: ${memo.ui.height}px;`")
+      textarea(v-model="memo.content" :style="`width: ${memo.ui.width}px; height: ${memo.ui.height}px;`" spellcheck="false")
       .erd_memo_bottom
         button
           font-awesome-icon(icon="expand-arrows-alt")
@@ -421,7 +422,7 @@ export default {
               $li.eq(index + 1 === len ? 0 : index + 1).addClass('selected')
             }
             break
-          case 39: // key: Arrow right
+          case 13: // key: Enter
             e.preventDefault()
             if (e.altKey) {
               if (type === 'dataType') {
@@ -436,7 +437,7 @@ export default {
                 })
               }
             } else {
-              if (index !== -1) {
+              if (e.ctrlKey && index !== -1) {
                 if (type === 'dataType') {
                   ERD.store().commit({
                     type: 'columnChangeDataType',
@@ -519,7 +520,7 @@ export default {
         }
       }
     },
-    // 컬럼 포커스 이동 이벤트
+    // 컬럼 수정 이벤트
     onEnterEditor (e, isRead, current, tableId, columnId) {
       if (!e.altKey) {
         if (columnId === undefined) {
@@ -530,16 +531,18 @@ export default {
             isRead: !isRead
           })
         } else {
-          ERD.store().commit({
-            type: 'columnEdit',
-            tableId: tableId,
-            columnId: columnId,
-            current: current,
-            isRead: !isRead
-          })
+          if (!e.ctrlKey) {
+            ERD.store().commit({
+              type: 'columnEdit',
+              tableId: tableId,
+              columnId: columnId,
+              current: current,
+              isRead: !isRead
+            })
+          }
         }
       }
-      if (!isRead) {
+      if (!e.ctrlKey && !isRead) {
         ERD.store().commit({
           type: 'columnDataTypeHintVisibleAll',
           isDataTypeHint: false
@@ -672,6 +675,14 @@ export default {
         })
       }
       ERD.store().commit({ type: 'columnWidthReset' })
+    },
+    // 도메인 변경 처리
+    changeDomain (tableId, columnId) {
+      ERD.store().commit({
+        type: 'columnDomainSync',
+        tableId: tableId,
+        columnId: columnId
+      })
     },
     // 데이터 타입 힌트 애니메이션
     onBeforeEnter (el) {

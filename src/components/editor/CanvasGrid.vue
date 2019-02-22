@@ -152,9 +152,9 @@ export default {
         z-index: 2147483646;
         color: white;
         button {
-          width: 17px;
-          height: 17px;
-          font-size: .70em;
+          width: 25px;
+          height: 25px;
+          /*font-size: .70em;*/
           margin-left: 5px;
           border: none;
           outline: none;

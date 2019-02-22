@@ -393,7 +393,26 @@ export default {
     JSLog('mutations', 'column', 'domainSync')
     const table = util.getData(state.tables, data.tableId)
     const column = util.getData(table.columns, data.columnId)
-    if (column.domainId.trim() !== '') {
+    if (column.domain === '') {
+      const undo = JSON.stringify(state)
+
+      column.domainId = ''
+      // 동기화 컬럼 탐색
+      const columns = []
+      const lines = state.lines.slice()
+      util.getColumnsSync(columns, lines, state, data.tableId, column)
+      // 컬럼 동기화
+      columns.forEach(v => {
+        v.domain = column.domain
+        v.domainId = column.domainId
+      })
+
+      // undo, redo 등록
+      ERD.core.undoRedo.add({
+        undo: undo,
+        redo: JSON.stringify(state)
+      })
+    } else if (column.domainId.trim() !== '') {
       this.commit({
         type: 'domainChange',
         isUpdated: true,
