@@ -33,7 +33,7 @@ class File {
           this.importJSONTag.val('')
         }
       } else {
-        alert('json 파일만 올려주세요')
+        alert('Just upload the json file')
       }
     })
     this.importSQLTag = $('<input type="file" accept=".sql">').change(e => {
@@ -46,7 +46,7 @@ class File {
           this.importSQLTag.val('')
         }
       } else {
-        alert('sql 파일만 올려주세요')
+        alert('Just upload the sql file')
       }
     })
   }
@@ -67,37 +67,41 @@ class File {
   load (type, data, isAdd) {
     switch (type) {
       case 'json':
-        const json = JSON.parse(data)
-        const tabs = []
-        for (let tab of json.tabs) {
-          const newTab = {
-            id: tab.id,
-            name: tab.name,
-            active: tab.active,
-            store: storeERD()
-          }
-          newTab.store.commit({
-            type: 'importData',
-            state: tab.store
-          })
-          if (isAdd) {
-            model.commit({
-              type: 'modelAdd',
-              isInit: true,
-              name: newTab.name,
-              store: newTab.store
-            })
-          } else {
-            tabs.push(newTab)
-          }
-        }
-        if (!isAdd) {
-          model.commit({
-            type: 'importData',
-            state: {
-              tabs: tabs
+        try {
+          const json = JSON.parse(data)
+          const tabs = []
+          for (let tab of json.tabs) {
+            const newTab = {
+              id: tab.id,
+              name: tab.name,
+              active: tab.active,
+              store: storeERD()
             }
-          })
+            newTab.store.commit({
+              type: 'importData',
+              state: tab.store
+            })
+            if (isAdd) {
+              model.commit({
+                type: 'modelAdd',
+                isInit: true,
+                name: newTab.name,
+                store: newTab.store
+              })
+            } else {
+              tabs.push(newTab)
+            }
+          }
+          if (!isAdd) {
+            model.commit({
+              type: 'importData',
+              state: {
+                tabs: tabs
+              }
+            })
+          }
+        } catch (e) {
+          alert('json parsing error')
         }
         break
     }

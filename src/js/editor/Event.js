@@ -69,13 +69,6 @@ class Event {
   }
 
   setEvent () {
-    // 페이지 이동시 경고창
-    // window.onbeforeunload = e => {
-    //   const dialogText = 'Dialog text here';
-    //   e.returnValue = dialogText;
-    //   return dialogText;
-    // }
-
     // 전역 이벤트
     this.on('contextmenu', e => {
       // 오른쪽 클릭 이벤트
@@ -728,7 +721,8 @@ class Event {
     this.onMemoResize('stop')
     this.components.QuickMenu.isShow = false
     this.components.CanvasGrid.isTable = false
-    this.components.CanvasMenu.isModal = false
+    this.components.CanvasMenu.isModalView = false
+    this.components.CanvasMenu.isModalHelp = false
     this.isSelectedColumn = false
     this.isGrid.table = false
     this.isStop = false

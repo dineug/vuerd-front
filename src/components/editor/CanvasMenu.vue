@@ -32,7 +32,8 @@
       @mousedown="onPreview")
 
     // view 셋팅 팝업
-    modal(v-if="isModal" @close="onClose")
+    modal(v-if="isModalView" type="view" @close="onClose('isModalView')")
+    modal(v-if="isModalHelp" type="help" @close="onClose('isModalHelp')")
 </template>
 
 <script>
@@ -67,7 +68,8 @@ export default {
       },
       isUndo: false,
       isRedo: false,
-      isModal: false,
+      isModalView: false,
+      isModalHelp: false,
       DBTypes: [
         'MariaDB',
         'MSSQL',
@@ -130,6 +132,11 @@ export default {
           type: 'redo',
           icon: 'redo',
           name: 'redo(Ctrl + Shift + Z)'
+        },
+        {
+          type: 'help',
+          icon: 'question',
+          name: 'help'
         }
       ]
     }
@@ -188,7 +195,7 @@ export default {
           ERD.core.file.clone()
           break
         case 'view':
-          this.isModal = true
+          this.isModalView = true
           ERD.core.event.isStop = true
           break
         case 'undo':
@@ -200,6 +207,10 @@ export default {
           if (this.isRedo) {
             ERD.core.undoRedo.redo()
           }
+          break
+        case 'help':
+          this.isModalHelp = true
+          ERD.core.event.isStop = true
           break
       }
     },
@@ -227,8 +238,8 @@ export default {
       this.preview.target.y = window.scrollY * this.previewRatio
     },
     // modal close
-    onClose () {
-      this.isModal = false
+    onClose (type) {
+      this[type] = false
       ERD.core.event.isStop = false
     }
   },
