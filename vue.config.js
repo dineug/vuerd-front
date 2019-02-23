@@ -1,7 +1,10 @@
 'use strict'
 
+console.log(process.env.NODE_ENV)
+
 module.exports = {
-  outputDir: './dist',
+  outputDir: process.env.OUTPUT_DIR,
+  publicPath: '/static',
   devServer: {
     proxy: {
       '^/api': {

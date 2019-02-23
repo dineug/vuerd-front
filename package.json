@@ -9,6 +9,7 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
+    "build-backend": "vue-cli-service build --mode backend",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
