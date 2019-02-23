@@ -7,6 +7,6 @@
 ## start
 ``` sh
 $ yarn
-$ npm serve
+$ yarn serve
 ```
 
