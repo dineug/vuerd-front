@@ -33,6 +33,9 @@ export default {
       return ERD.store().state.CANVAS_HEIGHT
     }
   },
+  created () {
+    ERD.core.event.setEvent()
+  },
   destroyed () {
     // 객체 정리
     ERD.destroy()
@@ -100,8 +103,8 @@ export default {
   }
 
   body {
-    overflow-x: hidden;
-    overflow-y: hidden;
+    /*overflow-x: hidden;*/
+    /*overflow-y: hidden;*/
   }
   /* width */
   body::-webkit-scrollbar {
@@ -119,25 +122,6 @@ export default {
   }
   /* Handle : hover*/
   body::-webkit-scrollbar-thumb:hover {
-    background: white;
-  }
-
-  /* width */
-  textarea::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
-  /* Track */
-  textarea::-webkit-scrollbar-track {
-    background: #191919;
-    border-left: 1px solid  #191919;
-  }
-  /* Handle */
-  textarea::-webkit-scrollbar-thumb {
-    background: #aaa;
-  }
-  /* Handle : hover*/
-  textarea::-webkit-scrollbar-thumb:hover {
-    background: white;
+    background: #a0a0a0;
   }
 </style>

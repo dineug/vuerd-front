@@ -2,6 +2,7 @@ import JSLog from '../JSLog'
 import $ from 'jquery'
 import * as util from './util'
 import model from '@/store/editor/model'
+import relationship from './img/relationship'
 
 /**
  * 이벤트 클래스
@@ -65,7 +66,7 @@ class Event {
   init (core) {
     JSLog('module dependency init', 'Event')
     this.core = core
-    this.setEvent()
+    // this.setEvent()
   }
 
   setEvent () {
@@ -441,7 +442,7 @@ class Event {
   onCursor (type, cursor) {
     switch (type) {
       case 'start':
-        document.body.setAttribute('style', `cursor: url("/static/img/erd/${cursor}.png") 16 16, auto;`)
+        document.body.setAttribute('style', `cursor: url("${relationship(cursor)}") 16 16, auto;`)
         this.isCursor = true
         this.cursor = cursor
         break
@@ -769,6 +770,7 @@ class Event {
     this.eventListener.forEach(target => {
       window.removeEventListener(target.type, target.fn)
     })
+    this.eventListener = []
   }
 }
 

@@ -1,6 +1,8 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import ERD from './views/ERD.vue'
+import ERD from './views/ERD'
+import Main from './views/Main'
+import NotFound from './views/NotFound'
 
 Vue.use(Router)
 
@@ -10,8 +12,15 @@ export default new Router({
   routes: [
     {
       path: '/',
-      name: 'ERD',
+      component: Main
+    },
+    {
+      path: '/erd',
       component: ERD
+    },
+    {
+      path: '*',
+      component: NotFound
     }
   ]
 })

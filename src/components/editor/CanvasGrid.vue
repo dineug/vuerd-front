@@ -119,6 +119,10 @@ export default {
 <style lang="scss" scoped>
   $menu_base_size: 30px;
 
+  ul, ol {
+    padding-left: 0;
+  }
+
   .grid_canvas {
     .menu_bottom {
       width: 100%;

@@ -157,6 +157,11 @@ export default {
           type: 'help',
           icon: 'question',
           name: 'help'
+        },
+        {
+          type: 'exit',
+          icon: 'sign-out-alt',
+          name: 'exit'
         }
       ]
     }
@@ -231,6 +236,9 @@ export default {
         case 'help':
           this.isModalHelp = true
           ERD.core.event.isStop = true
+          break
+        case 'exit':
+          this.$router.push({ path: '/' })
           break
       }
     },
@@ -325,6 +333,10 @@ export default {
   $menu_base_size: 30px;
   $column_selected: #00a9ff;
 
+  ul, ol {
+    padding-left: 0;
+  }
+
   .menu_canvas {
 
     input:focus {
@@ -370,16 +382,11 @@ export default {
         outline: none;
         cursor: pointer;
         border-radius: 50%;
-        /*color: #575a5f;*/
         color: #b9b9b9;
-        /*background-color: #575a5f;*/
         background-color: $tab_color;
-        /*box-shadow: 1px 1px 1px 1px #171717;*/
 
         &:hover {
           color: white;
-          font-size: .875em;
-          margin-top: 7.5px;
         }
       }
 
@@ -403,6 +410,10 @@ export default {
         text-align: center;
         padding: 10px;
         cursor: pointer;
+
+        &:hover {
+          background-color: $selected;
+        }
 
         ol {
           display: none;

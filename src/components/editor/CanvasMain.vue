@@ -756,6 +756,10 @@ export default {
   $key_fk: #dda8b1;
   $key_pfk: #60b9c4;
 
+  ul, ol {
+    padding-left: 0;
+  }
+
   input, textarea {
     background-color: #191919;
     color: white;
@@ -856,7 +860,6 @@ export default {
 
           &:hover {
             color: white;
-            font-size: .875em;
           }
         }
 
@@ -988,5 +991,24 @@ export default {
         resize: none;
       }
     }
+  }
+
+  /* width */
+  textarea::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  /* Track */
+  textarea::-webkit-scrollbar-track {
+    background: #191919;
+    border-left: 1px solid  #191919;
+  }
+  /* Handle */
+  textarea::-webkit-scrollbar-thumb {
+    background: #aaa;
+  }
+  /* Handle : hover*/
+  textarea::-webkit-scrollbar-thumb:hover {
+    background: white;
   }
 </style>

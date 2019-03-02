@@ -23,6 +23,7 @@
 import ERD from '@/js/editor/ERD'
 import model from '@/store/editor/model'
 import * as util from '@/js/editor/util'
+import relationship from '@/js/editor/img/relationship'
 
 export default {
   name: 'QuickMenu',
@@ -63,14 +64,14 @@ export default {
         },
         {
           type: 'erd-0-1',
-          icon: '/static/img/erd/erd-0-1.png',
+          icon: relationship('erd-0-1'),
           isImg: true,
           name: '1 : 1',
           keymap: 'Alt + 1'
         },
         {
           type: 'erd-0-1-N',
-          icon: '/static/img/erd/erd-0-1-N.png',
+          icon: relationship('erd-0-1-N'),
           isImg: true,
           name: '1 : N',
           keymap: 'Alt + 2'
@@ -124,6 +125,10 @@ export default {
 <style lang="scss" scoped>
   $mbg: #191919;
   $selected: #383d41;
+
+  ul, ol {
+    padding-left: 0;
+  }
 
   .quick_menu {
     color: #a2a2a2;

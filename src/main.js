@@ -4,7 +4,7 @@ import router from './router'
 import store from './store'
 import axios from 'axios'
 import Vuetify from 'vuetify'
-// import 'vuetify/dist/vuetify.min.css'
+import 'vuetify/dist/vuetify.min.css'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import {
@@ -22,6 +22,7 @@ import {
   faDatabase,
   faQuestion,
   faFileImage,
+  faSignOutAlt,
   faFileImport,
   faFileExport,
   faFileUpload,
@@ -47,6 +48,7 @@ library.add(
   faDatabase,
   faQuestion,
   faFileImage,
+  faSignOutAlt,
   faFileImport,
   faFileExport,
   faFileUpload,
