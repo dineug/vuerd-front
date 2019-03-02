@@ -2,7 +2,7 @@
 
 module.exports = {
   outputDir: process.env.OUTPUT_DIR,
-  publicPath: '/static',
+  publicPath: process.env.PUBLIC_PATH,
   devServer: {
     proxy: {
       '^/api': {
