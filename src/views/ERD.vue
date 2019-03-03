@@ -34,6 +34,10 @@ export default {
     }
   },
   created () {
+    // 레이아웃 비활성화
+    this.$event.$emit('App_layout', {
+      isLayout: false
+    })
     ERD.core.event.setEvent()
   },
   destroyed () {

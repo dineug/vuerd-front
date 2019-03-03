@@ -6,7 +6,7 @@ import NotFound from './views/NotFound'
 
 Vue.use(Router)
 
-export default new Router({
+const router = new Router({
   mode: 'history',
   base: process.env.BASE_URL,
   routes: [
@@ -24,3 +24,14 @@ export default new Router({
     }
   ]
 })
+
+router.afterEach((to, from) => {
+  // 기본 레이아웃 활성화
+  if (to.path !== '/erd') {
+    Vue.prototype.$event.$emit('App_layout', {
+      isLayout: true
+    })
+  }
+})
+
+export default router

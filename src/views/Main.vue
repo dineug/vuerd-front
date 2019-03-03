@@ -1,15 +1,15 @@
 <template lang="pug">
   .main_wrapper
-    header-toolbar
+    content-card
 </template>
 
 <script>
-import HeaderToolbar from '@/components/HeaderToolbar'
+import ContentCard from '@/components/ContentCard'
 
 export default {
   name: 'Main',
   components: {
-    HeaderToolbar
+    ContentCard
   }
 }
 </script>
