@@ -1,4 +1,3 @@
-import _ from 'underscore'
 import ERD from '@/js/editor/ERD'
 
 export default {
@@ -19,15 +18,15 @@ export default {
     rowHeaders: [{
       type: 'checkbox',
       template: function (props) {
-        let tmpl = '<div class="Checkbox_checkbox">'
-        tmpl += '<label>'
-        tmpl += '<input class="Checkbox_input <%=className%>" type="checkbox" name="<%=name%>" '
-        tmpl += '<%= disabled ? "disabled" : "" %> '
-        tmpl += '<%= checked ? "checked" : "" %> />'
-        tmpl += '<div class="Checkbox_indicator"></div>'
-        tmpl += '</label>'
-        tmpl += '</div>'
-        return _.template(tmpl)(props)
+        let tmpl = `<div class="Checkbox_checkbox">`
+        tmpl += `<label>`
+        tmpl += `<input class="Checkbox_input ${props.className}" type="checkbox" name="${props.name}" `
+        tmpl += `${props.disabled ? 'disabled' : ''}`
+        tmpl += `${props.checked ? 'checked' : ''} />`
+        tmpl += `<div class="Checkbox_indicator"></div>`
+        tmpl += `</label>`
+        tmpl += `</div>`
+        return tmpl
       }
     }, 'rowNum']
   },

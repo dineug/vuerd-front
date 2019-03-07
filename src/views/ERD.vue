@@ -33,13 +33,6 @@ export default {
       return ERD.store().state.CANVAS_HEIGHT
     }
   },
-  created () {
-    // 레이아웃 비활성화
-    this.$event.$emit('App_layout', {
-      isLayout: false
-    })
-    ERD.core.event.setEvent()
-  },
   destroyed () {
     // 객체 정리
     ERD.destroy()
@@ -48,6 +41,8 @@ export default {
 </script>
 
 <style lang="scss">
+  @import url(../css/NotoSans.css);
+
   #erd {
     display: flex;
     z-index: 2;
@@ -107,8 +102,8 @@ export default {
   }
 
   body {
-    /*overflow-x: hidden;*/
-    /*overflow-y: hidden;*/
+    overflow-x: hidden;
+    overflow-y: hidden;
   }
   /* width */
   body::-webkit-scrollbar {

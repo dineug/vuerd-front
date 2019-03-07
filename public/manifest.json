@@ -1,0 +1,12 @@
+{
+  "name": "vuerd",
+  "description" : "WEB ERD",
+  "version": "1.0",
+  "manifest_version": 2,
+  "app": {
+	"background": {
+	 "scripts": ["background.js"]
+	}
+  },
+  "icons": { "16": "hello_extensions.png" }
+}
