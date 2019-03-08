@@ -1,7 +1,6 @@
 import JSLog from '../JSLog'
 import storeERD from '@/store/editor/erd'
 import model from '@/store/editor/model'
-import $ from 'jquery'
 import domtoimage from 'dom-to-image'
 
 /**
@@ -23,27 +22,33 @@ class File {
 
   // import ready
   setImport () {
-    this.importJSONTag = $('<input type="file" accept=".json">').change(e => {
+    this.importJSONTag = document.createElement('input')
+    this.importJSONTag.setAttribute('type', 'file')
+    this.importJSONTag.setAttribute('accept', '.json')
+    this.importJSONTag.addEventListener('change', e => {
       const f = e.target.files[0]
       if (/\.(json)$/i.test(f.name)) {
         const reader = new FileReader()
         reader.readAsText(f)
         reader.onload = () => {
           this.load('json', reader.result, true)
-          this.importJSONTag.val('')
+          this.importJSONTag.value = ''
         }
       } else {
         alert('Just upload the json file')
       }
     })
-    this.importSQLTag = $('<input type="file" accept=".sql">').change(e => {
+    this.importSQLTag = document.createElement('input')
+    this.importSQLTag.setAttribute('type', 'file')
+    this.importSQLTag.setAttribute('accept', '.sql')
+    this.importSQLTag.addEventListener('change', e => {
       const f = e.target.files[0]
       if (/\.(sql)$/i.test(f.name)) {
         const reader = new FileReader()
         reader.readAsText(f)
         reader.onload = () => {
           this.load('sql', reader.result, true)
-          this.importSQLTag.val('')
+          this.importSQLTag.value = ''
         }
       } else {
         alert('Just upload the sql file')

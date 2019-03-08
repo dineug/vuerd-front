@@ -59,7 +59,6 @@
 </template>
 
 <script>
-import $ from 'jquery'
 import ERD from '@/js/editor/ERD'
 import * as util from '@/js/editor/util'
 
@@ -100,11 +99,13 @@ export default {
   },
   methods: {
     hover (e, id) {
-      const $g = $(e.target).parent('g')
-      $g.addClass('relation_active')
-      $g.find('line').addClass('relation_active')
-      $g.find('path').addClass('relation_active')
-      $g.find('circle').addClass('relation_active')
+      const g = e.target.parentNode
+      g.classList.add('relation_active')
+      g.childNodes.forEach(elem => {
+        if (elem.nodeName !== '#comment') {
+          elem.classList.add('relation_active')
+        }
+      })
       ERD.store().commit({
         type: 'lineHover',
         id: id,
@@ -112,15 +113,13 @@ export default {
       })
     },
     hoverOff (id) {
-      $(this.$el).find('g').each(function () {
-        const isClass = $(this).hasClass('relation_active')
-        if (isClass) {
-          $(this).removeClass('relation_active')
-          $(this).find('line').removeClass('relation_active')
-          $(this).find('path').removeClass('relation_active')
-          $(this).find('circle').removeClass('relation_active')
-          return false
-        }
+      this.$el.querySelectorAll('.relation_active').forEach(g => {
+        g.classList.remove('relation_active')
+        g.childNodes.forEach(elem => {
+          if (elem.nodeName !== '#comment') {
+            elem.classList.remove('relation_active')
+          }
+        })
       })
       ERD.store().commit({
         type: 'lineHover',

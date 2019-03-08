@@ -16,9 +16,6 @@ export default new Vuex.Store({
     // 그리드 활성화
     active (state, data) {
       JSLog('mutations', 'table grid', 'active')
-      if (ERD.core.event.isGrid.table) {
-        ERD.core.event.components.CanvasGrid.isTable = false
-      }
       state.rows = []
       state.table = util.getData(ERD.store().state.tables, data.id)
       if (state.table) {
@@ -40,9 +37,6 @@ export default new Vuex.Store({
     // 삭제
     delete (state) {
       JSLog('mutations', 'table grid', 'delete')
-      if (ERD.core.event.isGrid.table) {
-        ERD.core.event.components.CanvasGrid.isTable = false
-      }
       state.rows = []
       state.table = null
     },

@@ -54,7 +54,7 @@ import draggable from 'vuedraggable'
 import CanvasMain from './CanvasMain'
 import CanvasSvg from './CanvasSvg'
 import Modal from './Modal'
-import $ from 'jquery'
+import * as util from '@/js/editor/util'
 
 export default {
   name: 'CanvasMenu',
@@ -139,9 +139,14 @@ export default {
           name: 'clone'
         },
         {
-          type: 'view',
-          icon: 'eye',
-          name: 'view setting'
+          type: 'table',
+          icon: 'list',
+          name: 'table options'
+        },
+        {
+          type: 'domain',
+          icon: 'book',
+          name: 'domain'
         },
         {
           type: 'undo',
@@ -152,6 +157,11 @@ export default {
           type: 'redo',
           icon: 'redo',
           name: 'redo(Ctrl + Shift + Z)'
+        },
+        {
+          type: 'view',
+          icon: 'eye',
+          name: 'view setting'
         },
         {
           type: 'help',
@@ -228,6 +238,10 @@ export default {
             ERD.core.undoRedo.redo()
           }
           break
+        case 'table':
+          break
+        case 'domain':
+          break
         case 'help':
           this.isModalHelp = true
           ERD.core.event.isStop = true
@@ -249,9 +263,9 @@ export default {
     setPreview () {
       const width = window.innerWidth
       const height = window.innerHeight
-      this.preview.left = (-1 * this.CANVAS_WIDTH / 2) + (this.PREVIEW_WIDTH / 2) - this.PREVIEW_WIDTH - 50 + width
+      this.preview.left = (-1 * this.CANVAS_WIDTH / 2) + (this.PREVIEW_WIDTH / 2) - this.PREVIEW_WIDTH - 20 + width
       this.preview.top = (-1 * this.CANVAS_HEIGHT / 2) + (this.CANVAS_HEIGHT * this.previewRatio / 2) + 50
-      this.preview.x = width - this.PREVIEW_WIDTH - 50
+      this.preview.x = width - this.PREVIEW_WIDTH - 20
       this.preview.target.width = width * this.previewRatio
       this.preview.target.height = height * this.previewRatio
       this.preview.target.x = window.scrollX * this.previewRatio
@@ -277,24 +291,24 @@ export default {
     // 포커스 move
     onKeyArrowMove (e, isRead) {
       if (isRead) {
-        const $input = $(e.target).parents('.menu_top').find('input')
-        const index = $input.index(e.target)
+        const inputs = this.$el.querySelectorAll('.menu_top input')
+        const index = util.index(e.target.parentNode)
         switch (e.keyCode) {
           case 37: // key: Arrow left
             e.preventDefault()
-            $input.eq(index - 1).focus()
+            inputs[index - 1 < 0 ? inputs.length - 1 : index - 1].focus()
             break
           case 39: // key: Arrow right
             e.preventDefault()
-            $input.eq(index + 1 === $input.length ? 0 : index + 1).focus()
+            inputs[index + 1 === inputs.length ? 0 : index + 1].focus()
             break
         }
       }
       if (e.keyCode === 9) {
-        const $input = $(e.target).parents('.menu_top').find('input')
-        const index = $input.index(e.target)
         e.preventDefault()
-        $input.eq(index + 1 === $input.length ? 0 : index + 1).focus()
+        const inputs = this.$el.querySelectorAll('.menu_top input')
+        const index = util.index(e.target.parentNode)
+        inputs[index + 1 === inputs.length ? 0 : index + 1].focus()
       }
     }
   },

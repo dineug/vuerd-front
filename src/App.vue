@@ -1,7 +1,6 @@
 <template lang="pug">
   #erd(:style="`width: ${CANVAS_WIDTH}px; height: ${CANVAS_HEIGHT}px;`")
     canvas-menu
-    canvas-grid
     quick-menu
     .canvas
       canvas-main
@@ -10,7 +9,6 @@
 
 <script>
 import CanvasMenu from '@/components/editor/CanvasMenu'
-import CanvasGrid from '@/components/editor/CanvasGrid'
 import QuickMenu from '@/components/editor/QuickMenu'
 import CanvasMain from '@/components/editor/CanvasMain'
 import CanvasSvg from '@/components/editor/CanvasSvg'
@@ -20,7 +18,6 @@ export default {
   name: 'App',
   components: {
     CanvasMenu,
-    CanvasGrid,
     QuickMenu,
     CanvasMain,
     CanvasSvg

@@ -5,7 +5,6 @@ import * as util from '@/js/editor/util'
 import storeERD from '@/store/editor/erd'
 import ERD from '@/js/editor/ERD'
 import storeTable from './table'
-import $ from 'jquery'
 
 JSLog('store loaded', 'model')
 Vue.use(Vuex)
@@ -104,7 +103,7 @@ export default new Vuex.Store({
             this.commit({ type: 'modelAdd' })
           } else if (tab && tab.active) {
             state.tabs[state.tabs.length - 1].active = true
-            $(`#tab_${state.tabs[state.tabs.length - 1].id}`).focus()
+            document.getElementById(`tab_${state.tabs[state.tabs.length - 1].id}`).focus()
           }
           break
         }

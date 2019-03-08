@@ -208,11 +208,11 @@
 </template>
 
 <script>
-import $ from 'jquery'
 import ERD from '@/js/editor/ERD'
 import storeTable from '@/store/editor/table'
 import draggable from 'vuedraggable'
 import Velocity from 'velocity-animate'
+import * as util from '@/js/editor/util'
 
 export default {
   name: 'CanvasMain',
@@ -340,7 +340,7 @@ export default {
     // 컬럼 선택 전역
     onColumnSelected (e, tableId, columnId) {
       // 데이터 타입 힌트 hide
-      if (!$(e.target).closest('.erd_data_type_list').length) {
+      if (!e.target.closest('.erd_data_type_list')) {
         ERD.core.erd.store().commit({
           type: 'columnDataTypeHintVisibleAll',
           isDataTypeHint: false
@@ -400,26 +400,26 @@ export default {
     hintFocus (e, tableId, columnId, isRead, type) {
       if (!isRead) {
         // 힌트 포커스 이동
-        const $li = $(e.target).parent('div').find('li')
-        const index = $li.filter('.selected').index()
-        const len = $li.length
+        const lis = e.target.parentNode.querySelectorAll('li')
+        const index = util.index(e.target.parentNode.querySelector('ul'), '.selected')
+        const len = lis.length
         switch (e.keyCode) {
           case 38: // key: Arrow up
             e.preventDefault()
             if (index === -1) {
-              $li.eq(len - 1).addClass('selected')
+              lis[len - 1] && lis[len - 1].classList.add('selected')
             } else {
-              $li.eq(index).removeClass('selected')
-              $li.eq(index - 1).addClass('selected')
+              lis[index].classList.remove('selected')
+              lis[index - 1 < 0 ? len - 1 : index - 1].classList.add('selected')
             }
             break
           case 40: // key: Arrow down
             e.preventDefault()
             if (index === -1) {
-              $li.eq(0).addClass('selected')
+              lis[0] && lis[0].classList.add('selected')
             } else {
-              $li.eq(index).removeClass('selected')
-              $li.eq(index + 1 === len ? 0 : index + 1).addClass('selected')
+              lis[index].classList.remove('selected')
+              lis[index + 1 === len ? 0 : index + 1].classList.add('selected')
             }
             break
           case 13: // key: Enter
@@ -443,14 +443,14 @@ export default {
                     type: 'columnChangeDataType',
                     tableId: tableId,
                     columnId: columnId,
-                    dataType: $li.filter('.selected').text()
+                    dataType: e.target.parentNode.querySelector('ul').querySelector('.selected').innerHTML
                   })
                 } else if (type === 'domain') {
                   ERD.store().commit({
                     type: 'columnChangeDomain',
                     tableId: tableId,
                     columnId: columnId,
-                    domainId: $li.filter('.selected').attr('domain_id')
+                    domainId: e.target.parentNode.querySelector('ul').querySelector('.selected').getAttribute('domain_id')
                   })
                 }
               }
@@ -468,7 +468,7 @@ export default {
         columnId: columnId,
         dataType: dataType
       })
-      $(e.target).parents('div').find('.erd_data_type').focus()
+      e.target.parentNode.parentNode.querySelector('.erd_data_type').focus()
       ERD.store().commit({
         type: 'columnEdit',
         tableId: tableId,
@@ -485,7 +485,7 @@ export default {
         columnId: columnId,
         domainId: domainId
       })
-      $(e.target).parents('div').find('.erd_domain').focus()
+      e.target.parentNode.parentNode.querySelector('.erd_domain').focus()
       ERD.store().commit({
         type: 'columnEdit',
         tableId: tableId,
@@ -556,36 +556,28 @@ export default {
     // 테이블명, 코멘트 영역
     onKeyArrowMoveHead (e, isRead) {
       if (isRead) {
-        const $divColumns = $(e.target).parents('.erd_table').find('.erd_column')
-        const $input = $(e.target).parents('.erd_table_header').find('input')
-        const rowIndex = $input.index(e.target)
+        const divColumns = e.target.parentNode.parentNode.querySelectorAll('.erd_column')
+        const inputs = e.target.parentNode.querySelectorAll('input')
+        const rowIndex = util.index(e.target)
         switch (e.keyCode) {
           case 37: // key: Arrow left
             e.preventDefault()
-            if (rowIndex === 0) {
-              $input[1].focus()
-            } else {
-              $input[0].focus()
-            }
+            inputs[rowIndex === 0 ? 1 : 0].focus()
             break
           case 39: // key: Arrow right
             e.preventDefault()
-            if (rowIndex === 0) {
-              $input[1].focus()
-            } else {
-              $input[0].focus()
-            }
+            inputs[rowIndex === 0 ? 1 : 0].focus()
             break
           case 38: // key: Arrow up
             e.preventDefault()
-            if ($divColumns.length !== 0) {
-              $divColumns.last().find('input')[0].focus()
+            if (divColumns.length !== 0) {
+              divColumns[divColumns.length - 1].querySelector('input').focus()
             }
             break
           case 40: // key: Arrow down
             e.preventDefault()
-            if ($divColumns.length !== 0) {
-              $divColumns.first().find('input')[0].focus()
+            if (divColumns.length !== 0) {
+              divColumns[0].querySelector('input').focus()
             }
             break
         }
@@ -594,36 +586,42 @@ export default {
     // 컬럼 화살표 이동
     onKeyArrowMove (e, isRead) {
       if (isRead) {
-        const $tableInput = $(e.target).parents('.erd_table').find('.erd_table_header').find('input')
-        const $divColumns = $(e.target).parents('.erd_table').find('.erd_column')
-        const $input = $(e.target).parents('.erd_column').find('input')
-        const rowIndex = $input.index(e.target)
-        const index = $divColumns.filter('.selected').index()
-        const len = $divColumns.length
+        let table = e.target.parentNode.parentNode.parentNode
+        let column = e.target.parentNode
+        if (!table.querySelector('.erd_table_header')) {
+          table = e.target.parentNode.parentNode.parentNode.parentNode
+          column = e.target.parentNode.parentNode
+        }
+        const tableInputs = table.querySelector('.erd_table_header').querySelectorAll('input')
+        const divColumns = table.querySelectorAll('.erd_column')
+        const inputs = column.querySelectorAll('input')
+        const rowIndex = util.index(inputs, e.target)
+        const colIndex = util.index(divColumns, column)
+        const len = divColumns.length
         switch (e.keyCode) {
           case 38: // key: Arrow up
             e.preventDefault()
-            if (index === 0) {
-              $tableInput[0].focus()
+            if (colIndex === 0) {
+              tableInputs[0].focus()
             } else {
-              $divColumns.eq(index - 1).find('input').eq(rowIndex).focus()
+              divColumns[colIndex - 1].querySelectorAll('input')[rowIndex].focus()
             }
             break
           case 40: // key: Arrow down
             e.preventDefault()
-            if (index === len - 1) {
-              $tableInput[0].focus()
+            if (colIndex === len - 1) {
+              tableInputs[0].focus()
             } else {
-              $divColumns.eq(index + 1 === len ? 0 : index + 1).find('input').eq(rowIndex).focus()
+              divColumns[colIndex + 1 === len ? 0 : colIndex + 1].querySelectorAll('input')[rowIndex].focus()
             }
             break
           case 37: // key: Arrow left
             e.preventDefault()
-            $divColumns.eq(index).find('input').eq(rowIndex - 1).focus()
+            divColumns[colIndex].querySelectorAll('input')[rowIndex - 1 < 0 ? inputs.length - 1 : rowIndex - 1].focus()
             break
           case 39: // key: Arrow right
             e.preventDefault()
-            $divColumns.eq(index).find('input').eq(rowIndex + 1 === $input.length ? 0 : rowIndex + 1).focus()
+            divColumns[colIndex].querySelectorAll('input')[rowIndex + 1 === inputs.length ? 0 : rowIndex + 1].focus()
             break
         }
       }
@@ -631,20 +629,23 @@ export default {
     // 컬럼 마지막 tab 포커스처리
     columnLastTabFocus (e) {
       e.preventDefault()
-      const $tableInput = $(e.target).parents('.erd_table').find('.erd_table_header').find('input')
-      const $divColumns = $(e.target).parents('.erd_table').find('.erd_column')
-      const index = $divColumns.filter('.selected').index()
-      const len = $divColumns.length
+      const table = e.target.parentNode.parentNode.parentNode
+      const tableInputs = table.querySelector('.erd_table_header').querySelectorAll('input')
+      const divColumns = table.querySelectorAll('.erd_column')
+      const index = util.index(table, '.selected')
+      const len = divColumns.length
       if (index === len - 1) {
-        $tableInput[0].focus()
+        tableInputs[0].focus()
       } else {
-        $divColumns.eq(index + 1).find('input:eq(0)').focus()
+        divColumns[index + 1].querySelector('input').focus()
       }
     },
     // 힌트 hover addClass
     hintAddClass (e) {
-      $(e.target).parent('ul').find('li').removeClass('selected')
-      $(e.target).addClass('selected')
+      e.target.parentNode.querySelectorAll('li').forEach(li => {
+        li.classList.remove('selected')
+      })
+      e.target.classList.add('selected')
     },
     // undo
     onDraggableUndo () {

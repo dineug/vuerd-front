@@ -1,6 +1,5 @@
 import JSLog from '../JSLog'
 import ERD from './ERD'
-import $ from 'jquery'
 
 JSLog('module loaded', 'util')
 
@@ -52,8 +51,31 @@ export const getZIndex = () => {
   return ++max
 }
 
+// dom 순서
+export const index = (elem, selector) => {
+  if (typeof selector === 'object') {
+    for (let i = 0; i < elem.length; i++) {
+      if (selector.isEqualNode(elem[i])) {
+        return i
+      }
+    }
+  } else if (selector) {
+    if (elem && elem.querySelector(selector)) {
+      return index(elem.querySelector(selector))
+    }
+  } else {
+    const children = elem.parentNode.childNodes
+    for (let i = 0; i < children.length; i++) {
+      if (elem.isEqualNode(children[i])) {
+        return i
+      }
+    }
+  }
+  return -1
+}
+
 // 생성위치
-export const setPosition = (target) => {
+export const setPosition = target => {
   let isPosition = true
   while (isPosition) {
     isPosition = false
@@ -213,8 +235,17 @@ export const changeIdentification = (state, table) => {
 }
 
 // 컬럼 max width
-$(document.body).append('<span id="textWidth" style="display: none; font: 400 12px Arial;"></span>')
-const textWidthTag = $('#textWidth')
+const textWidthTag = document.createElement('span')
+if (document.getElementById('textWidth')) {
+  document.getElementById('textWidth').remove()
+}
+textWidthTag.setAttribute('id', 'textWidth')
+textWidthTag.setAttribute('style', 'visibility:hidden; position:absolute; top:-10000; font: 400 12px Arial;')
+document.body.appendChild(textWidthTag)
+function getTextWidth (text) {
+  textWidthTag.innerHTML = text
+  return textWidthTag.offsetWidth
+}
 export const columnMaxWidth = (state, columns) => {
   const max = {
     name: state.COLUMN_WIDTH,
@@ -223,10 +254,10 @@ export const columnMaxWidth = (state, columns) => {
     domain: state.COLUMN_WIDTH
   }
   columns.forEach(column => {
-    const widthName = textWidthTag.text(column.name).width()
-    const widthDataType = textWidthTag.text(column.dataType).width()
-    const widthComment = textWidthTag.text(column.comment).width()
-    const widthDomain = textWidthTag.text(column.domain).width()
+    const widthName = getTextWidth(column.name)
+    const widthDataType = getTextWidth(column.dataType)
+    const widthComment = getTextWidth(column.comment)
+    const widthDomain = getTextWidth(column.domain)
     if (max.name < widthName) {
       max.name = widthName
     }

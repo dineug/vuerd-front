@@ -1,5 +1,4 @@
 import JSLog from '../JSLog'
-import $ from 'jquery'
 import * as util from './util'
 import model from '@/store/editor/model'
 import relationship from './img/relationship'
@@ -17,8 +16,7 @@ class Event {
     this.components = {
       QuickMenu: null,
       CanvasMain: [],
-      CanvasMenu: null,
-      CanvasGrid: null
+      CanvasMenu: null
     }
     this.isStop = false
     this.isEdit = false
@@ -52,11 +50,6 @@ class Event {
     // move
     this.isMove = false
 
-    // grid
-    this.isGrid = {
-      table: false
-    }
-
     // memo resize
     this.isMemoResize = false
     this.memoId = null
@@ -82,8 +75,8 @@ class Event {
       // 미리보기 창크기 동적 위치
       const width = window.innerWidth
       const height = window.innerHeight
-      this.components.CanvasMenu.preview.left = (-1 * this.components.CanvasMenu.CANVAS_WIDTH / 2) + (this.components.CanvasMenu.PREVIEW_WIDTH / 2) - this.components.CanvasMenu.PREVIEW_WIDTH - 50 + width
-      this.components.CanvasMenu.preview.x = width - this.components.CanvasMenu.PREVIEW_WIDTH - 50
+      this.components.CanvasMenu.preview.left = (-1 * this.components.CanvasMenu.CANVAS_WIDTH / 2) + (this.components.CanvasMenu.PREVIEW_WIDTH / 2) - this.components.CanvasMenu.PREVIEW_WIDTH - 20 + width
+      this.components.CanvasMenu.preview.x = width - this.components.CanvasMenu.PREVIEW_WIDTH - 20
       this.components.CanvasMenu.preview.target.width = this.components.CanvasMenu.previewRatio * width
       this.components.CanvasMenu.preview.target.height = this.components.CanvasMenu.previewRatio * height
     }).on('scroll', e => {
@@ -94,29 +87,29 @@ class Event {
       JSLog('event', 'mousedown')
       if (!this.isStop) {
         // 테이블 메뉴 hide
-        if (!$(e.target).closest('.quick_menu').length) {
+        if (!e.target.closest('.quick_menu')) {
           this.components.QuickMenu.isShow = false
         }
         // 데이터 타입 힌트 hide
-        if (!$(e.target).closest('.erd_data_type_list').length) {
+        if (!e.target.closest('.erd_data_type_list')) {
           this.core.erd.store().commit({
             type: 'columnDataTypeHintVisibleAll',
             isDataTypeHint: false
           })
         }
         // 도메인 힌트 hide
-        if (!$(e.target).closest('.erd_domain_list').length) {
+        if (!e.target.closest('.erd_domain_list')) {
           this.core.erd.store().commit({
             type: 'columnDomainHintVisibleAll',
             isDomainHint: false
           })
         }
         // 테이블 및 컬럼 selected 해제
-        if (!$(e.target).closest('.erd_table').length &&
-          !$(e.target).closest('.erd_memo').length &&
-          !$(e.target).closest('.quick_menu_pk').length &&
-          !$(e.target).closest('.table_detail').length &&
-          !$(e.target).closest('.menu_bottom').length) {
+        if (!e.target.closest('.erd_table') &&
+          !e.target.closest('.erd_memo') &&
+          !e.target.closest('.quick_menu_pk') &&
+          !e.target.closest('.table_detail') &&
+          !e.target.closest('.menu_bottom')) {
           this.core.erd.store().commit({
             type: 'tableSelectedAllNone',
             isTable: true,
@@ -130,11 +123,11 @@ class Event {
           !this.isDraggable &&
           !this.isSelectedColumn &&
           !this.isPreview &&
-          !$(e.target).closest('.menu_top').length &&
-          !$(e.target).closest('.menu_sidebar').length &&
-          !$(e.target).closest('.menu_bottom').length &&
-          !$(e.target).closest('.table_detail').length &&
-          $(e.target).closest('.svg_canvas').length) {
+          !e.target.closest('.menu_top') &&
+          !e.target.closest('.menu_sidebar') &&
+          !e.target.closest('.menu_bottom') &&
+          !e.target.closest('.table_detail') &&
+          e.target.closest('.svg_canvas')) {
           if (e.ctrlKey) {
             // 마우스 drag
             this.onDrag('start', e)
@@ -727,16 +720,11 @@ class Event {
     this.onMove('stop')
     this.onMemoResize('stop')
     if (this.components.QuickMenu) this.components.QuickMenu.isShow = false
-    if (this.components.CanvasGrid) {
-      this.components.CanvasGrid.isTable = false
-      this.components.CanvasGrid.isDomain = false
-    }
     if (this.components.CanvasMenu) {
       this.components.CanvasMenu.isModalView = false
       this.components.CanvasMenu.isModalHelp = false
     }
     this.isSelectedColumn = false
-    this.isGrid.table = false
     this.isStop = false
     // 모든 selected 해제
     this.core.erd.store().commit({
