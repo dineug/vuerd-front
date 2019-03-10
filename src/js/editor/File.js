@@ -12,6 +12,7 @@ class File {
 
     this.core = null
     this.setImport()
+    this.a = document.createElement('a')
   }
 
   // 종속성 초기화
@@ -146,15 +147,18 @@ class File {
 
   // download
   execute (blob, fileName) {
-    if (window.navigator.msSaveOrOpenBlob) {
-      window.navigator.msSaveBlob(blob, fileName)
+    if (window.chrome.fileSystem) {
+      window.chrome.fileSystem.chooseEntry({ type: 'saveFile', suggestedName: fileName }, writableEntry => {
+        writableEntry.createWriter(writer => {
+          writer.write(blob)
+        }, () => {
+          alert('save error')
+        })
+      })
     } else {
-      const elem = window.document.createElement('a')
-      elem.href = window.URL.createObjectURL(blob)
-      elem.download = fileName
-      document.body.appendChild(elem)
-      elem.click()
-      document.body.removeChild(elem)
+      this.a.href = window.URL.createObjectURL(blob)
+      this.a.download = fileName
+      this.a.click()
     }
   }
 

@@ -3,10 +3,14 @@
   "description" : "WEB ERD",
   "version": "1.0",
   "manifest_version": 2,
+  "icons": { "16": "hello_extensions.png" },
   "app": {
 	"background": {
 	 "scripts": ["background.js"]
 	}
   },
-  "icons": { "16": "hello_extensions.png" }
+  "permissions":[
+    "syncFileSystem",
+    {"fileSystem": ["write"]}
+  ]
 }

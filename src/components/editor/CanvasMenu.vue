@@ -15,7 +15,8 @@
           @blur="onBlur")
 
           span.buttons(:class="{ tab_active: tab.active }")
-            button(@click="modelDelete(tab.id)" title="Ctrl + Shift + Delete")
+            button(title="Ctrl + Shift + Delete"
+            @click="modelDelete(tab.id)")
               font-awesome-icon(icon="times")
 
     // 메뉴 sidebar left
@@ -28,13 +29,6 @@
           li(v-for="dbType in DBTypes" :class="{ db_active: DBType === dbType }"
           @click="changeDB(dbType)") {{ dbType }}
 
-    // 메뉴 sidebar right
-    <!--ui.menu_sidebar_right-->
-      <!--li(v-for="menu in menus" :key="menu.id" :title="menu.name"-->
-      <!--:class="{ undo_none: menu.type === 'undo' && !isUndo, redo_none: menu.type === 'redo' && !isRedo }"-->
-      <!--@click="menuAction(menu.type)")-->
-        <!--font-awesome-icon(:icon="menu.icon")-->
-
     // 메뉴 Preview Navigation
     canvas-main.preview(:style="`top: ${preview.top}px; left: ${preview.left}px; transform: scale(${previewRatio}, ${previewRatio});`"
     :isPreview="true")
@@ -43,8 +37,14 @@
       @mousedown="onPreview")
 
     // view 셋팅 팝업
-    modal(v-if="isModalView" type="view" @close="onClose('isModalView')")
-    modal(v-if="isModalHelp" type="help" @close="onClose('isModalHelp')")
+    modal(v-if="isModalView" type="view"
+    @close="onClose('isModalView')")
+    modal(v-if="isModalHelp" type="help"
+    @close="onClose('isModalHelp')")
+
+    grid.menu_grid(v-if="isGridColumn"
+    :columnData="gridColumnData" :data="gridTableData"
+    @close="gridClose")
 </template>
 
 <script>
@@ -54,6 +54,9 @@ import draggable from 'vuedraggable'
 import CanvasMain from './CanvasMain'
 import CanvasSvg from './CanvasSvg'
 import Modal from './Modal'
+import Grid from './Grid'
+import gridColumnData from '@/js/editor/grid/column'
+import table from '@/store/editor/table'
 import * as util from '@/js/editor/util'
 
 export default {
@@ -62,7 +65,8 @@ export default {
     draggable,
     CanvasMain,
     CanvasSvg,
-    Modal
+    Modal,
+    Grid
   },
   directives: {
     // focus 정의
@@ -74,6 +78,8 @@ export default {
   },
   data () {
     return {
+      gridColumnData: gridColumnData,
+      isGridColumn: false,
       preview: {
         top: 0,
         left: 0,
@@ -189,6 +195,9 @@ export default {
     },
     PREVIEW_WIDTH () {
       return ERD.store().state.PREVIEW_WIDTH
+    },
+    gridTableData () {
+      return table.state.rows
     }
   },
   methods: {
@@ -239,6 +248,7 @@ export default {
           }
           break
         case 'table':
+          this.isGridColumn = !this.isGridColumn
           break
         case 'domain':
           break
@@ -310,6 +320,9 @@ export default {
         const index = util.index(e.target.parentNode)
         inputs[index + 1 === inputs.length ? 0 : index + 1].focus()
       }
+    },
+    gridClose () {
+      this.isGridColumn = false
     }
   },
   mounted () {
@@ -457,23 +470,6 @@ export default {
       }
     }
 
-    .menu_sidebar_right {
-      width: $menu_base_size;
-      height: 100%;
-      position: fixed;
-      right: 0;
-      z-index: 2147483646;
-      color: white;
-      background-color: black;
-      list-style: none;
-
-      & > li {
-        text-align: center;
-        padding: 10px;
-        cursor: pointer;
-      }
-    }
-
     .preview {
       position: fixed;
       z-index: 2147483646;
@@ -487,6 +483,11 @@ export default {
         position: absolute;
         border: solid orange 1px;
       }
+    }
+
+    .menu_grid {
+      position: fixed;
+      z-index: 2147483646;
     }
 
     /* 이동 animation */

@@ -29,7 +29,13 @@ export default new Vuex.Store({
             unique: column.options.unique,
             autoIncrement: column.options.autoIncrement,
             default: column.default,
-            comment: column.comment
+            comment: column.comment,
+            ui: {
+              isReadname: true,
+              isReaddataType: true,
+              isReaddefault: true,
+              isReadcomment: true
+            }
           })
         })
       }
@@ -46,8 +52,8 @@ export default new Vuex.Store({
       if (state.table) {
         const undo = JSON.stringify(ERD.core.erd.store().state)
         if (data.isPK) {
-          state.table.columns.forEach((column, i) => {
-            if (i === data.rowKey) {
+          state.table.columns.forEach(column => {
+            if (column.id === data.columnId) {
               column.ui.selected = true
             } else {
               column.ui.selected = false
@@ -57,21 +63,23 @@ export default new Vuex.Store({
             type: 'columnKey',
             key: 'pk'
           })
+          util.setData(util.getData(state.rows, data.columnId), data.columnGrid)
         } else {
-          state.table.columns.forEach((column, i) => {
-            if (i === data.rowKey) {
+          state.table.columns.forEach(column => {
+            if (column.id === data.columnId) {
               column.ui.selected = true
             } else {
               column.ui.selected = false
             }
           })
-          util.setData(state.table.columns[data.rowKey], data.column)
+          util.setData(util.getData(state.table.columns, data.columnId), data.column)
+          util.setData(util.getData(state.rows, data.columnId), data.columnGrid)
           if (data.column.dataType) {
             // 컬럼 데이터타입 관계 동기화
             ERD.store().commit({
               type: 'columnRelationSync',
               tableId: state.table.id,
-              columnId: state.table.columns[data.rowKey].id
+              columnId: data.columnId
             })
           }
           // 도메인 동기화
@@ -79,7 +87,7 @@ export default new Vuex.Store({
             ERD.store().commit({
               type: 'columnDomainSync',
               tableId: state.table.id,
-              columnId: state.table.columns[data.rowKey].id
+              columnId: data.columnId
             })
           }
         }
@@ -90,6 +98,12 @@ export default new Vuex.Store({
           redo: JSON.stringify(ERD.core.erd.store().state)
         })
       }
+    },
+    // 수정모드
+    edit (state, data) {
+      JSLog('mutations', 'table grid', 'edit')
+      const column = util.getData(state.rows, data.columnId)
+      column.ui[data.current] = data.isRead
     }
   }
 })

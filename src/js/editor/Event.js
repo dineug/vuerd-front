@@ -16,7 +16,11 @@ class Event {
     this.components = {
       QuickMenu: null,
       CanvasMain: [],
-      CanvasMenu: null
+      CanvasMenu: null,
+      Grid: {
+        column: null,
+        domain: null
+      }
     }
     this.isStop = false
     this.isEdit = false
@@ -53,6 +57,10 @@ class Event {
     // memo resize
     this.isMemoResize = false
     this.memoId = null
+
+    // grid column resize
+    this.isGridResize = false
+    this.grid = null
   }
 
   // 종속성 초기화
@@ -108,8 +116,8 @@ class Event {
         if (!e.target.closest('.erd_table') &&
           !e.target.closest('.erd_memo') &&
           !e.target.closest('.quick_menu_pk') &&
-          !e.target.closest('.table_detail') &&
-          !e.target.closest('.menu_bottom')) {
+          !e.target.closest('.menu_grid') &&
+          !e.target.closest('.menu_sidebar')) {
           this.core.erd.store().commit({
             type: 'tableSelectedAllNone',
             isTable: true,
@@ -125,7 +133,7 @@ class Event {
           !this.isPreview &&
           !e.target.closest('.menu_top') &&
           !e.target.closest('.menu_sidebar') &&
-          !e.target.closest('.menu_bottom') &&
+          !e.target.closest('.menu_grid') &&
           !e.target.closest('.table_detail') &&
           e.target.closest('.svg_canvas')) {
           if (e.ctrlKey) {
@@ -144,6 +152,7 @@ class Event {
       this.onPreview('stop')
       this.onMove('stop')
       this.onMemoResize('stop')
+      this.onGridResize('stop')
     }).on('mousemove', e => {
       if (!this.isStop) {
         if (this.move.x === 0 && this.move.y === 0) {
@@ -165,6 +174,8 @@ class Event {
         this.onMove('update', e)
         // 메모 리사이징
         this.onMemoResize('update', null, e)
+        // grid column 리사이징
+        this.onGridResize('update', null, e)
 
         this.move.x = e.clientX + document.documentElement.scrollLeft
         this.move.y = e.clientY + document.documentElement.scrollTop
@@ -711,6 +722,36 @@ class Event {
     }
   }
 
+  onGridResize (type, grid, e) {
+    switch (type) {
+      case 'start':
+        this.isGridResize = true
+        this.grid = grid
+        break
+      case 'update':
+        if (this.isGridResize) {
+          e.preventDefault()
+          const maxHeight = 25 * this.components.Grid[this.grid].data.length
+          const y = e.clientY + document.documentElement.scrollTop - this.move.y
+          let height = this.components.Grid[this.grid].height - y
+
+          if (height < 25 || maxHeight < 25) {
+            height = 25
+          } else if (height > maxHeight) {
+            height = maxHeight
+          }
+          this.components.Grid[this.grid].height = height
+        }
+        break
+      case 'stop':
+        if (this.isGridResize) {
+          this.isGridResize = false
+          this.grid = null
+        }
+        break
+    }
+  }
+
   // 모든 이벤트 중지
   stop () {
     this.onCursor('stop')
@@ -719,10 +760,12 @@ class Event {
     this.onDrag('stop')
     this.onMove('stop')
     this.onMemoResize('stop')
+    this.onGridResize('stop')
     if (this.components.QuickMenu) this.components.QuickMenu.isShow = false
     if (this.components.CanvasMenu) {
       this.components.CanvasMenu.isModalView = false
       this.components.CanvasMenu.isModalHelp = false
+      this.components.CanvasMenu.isGridColumn = false
     }
     this.isSelectedColumn = false
     this.isStop = false
