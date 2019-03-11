@@ -55,7 +55,7 @@ class IndexedDB {
       json: this.core.file.toJSON()
     })
     req.onsuccess = e => {
-      console.log('IndexedDB store onsuccess')
+      JSLog('IndexedDB store onsuccess')
     }
     req.onerror = e => {
       alert('IndexedDB store onerror')

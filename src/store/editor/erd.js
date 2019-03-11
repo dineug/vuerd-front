@@ -152,7 +152,11 @@ export default () => {
       // 도메인 삭제
       domainDelete: domain.delete,
       // 도메인값 변경
-      domainChange: domain.change
+      domainChange: domain.change,
+      // 도메인 수정모드
+      domainEdit: domain.edit,
+      // 도메인 edit 해제
+      domainEditAllNone: domain.editAllNone
     }
   })
 }

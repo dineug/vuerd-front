@@ -75,6 +75,7 @@ class File {
       case 'verd':
         try {
           const json = JSON.parse(data)
+          this.core.data.set(json)
           const tabs = []
           for (let tab of json.tabs) {
             const newTab = {

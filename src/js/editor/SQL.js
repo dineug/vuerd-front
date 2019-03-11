@@ -1,5 +1,4 @@
 import JSLog from '../JSLog'
-import model from '@/store/editor/model'
 import mysql from './sql/MySQL'
 import oracle from './sql/Oracle'
 import mariadb from './sql/MariaDB'

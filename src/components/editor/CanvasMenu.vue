@@ -45,10 +45,11 @@
 
     // 테이블 컬럼 상세 옵션 그리드
     grid.menu_grid(v-if="isGridColumn"
-    :columnData="gridDataColumn" :data="gridRowDataColumn"
+    :columnData="gridDataColumn" :data="gridRowDataColumn" gridType="table"
     @close="gridClose")
     grid.menu_grid(v-if="isGridDomain"
-    :columnData="gridDataDomain" :data="gridRowDataDomain" gridType="domain")
+    :columnData="gridDataDomain" :data="gridRowDataDomain" gridType="domain"
+    @close="gridClose")
 </template>
 
 <script>
@@ -346,6 +347,7 @@ export default {
     },
     gridClose () {
       this.isGridColumn = false
+      this.isGridDomain = false
     }
   },
   mounted () {

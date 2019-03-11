@@ -3,7 +3,7 @@
   "description" : "WEB ERD",
   "version": "1.0",
   "manifest_version": 2,
-  "icons": { "16": "hello_extensions.png" },
+  "icons": { "128": "verd.png" },
   "app": {
 	"background": {
 	 "scripts": ["background.js"]

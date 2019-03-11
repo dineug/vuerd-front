@@ -1,17 +1,24 @@
 export default [
   {
-    name: 'name',
+    name: 'Name',
     key: 'name',
-    width: 33
+    width: 32
   },
   {
-    name: 'dataType',
+    name: 'DataType',
     key: 'dataType',
-    width: 34
+    width: 32
   },
   {
-    name: 'default',
+    name: 'Default',
     key: 'default',
-    width: 33
+    width: 32
+  },
+  {
+    name: '',
+    key: '',
+    width: 4,
+    type: 'button',
+    icon: 'times'
   }
 ]

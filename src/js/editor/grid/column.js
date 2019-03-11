@@ -1,11 +1,11 @@
 export default [
   {
-    name: 'name',
+    name: 'Name',
     key: 'name',
     width: 23
   },
   {
-    name: 'dataType',
+    name: 'DataType',
     key: 'dataType',
     width: 23
   },
@@ -34,12 +34,12 @@ export default [
     type: 'checkbox'
   },
   {
-    name: 'default',
+    name: 'Default',
     key: 'default',
     width: 23
   },
   {
-    name: 'comment',
+    name: 'Comment',
     key: 'comment',
     width: 23
   }

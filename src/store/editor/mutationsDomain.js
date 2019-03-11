@@ -14,7 +14,12 @@ export default {
       id: util.guid(),
       name: '',
       dataType: '',
-      default: ''
+      default: '',
+      ui: {
+        isReadname: true,
+        isReaddataType: true,
+        isReaddefault: true
+      }
     }
     state.domains.push(domain)
 
@@ -57,14 +62,8 @@ export default {
     JSLog('mutations', 'domain', 'change')
     const undo = JSON.stringify(ERD.core.erd.store().state)
 
-    let domain = null
-    if (data.rowKey !== undefined) {
-      domain = state.domains[data.rowKey]
-      util.setData(domain, data.domain)
-    } else if (data.id !== undefined) {
-      domain = util.getData(state.domains, data.id)
-      util.setData(domain, data.domain)
-    }
+    const domain = util.getData(state.domains, data.id)
+    util.setData(domain, data.domain)
 
     state.tables.forEach(table => {
       table.columns.forEach(column => {
@@ -87,6 +86,21 @@ export default {
     ERD.core.undoRedo.add({
       undo: undo,
       redo: JSON.stringify(ERD.core.erd.store().state)
+    })
+  },
+  // 도메인 수정모드
+  edit (state, data) {
+    JSLog('mutations', 'domain', 'edit')
+    const domain = util.getData(state.domains, data.id)
+    domain.ui[data.current] = data.isRead
+  },
+  // 도메인 edit 해제
+  editAllNone (state) {
+    JSLog('mutations', 'domain', 'editAllNone')
+    state.domains.forEach(domain => {
+      domain.ui.isReadname = true
+      domain.ui.isReaddataType = true
+      domain.ui.isReaddefault = true
     })
   }
 }

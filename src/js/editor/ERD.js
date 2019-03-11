@@ -4,6 +4,7 @@ import file from './File'
 import sql from './SQL'
 import undoRedo from './UndoRedo'
 import indexedDB from './IndexedDB'
+import data from './Data'
 import model from '@/store/editor/model'
 
 /**
@@ -20,7 +21,8 @@ class ERD {
       file: file,
       sql: sql,
       undoRedo: undoRedo,
-      indexedDB: indexedDB
+      indexedDB: indexedDB,
+      data: data
     }
 
     this.setInit(this.core)
