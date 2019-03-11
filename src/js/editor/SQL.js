@@ -31,13 +31,7 @@ class SQL {
 
   // SQL DDL
   toDDL () {
-    let database = null
-    for (let tab of model.state.tabs) {
-      if (tab.active) {
-        database = tab
-        break
-      }
-    }
+    const database = this.core.erd.active()
     return this.ddl(database)
   }
 

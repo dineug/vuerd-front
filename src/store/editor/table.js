@@ -104,6 +104,18 @@ export default new Vuex.Store({
       JSLog('mutations', 'table grid', 'edit')
       const column = util.getData(state.rows, data.columnId)
       column.ui[data.current] = data.isRead
+    },
+    // edit 해제
+    editAllNone (state) {
+      JSLog('mutations', 'table grid', 'editAllNone')
+      if (state.table) {
+        state.rows.forEach(row => {
+          row.ui.isReadname = true
+          row.ui.isReaddataType = true
+          row.ui.isReaddefault = true
+          row.ui.isReadcomment = true
+        })
+      }
     }
   }
 })

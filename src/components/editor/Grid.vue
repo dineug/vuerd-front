@@ -7,7 +7,7 @@
             .table_resize(@mousedown="resize")
             button.close(@click="close" title="ESC")
               font-awesome-icon(icon="times")
-            //button.add
+            //button.add(v-if="gridType === 'domain'")
               font-awesome-icon(icon="plus")
 
         tr
@@ -41,6 +41,10 @@ import table from '@/store/editor/table'
 export default {
   name: 'Grid',
   props: {
+    gridType: {
+      type: String,
+      default: 'grid'
+    },
     columnData: {
       type: Array,
       default: () => {
@@ -69,6 +73,7 @@ export default {
     }
   },
   methods: {
+    // ui 옵션
     style (option) {
       const buffer = []
       if (option.width) {
@@ -76,15 +81,19 @@ export default {
       }
       return buffer.join('')
     },
+    // input type
     type (option) {
       return option.type ? option.type : 'text'
     },
+    // grid 리사이징
     resize () {
-      ERD.core.event.onGridResize('start', 'column')
+      ERD.core.event.onGridResize('start')
     },
+    // grid cloase 이벤트
     close () {
       this.$emit('close')
     },
+    // arrow key 이동 이벤트
     onKeyArrowMove (e, isRead) {
       if (isRead || isRead === undefined) {
         const tbody = e.target.parentNode.parentNode.parentNode
@@ -114,16 +123,20 @@ export default {
         }
       }
     },
+    // 포커스 생성
     onFocus (e, isCheckbox) {
       if (isCheckbox) {
         e.target.parentNode.classList.add('selected')
       }
     },
+    // 포커스 제거
     onBlur (e, isCheckbox) {
       if (isCheckbox) {
         e.target.parentNode.classList.remove('selected')
       }
+      table.commit({ type: 'editAllNone' })
     },
+    // 마지막 tab 포커스 이벤트
     lastTabFocus (e, isLast) {
       if (isLast) {
         e.preventDefault()
@@ -139,6 +152,7 @@ export default {
         }
       }
     },
+    // edit 이벤트
     onEnterEditor (e, isRead, current, columnId) {
       if (!e.altKey && isRead !== undefined) {
         if (!e.ctrlKey) {
@@ -154,6 +168,7 @@ export default {
         this.change(e, current, columnId)
       }
     },
+    // 변경값 동기화
     change (e, current, columnId) {
       const column = {}
       const columnGrid = {}
@@ -175,7 +190,7 @@ export default {
     }
   },
   mounted () {
-    ERD.core.event.components.Grid.column = this
+    ERD.core.event.components.Grid = this
   }
 }
 </script>

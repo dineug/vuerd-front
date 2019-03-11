@@ -24,7 +24,8 @@
       li(v-for="menu in menus" :key="menu.id" :title="menu.name"
       :class="{ undo_none: menu.type === 'undo' && !isUndo, redo_none: menu.type === 'redo' && !isRedo }"
       @click="menuAction(menu.type)")
-        font-awesome-icon(:icon="menu.icon")
+        span(v-if="menu.type === 'googleDrive'" v-html="menu.icon")
+        font-awesome-icon(v-else :icon="menu.icon")
         ol(v-if="menu.type === 'DBType'")
           li(v-for="dbType in DBTypes" :class="{ db_active: DBType === dbType }"
           @click="changeDB(dbType)") {{ dbType }}
@@ -42,9 +43,12 @@
     modal(v-if="isModalHelp" type="help"
     @close="onClose('isModalHelp')")
 
+    // 테이블 컬럼 상세 옵션 그리드
     grid.menu_grid(v-if="isGridColumn"
-    :columnData="gridColumnData" :data="gridTableData"
+    :columnData="gridDataColumn" :data="gridRowDataColumn"
     @close="gridClose")
+    grid.menu_grid(v-if="isGridDomain"
+    :columnData="gridDataDomain" :data="gridRowDataDomain" gridType="domain")
 </template>
 
 <script>
@@ -55,9 +59,11 @@ import CanvasMain from './CanvasMain'
 import CanvasSvg from './CanvasSvg'
 import Modal from './Modal'
 import Grid from './Grid'
-import gridColumnData from '@/js/editor/grid/column'
+import gridDataColumn from '@/js/editor/grid/column'
+import gridDataDomain from '@/js/editor/grid/domain'
 import table from '@/store/editor/table'
 import * as util from '@/js/editor/util'
+import svg from '@/js/editor/svg'
 
 export default {
   name: 'CanvasMenu',
@@ -78,8 +84,10 @@ export default {
   },
   data () {
     return {
-      gridColumnData: gridColumnData,
+      gridDataColumn: gridDataColumn,
+      gridDataDomain: gridDataDomain,
       isGridColumn: false,
+      isGridDomain: false,
       preview: {
         top: 0,
         left: 0,
@@ -110,19 +118,24 @@ export default {
           name: 'DB'
         },
         {
+          type: 'googleDrive',
+          icon: svg.googleDrive,
+          name: 'import-json-cloud'
+        },
+        {
           type: 'save',
           icon: 'cloud-upload-alt',
-          name: 'save'
+          name: 'save-json-cloud'
         },
         {
-          type: 'import-json',
+          type: 'import-verd',
           icon: 'file-import',
-          name: 'import-json'
+          name: 'import-verd'
         },
         {
-          type: 'export-json',
+          type: 'export-verd',
           icon: 'file-export',
-          name: 'export-json'
+          name: 'export-verd'
         },
         {
           type: 'export-png',
@@ -196,8 +209,11 @@ export default {
     PREVIEW_WIDTH () {
       return ERD.store().state.PREVIEW_WIDTH
     },
-    gridTableData () {
+    gridRowDataColumn () {
       return table.state.rows
+    },
+    gridRowDataDomain () {
+      return ERD.store().state.domains
     }
   },
   methods: {
@@ -224,11 +240,11 @@ export default {
         case 'export-sql':
           ERD.core.file.exportData('sql')
           break
-        case 'import-json':
-          ERD.core.file.click('json')
+        case 'import-verd':
+          ERD.core.file.click('verd')
           break
-        case 'export-json':
-          ERD.core.file.exportData('json')
+        case 'export-verd':
+          ERD.core.file.exportData('verd')
           break
         case 'clone':
           ERD.core.file.clone()
@@ -249,8 +265,15 @@ export default {
           break
         case 'table':
           this.isGridColumn = !this.isGridColumn
+          if (this.isGridColumn) {
+            this.isGridDomain = false
+          }
           break
         case 'domain':
+          this.isGridDomain = !this.isGridDomain
+          if (this.isGridDomain) {
+            this.isGridColumn = false
+          }
           break
         case 'help':
           this.isModalHelp = true

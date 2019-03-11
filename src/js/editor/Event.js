@@ -17,10 +17,7 @@ class Event {
       QuickMenu: null,
       CanvasMain: [],
       CanvasMenu: null,
-      Grid: {
-        column: null,
-        domain: null
-      }
+      Grid: null
     }
     this.isStop = false
     this.isEdit = false
@@ -60,7 +57,6 @@ class Event {
 
     // grid column resize
     this.isGridResize = false
-    this.grid = null
   }
 
   // 종속성 초기화
@@ -175,7 +171,7 @@ class Event {
         // 메모 리사이징
         this.onMemoResize('update', null, e)
         // grid column 리사이징
-        this.onGridResize('update', null, e)
+        this.onGridResize('update', e)
 
         this.move.x = e.clientX + document.documentElement.scrollLeft
         this.move.y = e.clientY + document.documentElement.scrollTop
@@ -722,31 +718,29 @@ class Event {
     }
   }
 
-  onGridResize (type, grid, e) {
+  onGridResize (type, e) {
     switch (type) {
       case 'start':
         this.isGridResize = true
-        this.grid = grid
         break
       case 'update':
         if (this.isGridResize) {
           e.preventDefault()
-          const maxHeight = 25 * this.components.Grid[this.grid].data.length
+          const maxHeight = 25 * this.components.Grid.data.length
           const y = e.clientY + document.documentElement.scrollTop - this.move.y
-          let height = this.components.Grid[this.grid].height - y
+          let height = this.components.Grid.height - y
 
           if (height < 25 || maxHeight < 25) {
             height = 25
           } else if (height > maxHeight) {
             height = maxHeight
           }
-          this.components.Grid[this.grid].height = height
+          this.components.Grid.height = height
         }
         break
       case 'stop':
         if (this.isGridResize) {
           this.isGridResize = false
-          this.grid = null
         }
         break
     }

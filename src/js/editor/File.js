@@ -1,7 +1,7 @@
 import JSLog from '../JSLog'
 import storeERD from '@/store/editor/erd'
 import model from '@/store/editor/model'
-import domtoimage from 'dom-to-image'
+import domToImage from 'dom-to-image'
 
 /**
  * 파일 클래스
@@ -25,18 +25,18 @@ class File {
   setImport () {
     this.importJSONTag = document.createElement('input')
     this.importJSONTag.setAttribute('type', 'file')
-    this.importJSONTag.setAttribute('accept', '.json')
+    this.importJSONTag.setAttribute('accept', '.verd')
     this.importJSONTag.addEventListener('change', e => {
       const f = e.target.files[0]
-      if (/\.(json)$/i.test(f.name)) {
+      if (/\.(verd)$/i.test(f.name)) {
         const reader = new FileReader()
         reader.readAsText(f)
         reader.onload = () => {
-          this.load('json', reader.result, true)
+          this.loaded('verd', reader.result, true)
           this.importJSONTag.value = ''
         }
       } else {
-        alert('Just upload the json file')
+        alert('Just upload the verd file')
       }
     })
     this.importSQLTag = document.createElement('input')
@@ -48,7 +48,7 @@ class File {
         const reader = new FileReader()
         reader.readAsText(f)
         reader.onload = () => {
-          this.load('sql', reader.result, true)
+          this.loaded('sql', reader.result, true)
           this.importSQLTag.value = ''
         }
       } else {
@@ -60,7 +60,7 @@ class File {
   // file import click event
   click (type) {
     switch (type) {
-      case 'json':
+      case 'verd':
         this.importJSONTag.click()
         break
       case 'sql':
@@ -69,10 +69,10 @@ class File {
     }
   }
 
-  // load
-  load (type, data, isAdd) {
+  // loaded
+  loaded (type, data, isAdd) {
     switch (type) {
-      case 'json':
+      case 'verd':
         try {
           const json = JSON.parse(data)
           const tabs = []
@@ -110,7 +110,7 @@ class File {
             })
           }
         } catch (e) {
-          alert('json parsing error')
+          alert('verd parsing error')
         }
         break
     }
@@ -118,16 +118,9 @@ class File {
 
   // export
   exportData (type) {
-    let database = null
-    for (let tab of model.state.tabs) {
-      if (tab.active) {
-        database = tab
-        break
-      }
-    }
-    const fileName = `vuerd-${database.name}-${this.formatDate('yyyyMMdd_hhmmss', new Date())}.${type}`
+    const fileName = `${this.getFileName()}.${type}`
     switch (type) {
-      case 'json':
+      case 'verd':
         const json = this.toJSON()
         const blobJson = new Blob([json], { type: 'application/json' })
         this.execute(blobJson, fileName)
@@ -138,7 +131,7 @@ class File {
         this.execute(blobSQL, fileName)
         break
       case 'png':
-        domtoimage.toBlob(document.querySelector('.canvas')).then(blob => {
+        domToImage.toBlob(document.querySelector('.canvas')).then(blob => {
           this.execute(blob, fileName)
         })
         break
@@ -160,6 +153,12 @@ class File {
       this.a.download = fileName
       this.a.click()
     }
+  }
+
+  // file Name
+  getFileName () {
+    const database = this.core.erd.active()
+    return `verd-${database.name}-${this.formatDate('yyyyMMdd_hhmmss', new Date())}`
   }
 
   // json 데이터 정제
