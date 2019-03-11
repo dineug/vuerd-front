@@ -36,7 +36,7 @@ export default {
       menus: [
         {
           type: 'modelAdd',
-          icon: 'file-medical',
+          icon: 'file',
           isImg: false,
           name: 'New Model',
           keymap: 'Alt + N'

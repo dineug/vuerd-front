@@ -119,11 +119,6 @@ export default {
             'PostgreSQL'
           ]
         },
-        // {
-        //   type: 'save',
-        //   icon: 'cloud-upload-alt',
-        //   name: 'save-json-cloud'
-        // },
         {
           type: 'import',
           icon: 'file-import',
@@ -154,6 +149,11 @@ export default {
             }
           ]
         },
+        // {
+        //   type: 'cloud',
+        //   icon: 'cloud',
+        //   name: 'cloud'
+        // },
         {
           type: 'clone',
           icon: 'copy',
