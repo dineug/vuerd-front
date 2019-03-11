@@ -21,14 +21,16 @@
 
     // 메뉴 sidebar left
     ul.menu_sidebar
-      li(v-for="menu in menus" :key="menu.id" :title="menu.name"
+      li(v-for="(menu, i) in menus" :key="menu.id" :title="menu.name"
       :class="{ undo_none: menu.type === 'undo' && !isUndo, redo_none: menu.type === 'redo' && !isRedo }"
       @click="menuAction(menu.type)")
-        span(v-if="menu.type === 'googleDrive'" v-html="menu.icon")
-        font-awesome-icon(v-else :icon="menu.icon")
-        ol(v-if="menu.type === 'DBType'")
-          li(v-for="dbType in DBTypes" :class="{ db_active: DBType === dbType }"
-          @click="changeDB(dbType)") {{ dbType }}
+        font-awesome-icon(:icon="menu.icon")
+        ol(v-if="menu.type === 'DBType'" :style="`top: ${i * 32.5}px`")
+          li(v-for="item in menu.list" :class="{ db_active: DBType === item }"
+          @click="changeDB(item)") {{ item }}
+        ol(v-else-if="menu.type === 'export' || menu.type === 'import'" :style="`top: ${i * 32.5}px`")
+          li(v-for="item in menu.list"
+          @click="menuAction(item.type)") {{ item.name }}
 
     // 메뉴 Preview Navigation
     canvas-main.preview(:style="`top: ${preview.top}px; left: ${preview.left}px; transform: scale(${previewRatio}, ${previewRatio});`"
@@ -64,7 +66,6 @@ import gridDataColumn from '@/js/editor/grid/column'
 import gridDataDomain from '@/js/editor/grid/domain'
 import table from '@/store/editor/table'
 import * as util from '@/js/editor/util'
-import svg from '@/js/editor/svg'
 
 export default {
   name: 'CanvasMenu',
@@ -105,53 +106,53 @@ export default {
       isRedo: false,
       isModalView: false,
       isModalHelp: false,
-      DBTypes: [
-        'MariaDB',
-        'MSSQL',
-        'MySQL',
-        'Oracle',
-        'PostgreSQL'
-      ],
       menus: [
         {
           type: 'DBType',
           icon: 'database',
-          name: 'DB'
-        },
-        {
-          type: 'googleDrive',
-          icon: svg.googleDrive,
-          name: 'import-json-cloud'
-        },
-        {
-          type: 'save',
-          icon: 'cloud-upload-alt',
-          name: 'save-json-cloud'
-        },
-        {
-          type: 'import-verd',
-          icon: 'file-import',
-          name: 'import-verd'
-        },
-        {
-          type: 'export-verd',
-          icon: 'file-export',
-          name: 'export-verd'
-        },
-        {
-          type: 'export-png',
-          icon: 'file-image',
-          name: 'export-png'
+          name: 'DB',
+          list: [
+            'MariaDB',
+            'MSSQL',
+            'MySQL',
+            'Oracle',
+            'PostgreSQL'
+          ]
         },
         // {
-        //   type: 'import-sql',
-        //   icon: 'file-upload',
-        //   name: 'import-sql'
+        //   type: 'save',
+        //   icon: 'cloud-upload-alt',
+        //   name: 'save-json-cloud'
         // },
         {
-          type: 'export-sql',
-          icon: 'file-download',
-          name: 'export-sql'
+          type: 'import',
+          icon: 'file-import',
+          name: 'import',
+          list: [
+            {
+              type: 'import-verd',
+              name: 'import-verd'
+            }
+          ]
+        },
+        {
+          type: 'export',
+          icon: 'file-export',
+          name: 'export',
+          list: [
+            {
+              type: 'export-verd',
+              name: 'export-verd'
+            },
+            {
+              type: 'export-png',
+              name: 'export-png'
+            },
+            {
+              type: 'export-sql',
+              name: 'export-sql'
+            }
+          ]
         },
         {
           type: 'clone',
