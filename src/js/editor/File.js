@@ -2,6 +2,7 @@ import JSLog from '../JSLog'
 import storeERD from '@/store/editor/erd'
 import model from '@/store/editor/model'
 import domToImage from 'dom-to-image'
+import * as util from './util'
 
 /**
  * 파일 클래스
@@ -33,6 +34,7 @@ class File {
         reader.readAsText(f)
         reader.onload = () => {
           this.loaded('verd', reader.result, true)
+          this.core.indexedDB.setImport(f.name.substr(0, f.name.lastIndexOf('.')))
           this.importJSONTag.value = ''
         }
       } else {
@@ -70,16 +72,19 @@ class File {
   }
 
   // loaded
-  loaded (type, data, isAdd) {
+  loaded (type, data, isImport) {
     switch (type) {
       case 'verd':
         try {
           const json = JSON.parse(data)
           this.core.data.set(json)
+          if (isImport) {
+            json.id = util.guid()
+          }
           const tabs = []
           for (let tab of json.tabs) {
             const newTab = {
-              id: tab.id,
+              id: util.guid(),
               name: tab.name,
               active: tab.active,
               store: storeERD(),
@@ -91,25 +96,16 @@ class File {
               type: 'importData',
               state: tab.store
             })
-            if (isAdd) {
-              model.commit({
-                type: 'modelAdd',
-                isInit: true,
-                name: newTab.name,
-                store: newTab.store
-              })
-            } else {
-              tabs.push(newTab)
+            tabs.push(newTab)
+          }
+          model.commit({
+            type: 'importData',
+            state: {
+              id: json.id,
+              tabs: tabs
             }
-          }
-          if (!isAdd) {
-            model.commit({
-              type: 'importData',
-              state: {
-                tabs: tabs
-              }
-            })
-          }
+          })
+          this.core.event.components.CanvasMenu.isSave = true
         } catch (e) {
           alert('verd parsing error')
         }
@@ -119,24 +115,26 @@ class File {
 
   // export
   exportData (type) {
-    const fileName = `${this.getFileName()}.${type}`
-    switch (type) {
-      case 'verd':
-        const json = this.toJSON()
-        const blobJson = new Blob([json], { type: 'application/json' })
-        this.execute(blobJson, fileName)
-        break
-      case 'sql':
-        const sql = this.core.sql.toDDL()
-        const blobSQL = new Blob([sql], { type: 'text' })
-        this.execute(blobSQL, fileName)
-        break
-      case 'png':
-        domToImage.toBlob(document.querySelector('.canvas')).then(blob => {
-          this.execute(blob, fileName)
-        })
-        break
-    }
+    this.core.indexedDB.one(model.state.id, v => {
+      const fileName = `${v.name}.${type}`
+      switch (type) {
+        case 'verd':
+          const json = this.toJSON()
+          const blobJson = new Blob([json], { type: 'application/json' })
+          this.execute(blobJson, fileName)
+          break
+        case 'sql':
+          const sql = this.core.sql.toDDL()
+          const blobSQL = new Blob([sql], { type: 'text' })
+          this.execute(blobSQL, fileName)
+          break
+        case 'png':
+          domToImage.toBlob(document.querySelector('.canvas')).then(blob => {
+            this.execute(blob, fileName)
+          })
+          break
+      }
+    })
   }
 
   // download
@@ -156,18 +154,17 @@ class File {
     }
   }
 
-  // file Name
-  getFileName () {
-    const database = this.core.erd.active()
-    return `verd-${database.name}-${this.formatDate('yyyyMMdd_hhmmss', new Date())}`
-  }
-
   // json 데이터 정제
-  toJSON () {
+  toJSON (data) {
+    let state = model.state
+    if (data) {
+      state = data
+    }
     const models = {
+      id: state.id,
       tabs: []
     }
-    for (let tab of model.state.tabs) {
+    for (let tab of state.tabs) {
       models.tabs.push({
         id: tab.id,
         name: tab.name,
@@ -176,34 +173,6 @@ class File {
       })
     }
     return JSON.stringify(models)
-  }
-
-  // 날짜 포맷 yyyy, MM, dd, hh, mm, ss
-  formatDate (format, date) {
-    const d = new Date(date)
-    let year = d.getFullYear()
-    let month = (d.getMonth() + 1)
-    let day = d.getDate()
-    let hh = d.getHours().toString()
-    let mm = d.getMinutes().toString()
-    let ss = d.getSeconds().toString()
-
-    if (month < 10) month = '0' + month
-    if (day < 10) day = '0' + day
-    if (hh < 10) hh = '0' + hh
-    if (mm < 10) mm = '0' + mm
-    if (ss < 10) ss = '0' + ss
-    hh = hh === '0' ? '00' : hh
-    mm = mm === '0' ? '00' : mm
-    ss = ss === '0' ? '00' : ss
-
-    format = format.replace('yyyy', year)
-    format = format.replace('MM', month)
-    format = format.replace('dd', day)
-    format = format.replace('hh', hh)
-    format = format.replace('mm', mm)
-    format = format.replace('ss', ss)
-    return format
   }
 
   // 현재 텝 복사 생성

@@ -8,6 +8,8 @@ export default {
   // 도메인 추가
   add (state) {
     JSLog('mutations', 'domain', 'add')
+    ERD.core.event.components.CanvasMenu.isSave = false
+    ERD.core.undoRedo.set()
     const undo = JSON.stringify(ERD.core.erd.store().state)
 
     const domain = {
@@ -32,6 +34,8 @@ export default {
   // 도메인 삭제
   delete (state, data) {
     JSLog('mutations', 'domain', 'delete')
+    ERD.core.event.components.CanvasMenu.isSave = false
+    ERD.core.undoRedo.set()
     const undo = JSON.stringify(ERD.core.erd.store().state)
 
     for (let i in state.domains) {
@@ -60,6 +64,8 @@ export default {
   // 도메인값 변경
   change (state, data) {
     JSLog('mutations', 'domain', 'change')
+    ERD.core.event.components.CanvasMenu.isSave = false
+    ERD.core.undoRedo.set()
     const undo = JSON.stringify(ERD.core.erd.store().state)
 
     const domain = util.getData(state.domains, data.id)

@@ -9,7 +9,8 @@ export default {
   // 테이블 추가
   add (state, data) {
     JSLog('mutations', 'table', 'add')
-    ERD.core.event.onCursor('stop')
+    ERD.core.event.components.CanvasMenu.isSave = false
+    ERD.core.undoRedo.set()
     const undo = JSON.stringify(state)
 
     ERD.core.event.isEdit = true
@@ -48,8 +49,8 @@ export default {
   // 테이블 삭제
   delete (state, data) {
     JSLog('mutations', 'table', 'delete')
-    ERD.core.event.onCursor('stop')
-    ERD.core.event.onDraggable('stop')
+    ERD.core.event.components.CanvasMenu.isSave = false
+    ERD.core.undoRedo.set()
     const undo = JSON.stringify(state)
 
     // 테이블 상세 그리드 해제
@@ -114,6 +115,7 @@ export default {
   // 테이블 높이 리셋
   heightReset (state) {
     JSLog('mutations', 'table', 'heightReset')
+    ERD.core.event.components.CanvasMenu.isSave = false
     for (let table of state.tables) {
       table.ui.height = table.columns.length * state.COLUMN_HEIGHT + state.TABLE_HEIGHT
     }
@@ -205,6 +207,7 @@ export default {
   // 테이블 top, left 변경
   draggable (state, data) {
     JSLog('mutations', 'table', 'draggable')
+    ERD.core.event.components.CanvasMenu.isSave = false
     const table = util.getData(state.tables, data.id)
     table.ui.top += data.y
     table.ui.left += data.x

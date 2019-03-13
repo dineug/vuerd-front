@@ -3,20 +3,24 @@
       .modal_background
       .modal_box
         .modal_btn
-          button(title="ESC"
-          @click="onClose")
+          button.close(title="ESC" @click="onClose")
             font-awesome-icon(icon="times")
+          button.add(v-if="type === 'project'" @click="projectAdd")
+            font-awesome-icon(icon="plus")
+
         .modal_head
           h3(v-if="type === 'view'") view setting
-          h3(v-if="type === 'help'") help
-        .modal_body(:style="type === 'help' ? 'width: 530px;' : ''")
+          h3(v-else-if="type === 'help'") help
+          h3(v-else-if="type === 'project'") project
+        .modal_body(:class="{ help: type === 'help', project: type === 'project' }")
+
           .modal_title(v-if="type === 'view'") canvas size
           .modal_content(v-if="type === 'view'")
             span x
-            input(type="text" v-model="CANVAS_WIDTH"
+            input(type="text" v-model="CANVAS_WIDTH" spellcheck="false"
             @change="onChangeCanvasWidth")
             span y
-            input(type="text" v-model="CANVAS_HEIGHT"
+            input(type="text" v-model="CANVAS_HEIGHT" spellcheck="false"
             @change="onChangeCanvasHeight")
 
           .modal_title.help(v-if="type === 'help'") base
@@ -67,10 +71,20 @@
           .modal_content.help(v-if="type === 'help'")
             span(v-html="`Alt + 1${space(23)}- 1 : 1`")
             span(v-html="`Alt + 2${space(16)}- 1 : N`")
+
+          ul.modal_content(v-if="type === 'project'")
+            li(v-for="item in projectList" :class="{ project_active: projectId === item.id }")
+              span(@click="projectLoaded(item.id)")
+                font-awesome-icon(:icon="projectId === item.id ? 'folder-open' : 'folder'")
+              input(type="text" :value="item.name" @change="projectNameChange($event, item.id)" spellcheck="false")
+              button(@click="projectDelete(item.id)")
+                font-awesome-icon(icon="times")
 </template>
 
 <script>
 import ERD from '@/js/editor/ERD'
+import model from '@/store/editor/model'
+import * as util from '@/js/editor/util'
 
 export default {
   name: 'Modal',
@@ -83,7 +97,13 @@ export default {
   data () {
     return {
       CANVAS_WIDTH: ERD.store().state.CANVAS_WIDTH,
-      CANVAS_HEIGHT: ERD.store().state.CANVAS_HEIGHT
+      CANVAS_HEIGHT: ERD.store().state.CANVAS_HEIGHT,
+      projectList: []
+    }
+  },
+  computed: {
+    projectId () {
+      return model.state.id
     }
   },
   watch: {
@@ -134,12 +154,51 @@ export default {
         }
       }
       return buffer.join('')
+    },
+    // 프로젝트 로드
+    projectLoaded (id) {
+      ERD.core.indexedDB.loaded(id)
+    },
+    // 프로젝트 이름 변경
+    projectNameChange (e, id) {
+      e.target.value = util.validFileName(e.target.value)
+      if (e.target.value.trim() === '') {
+        e.target.value = ERD.core.indexedDB.getProjectName()
+      }
+      ERD.core.indexedDB.update({
+        id: id,
+        name: e.target.value
+      })
+    },
+    // 프로젝트 추가
+    projectAdd () {
+      ERD.core.indexedDB.add()
+    },
+    // 프로젝트 삭제
+    projectDelete (id) {
+      if (confirm('정말 삭제하시겠습니까?')) {
+        ERD.core.indexedDB.delete(id, () => {
+          ERD.core.indexedDB.list([], list => {
+            this.projectList = list
+          })
+        })
+      }
+    }
+  },
+  mounted () {
+    if (this.type === 'project') {
+      ERD.core.indexedDB.list([], list => {
+        this.projectList = list
+      })
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
+  $selected: #383d41;
+  $text: #a2a2a2;
+
   .modal {
     .modal_background {
       position: fixed;
@@ -156,11 +215,11 @@ export default {
       left: 50%;
       top: 50%;
       transform: translate(-50%, -50%);
-      background-color: #1b1b1b;
-      color: white;
+      background-color: black;
+      color: $text;
 
       input {
-        background-color: #484848;
+        background-color: $selected;
         color: white;
         height: 20px;
       }
@@ -178,10 +237,15 @@ export default {
           cursor: pointer;
           border-radius: 50%;
 
-          &:first-child {
+          &.close {
             color: #9B0005;
             background-color: #9B0005;
           }
+          &.add {
+            color: #009B2E;
+            background-color: #009B2E;
+          }
+
           &:hover {
             color: white;
           }
@@ -194,6 +258,15 @@ export default {
       }
       .modal_body {
         padding: 10px;
+
+        &.help {
+          width: 530px;
+        }
+
+        &.project {
+          width: 391px;
+        }
+
         .modal_title {
           font-size: 20px;
           padding: 5px;
@@ -221,6 +294,81 @@ export default {
               margin-left: 10px;
             }
           }
+        }
+        ul.modal_content {
+          background-color: black;
+          height: 200px;
+          overflow: auto;
+          overflow-x: hidden;
+
+          /* width */
+          &::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+          }
+          /* Track */
+          &::-webkit-scrollbar-track {
+            background: #191919;
+            border-left: 1px solid  #191919;
+          }
+          /* Handle */
+          &::-webkit-scrollbar-thumb {
+            background: #aaa;
+          }
+          /* Handle : hover*/
+          &::-webkit-scrollbar-thumb:hover {
+            background: white;
+          }
+
+          li {
+            padding: 10px;
+            color: $text;
+
+            span {
+              cursor: pointer;
+            }
+
+            &:hover {
+              color: white;
+              background-color: $selected;
+              input {
+                background-color: $selected;
+              }
+              button {
+                color: white;
+                background-color: $selected;
+              }
+            }
+
+            input {
+              background-color: black;
+              width: 300px;
+            }
+
+            button {
+              padding: 0;
+              width: 25px;
+              height: 25px;
+              color: #b9b9b9;
+              border: none;
+              outline: none;
+              background-color: black;
+              cursor: pointer;
+            }
+          }
+
+          .project_active {
+            color: white;
+            background-color: $selected;
+            input {
+              background-color: $selected;
+            }
+            button {
+              color: white;
+              background-color: $selected;
+            }
+          }
+
         }
       }
     }

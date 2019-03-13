@@ -16,11 +16,11 @@
 
       // 테이블 해더
       .erd_table_top
-        button(title="Ctrl + Delete"
+        button.close(title="Ctrl + Delete"
         @click="tableDelete(table.id)")
           font-awesome-icon(icon="times")
 
-        button(title="Alt + Enter"
+        button.add(title="Alt + Enter"
         @click="columnAdd(table.id)")
           font-awesome-icon(icon="plus")
 
@@ -158,7 +158,7 @@
     :style="`top: ${memo.ui.top}px; left: ${memo.ui.left}px; z-index: ${memo.ui.zIndex};`"
     @mousedown="memoSelected($event, memo.id)")
       .erd_memo_top
-        button(title="Ctrl + Delete"
+        button.close(title="Ctrl + Delete"
         @click="memoDelete(memo.id)")
           font-awesome-icon(icon="times")
 
@@ -199,7 +199,7 @@
           font-awesome-icon(icon="times")
     .erd_memo(v-for="memo in memos" :key="memo.id" :class="{ selected: memo.ui.selected }" :style="`top: ${memo.ui.top}px; left: ${memo.ui.left}px; z-index: ${memo.ui.zIndex};`")
       .erd_memo_top
-        button(title="Ctrl + Delete")
+        button.close(title="Ctrl + Delete")
           font-awesome-icon(icon="times")
       textarea(v-model="memo.content" :style="`width: ${memo.ui.width}px; height: ${memo.ui.height}px;`" spellcheck="false")
       .erd_memo_bottom
@@ -800,11 +800,11 @@ export default {
           cursor: pointer;
           border-radius: 50%;
 
-          &:first-child {
+          &.close {
             color: #9B0005;
             background-color: #9B0005;
           }
-          &:last-child {
+          &.add {
             color: #009B2E;
             background-color: #009B2E;
           }

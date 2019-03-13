@@ -11,6 +11,7 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
+    id: util.guid(),
     tabs: [
       {
         id: util.guid(),
@@ -34,6 +35,8 @@ export default new Vuex.Store({
     // 모델 추가
     modelAdd (state, data) {
       JSLog('mutations', 'modelAdd')
+      ERD.core.event.components.CanvasMenu.isSave = false
+
       const tab = {
         id: util.guid(),
         name: util.autoName(state.tabs, 'untitled'),
@@ -94,6 +97,7 @@ export default new Vuex.Store({
     // 모델 삭제
     modelDelete (state, data) {
       JSLog('mutations', 'modelDelete')
+      ERD.core.event.components.CanvasMenu.isSave = false
 
       const tab = util.getData(state.tabs, data.id)
       for (let i in state.tabs) {

@@ -137,6 +137,9 @@ class Data {
   }
 
   set (old) {
+    if (old.id === undefined) {
+      old.id = util.guid()
+    }
     this.setTab(old.tabs)
   }
   setTab (list) {

@@ -9,7 +9,8 @@ export default {
   // 컬럼 추가
   add (state, data) {
     JSLog('mutations', 'column', 'add')
-    ERD.core.event.onCursor('stop')
+    ERD.core.event.components.CanvasMenu.isSave = false
+    ERD.core.undoRedo.set()
     const undo = JSON.stringify(state)
 
     ERD.core.event.isEdit = true
@@ -74,7 +75,8 @@ export default {
   // 컬럼 삭제
   delete (state, data) {
     JSLog('mutations', 'column', 'delete')
-    ERD.core.event.onCursor('stop')
+    ERD.core.event.components.CanvasMenu.isSave = false
+    ERD.core.undoRedo.set()
     const undo = JSON.stringify(state)
 
     const table = util.getData(state.tables, data.tableId)
@@ -147,7 +149,8 @@ export default {
   // 컬럼 NULL 조건 변경
   changeNull (state, data) {
     JSLog('mutations', 'column', 'changeNull')
-    ERD.core.event.onCursor('stop')
+    ERD.core.event.components.CanvasMenu.isSave = false
+    ERD.core.undoRedo.set()
     const undo = JSON.stringify(state)
 
     const table = util.getData(state.tables, data.tableId)
@@ -183,7 +186,8 @@ export default {
   // 컬럼 key active
   key (state, data) {
     JSLog('mutations', 'column', 'key')
-    ERD.core.event.onCursor('stop')
+    ERD.core.event.components.CanvasMenu.isSave = false
+    ERD.core.undoRedo.set()
     const undo = JSON.stringify(state)
 
     for (let table of state.tables) {
@@ -230,7 +234,8 @@ export default {
   // 컬럼 데이터변경
   changeDataType (state, data) {
     JSLog('mutations', 'column', 'changeDataType')
-    ERD.core.event.onCursor('stop')
+    ERD.core.event.components.CanvasMenu.isSave = false
+    ERD.core.undoRedo.set()
     const undo = JSON.stringify(state)
 
     const table = util.getData(state.tables, data.tableId)
@@ -281,6 +286,7 @@ export default {
   // 컬럼 데이터타입 관계 동기화
   relationSync (state, data) {
     JSLog('mutations', 'column', 'relationSync')
+    ERD.core.event.components.CanvasMenu.isSave = false
     const table = util.getData(state.tables, data.tableId)
     const column = util.getData(table.columns, data.columnId)
     if (util.isRelationSync(state, data.tableId, column)) {
@@ -350,7 +356,8 @@ export default {
   // 컬럼 도메인 변경
   changeDomain (state, data) {
     JSLog('mutations', 'column', 'changeDomain')
-    ERD.core.event.onCursor('stop')
+    ERD.core.event.components.CanvasMenu.isSave = false
+    ERD.core.undoRedo.set()
     const undo = JSON.stringify(state)
 
     const table = util.getData(state.tables, data.tableId)
@@ -391,9 +398,11 @@ export default {
   // 컬럼 도메인 동기화
   domainSync (state, data) {
     JSLog('mutations', 'column', 'domainSync')
+    ERD.core.event.components.CanvasMenu.isSave = false
     const table = util.getData(state.tables, data.tableId)
     const column = util.getData(table.columns, data.columnId)
     if (column.domain === '') {
+      ERD.core.undoRedo.set()
       const undo = JSON.stringify(state)
 
       column.domainId = ''

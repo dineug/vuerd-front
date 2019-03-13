@@ -49,7 +49,10 @@ export default new Vuex.Store({
     // 컬럼데이터 동기화
     sync (state, data) {
       JSLog('mutations', 'table grid', 'sync')
+      ERD.core.event.components.CanvasMenu.isSave = false
+
       if (state.table) {
+        ERD.core.undoRedo.set()
         const undo = JSON.stringify(ERD.core.erd.store().state)
         if (data.isPK) {
           state.table.columns.forEach(column => {

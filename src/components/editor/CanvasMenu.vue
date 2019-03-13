@@ -22,7 +22,7 @@
     // 메뉴 sidebar left
     ul.menu_sidebar
       li(v-for="(menu, i) in menus" :key="menu.id" :title="menu.name"
-      :class="{ undo_none: menu.type === 'undo' && !isUndo, redo_none: menu.type === 'redo' && !isRedo }"
+      :class="{ undo_none: menu.type === 'undo' && !isUndo, redo_none: menu.type === 'redo' && !isRedo, save: menu.type === 'save' && isSave, save_none: menu.type === 'save' && !isSave }"
       @click="menuAction(menu.type)")
         font-awesome-icon(:icon="menu.icon")
         ol(v-if="menu.type === 'DBType'" :style="`top: ${i * 32.5}px`")
@@ -42,13 +42,18 @@
     // view 셋팅 팝업
     modal(v-if="isModalView" type="view"
     @close="onClose('isModalView')")
+    // 도움말 팝업
     modal(v-if="isModalHelp" type="help"
     @close="onClose('isModalHelp')")
+    // 프로젝트
+    modal(v-if="isModalProject" type="project"
+    @close="onClose('isModalProject')")
 
     // 테이블 컬럼 상세 옵션 그리드
     grid.menu_grid(v-if="isGridColumn"
     :columnData="gridDataColumn" :data="gridRowDataColumn" gridType="table"
     @close="gridClose")
+    // 도메인
     grid.menu_grid(v-if="isGridDomain"
     :columnData="gridDataDomain" :data="gridRowDataDomain" gridType="domain"
     @close="gridClose")
@@ -104,8 +109,10 @@ export default {
       },
       isUndo: false,
       isRedo: false,
+      isSave: true,
       isModalView: false,
       isModalHelp: false,
+      isModalProject: false,
       menus: [
         {
           type: 'DBType',
@@ -149,11 +156,16 @@ export default {
             }
           ]
         },
-        // {
-        //   type: 'cloud',
-        //   icon: 'cloud',
-        //   name: 'cloud'
-        // },
+        {
+          type: 'project',
+          icon: 'folder-open',
+          name: 'project'
+        },
+        {
+          type: 'save',
+          icon: 'save',
+          name: 'save(Ctrl + S)'
+        },
         {
           type: 'clone',
           icon: 'copy',
@@ -247,6 +259,13 @@ export default {
           break
         case 'export-verd':
           ERD.core.file.exportData('verd')
+          break
+        case 'project':
+          this.isModalProject = true
+          ERD.core.event.isStop = true
+          break
+        case 'save':
+          ERD.core.indexedDB.update()
           break
         case 'clone':
           ERD.core.file.clone()
@@ -492,6 +511,13 @@ export default {
         &.undo_none, &.redo_none {
           cursor: default;
           color: #a2a2a2;
+        }
+
+        &.save {
+          color: #009B2E;
+        }
+        &.save_none {
+          color: red;
         }
       }
     }

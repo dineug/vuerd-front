@@ -8,7 +8,8 @@ export default {
   // 메모 추가
   add (state, data) {
     JSLog('mutations', 'memo', 'add')
-    ERD.core.event.onCursor('stop')
+    ERD.core.event.components.CanvasMenu.isSave = false
+    ERD.core.undoRedo.set()
     const undo = JSON.stringify(state)
 
     const newMemo = {
@@ -40,9 +41,8 @@ export default {
   // 메모 삭제
   delete (state, data) {
     JSLog('mutations', 'memo', 'delete')
-    ERD.core.event.onCursor('stop')
-    ERD.core.event.onDraggable('stop')
-    ERD.core.event.onMemoResize('stop')
+    ERD.core.event.components.CanvasMenu.isSave = false
+    ERD.core.undoRedo.set()
     const undo = JSON.stringify(state)
 
     for (let i in state.memos) {
@@ -61,6 +61,7 @@ export default {
   // 메모 크기 수정
   setWidthHeight (state, data) {
     JSLog('mutations', 'memo', 'setWidthHeight')
+    ERD.core.event.components.CanvasMenu.isSave = false
     const memo = util.getData(state.memos, data.id)
     memo.ui.width = data.width
     memo.ui.height = data.height
@@ -108,6 +109,7 @@ export default {
   // 메모 top, left 변경
   draggable (state, data) {
     JSLog('mutations', 'memo', 'draggable')
+    ERD.core.event.components.CanvasMenu.isSave = false
     const memo = util.getData(state.memos, data.id)
     memo.ui.top += data.y
     memo.ui.left += data.x
@@ -144,6 +146,7 @@ export default {
   // 메모 리사이징
   resize (state, data) {
     JSLog('mutations', 'memo', 'resize')
+    ERD.core.event.components.CanvasMenu.isSave = false
     const memo = util.getData(state.memos, data.id)
     memo.ui.height += data.y
     memo.ui.width += data.x

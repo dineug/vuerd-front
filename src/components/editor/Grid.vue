@@ -352,7 +352,6 @@ export default {
           padding: 0;
           width: 15px;
           height: 15px;
-          font-size: .70em;
           color: #b9b9b9;
           border: none;
           outline: none;

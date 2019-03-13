@@ -391,6 +391,11 @@ class Event {
               })
             }
             break
+          case 83:
+            if (e.ctrlKey) {
+              e.preventDefault()
+            }
+            break
         }
       } else {
         if (e.keyCode === 27) {
@@ -400,6 +405,18 @@ class Event {
       }
     }).on('keyup', e => {
       JSLog('event', 'keyup', e.keyCode)
+      if (e.altKey) e.preventDefault()
+      if (!this.isStop) {
+        switch (e.keyCode) {
+          case 83: // key: S
+            if (e.ctrlKey) {
+              e.preventDefault()
+              // 저장
+              this.core.indexedDB.update()
+            }
+            break
+        }
+      }
     })
   }
 
@@ -759,6 +776,7 @@ class Event {
     if (this.components.CanvasMenu) {
       this.components.CanvasMenu.isModalView = false
       this.components.CanvasMenu.isModalHelp = false
+      this.components.CanvasMenu.isModalProject = false
       this.components.CanvasMenu.isGridColumn = false
       this.components.CanvasMenu.isGridDomain = false
     }

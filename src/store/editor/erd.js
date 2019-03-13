@@ -8,6 +8,7 @@ import line from './mutationsLine'
 import memo from './mutationsMemo'
 import domain from './mutationsDomain'
 import * as util from '@/js/editor/util'
+import ERD from '@/js/editor/ERD'
 
 JSLog('store loaded', 'erd')
 Vue.use(Vuex)
@@ -63,6 +64,7 @@ export default () => {
       },
       // 환경설정
       setConfig (state, data) {
+        ERD.core.event.components.CanvasMenu.isSave = false
         util.setData(state, data.config)
       },
       // 테이블 추가

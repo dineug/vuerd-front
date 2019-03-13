@@ -1,5 +1,6 @@
 import JSLog from '../JSLog'
 import ERD from './ERD'
+import fileNameRex from 'filename-reserved-regex'
 
 JSLog('module loaded', 'util')
 
@@ -30,6 +31,39 @@ export const setData = (oldData, newData) => {
       oldData[key] = newData[key]
     }
   })
+}
+
+// 파일이름 휴효성처리
+export const validFileName = name => {
+  return name.replace(fileNameRex(), '').replace(fileNameRex.windowsNames(), '')
+}
+
+// 날짜 포맷 yyyy, MM, dd, hh, mm, ss
+export const formatDate = (format, date) => {
+  const d = new Date(date)
+  let year = d.getFullYear()
+  let month = (d.getMonth() + 1)
+  let day = d.getDate()
+  let hh = d.getHours().toString()
+  let mm = d.getMinutes().toString()
+  let ss = d.getSeconds().toString()
+
+  if (month < 10) month = '0' + month
+  if (day < 10) day = '0' + day
+  if (hh < 10) hh = '0' + hh
+  if (mm < 10) mm = '0' + mm
+  if (ss < 10) ss = '0' + ss
+  hh = hh === '0' ? '00' : hh
+  mm = mm === '0' ? '00' : mm
+  ss = ss === '0' ? '00' : ss
+
+  format = format.replace('yyyy', year)
+  format = format.replace('MM', month)
+  format = format.replace('dd', day)
+  format = format.replace('hh', hh)
+  format = format.replace('mm', mm)
+  format = format.replace('ss', ss)
+  return format
 }
 
 // max z-index 반환
