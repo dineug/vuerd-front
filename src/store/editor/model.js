@@ -100,6 +100,9 @@ export default new Vuex.Store({
       ERD.core.event.components.CanvasMenu.isSave = false
 
       const tab = util.getData(state.tabs, data.id)
+      if (tab) {
+        ERD.core.indexedDB.add('model', tab)
+      }
       for (let i in state.tabs) {
         if (data.id === state.tabs[i].id) {
           state.tabs.splice(i, 1)

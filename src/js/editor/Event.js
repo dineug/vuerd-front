@@ -777,6 +777,7 @@ class Event {
       this.components.CanvasMenu.isModalView = false
       this.components.CanvasMenu.isModalHelp = false
       this.components.CanvasMenu.isModalProject = false
+      this.components.CanvasMenu.isModalModel = false
       this.components.CanvasMenu.isGridColumn = false
       this.components.CanvasMenu.isGridDomain = false
     }

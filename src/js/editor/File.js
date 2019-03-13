@@ -169,7 +169,10 @@ class File {
         id: tab.id,
         name: tab.name,
         active: tab.active,
-        store: tab.store.state
+        store: tab.store.state,
+        ui: {
+          isReadName: true
+        }
       })
     }
     return JSON.stringify(models)

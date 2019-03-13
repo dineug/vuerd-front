@@ -48,6 +48,9 @@
     // 프로젝트
     modal(v-if="isModalProject" type="project"
     @close="onClose('isModalProject')")
+    // 삭제 모델 리스트
+    modal(v-if="isModalModel" type="model"
+    @close="onClose('isModalModel')")
 
     // 테이블 컬럼 상세 옵션 그리드
     grid.menu_grid(v-if="isGridColumn"
@@ -113,6 +116,7 @@ export default {
       isModalView: false,
       isModalHelp: false,
       isModalProject: false,
+      isModalModel: false,
       menus: [
         {
           type: 'DBType',
@@ -165,6 +169,11 @@ export default {
           type: 'save',
           icon: 'save',
           name: 'save(Ctrl + S)'
+        },
+        {
+          type: 'history',
+          icon: 'trash-alt',
+          name: 'history'
         },
         {
           type: 'clone',
@@ -266,6 +275,10 @@ export default {
           break
         case 'save':
           ERD.core.indexedDB.update()
+          break
+        case 'history':
+          this.isModalModel = true
+          ERD.core.event.isStop = true
           break
         case 'clone':
           ERD.core.file.clone()

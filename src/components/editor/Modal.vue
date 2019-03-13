@@ -12,7 +12,8 @@
           h3(v-if="type === 'view'") view setting
           h3(v-else-if="type === 'help'") help
           h3(v-else-if="type === 'project'") project
-        .modal_body(:class="{ help: type === 'help', project: type === 'project' }")
+          h3(v-else-if="type === 'model'") model
+        .modal_body(:class="{ help: type === 'help', project: type === 'project' || type === 'model' }")
 
           .modal_title(v-if="type === 'view'") canvas size
           .modal_content(v-if="type === 'view'")
@@ -38,6 +39,7 @@
             span(v-html="`Arrow key${space(7)} - Model focus move`")
           .modal_content.help(v-if="type === 'help'")
             span(v-html="`drag${space(27)}- Model move`")
+            span(v-html="`Ctrl + S${space(14)}- save`")
 
           .modal_title.help(v-if="type === 'help'") table, memo
           .modal_content.help(v-if="type === 'help'")
@@ -74,10 +76,18 @@
 
           ul.modal_content(v-if="type === 'project'")
             li(v-for="item in projectList" :class="{ project_active: projectId === item.id }")
-              span(@click="projectLoaded(item.id)")
+              span(@click="historyLoaded(item.id)")
                 font-awesome-icon(:icon="projectId === item.id ? 'folder-open' : 'folder'")
               input(type="text" :value="item.name" @change="projectNameChange($event, item.id)" spellcheck="false")
-              button(@click="projectDelete(item.id)")
+              button(@click="historyDelete(item.id)")
+                font-awesome-icon(icon="times")
+
+          ul.modal_content(v-if="type === 'model'")
+            li(v-for="item in modelList")
+              span(@click="historyLoaded(item.id)")
+                font-awesome-icon(icon="history")
+              span.model {{ item.name }} - {{ item.update_date }}
+              button(@click="historyDelete(item.id)")
                 font-awesome-icon(icon="times")
 </template>
 
@@ -98,7 +108,8 @@ export default {
     return {
       CANVAS_WIDTH: ERD.store().state.CANVAS_WIDTH,
       CANVAS_HEIGHT: ERD.store().state.CANVAS_HEIGHT,
-      projectList: []
+      projectList: [],
+      modelList: []
     }
   },
   computed: {
@@ -156,8 +167,8 @@ export default {
       return buffer.join('')
     },
     // 프로젝트 로드
-    projectLoaded (id) {
-      ERD.core.indexedDB.loaded(id)
+    historyLoaded (id) {
+      ERD.core.indexedDB.loaded(this.type, id)
     },
     // 프로젝트 이름 변경
     projectNameChange (e, id) {
@@ -172,14 +183,18 @@ export default {
     },
     // 프로젝트 추가
     projectAdd () {
-      ERD.core.indexedDB.add()
+      ERD.core.indexedDB.add('project')
     },
-    // 프로젝트 삭제
-    projectDelete (id) {
-      if (confirm('정말 삭제하시겠습니까?')) {
-        ERD.core.indexedDB.delete(id, () => {
-          ERD.core.indexedDB.list([], list => {
-            this.projectList = list
+    // 삭제
+    historyDelete (id) {
+      if (confirm('Are you sure you want to delete it?')) {
+        ERD.core.indexedDB.delete(this.type, id, () => {
+          ERD.core.indexedDB.list(this.type, [], list => {
+            if (this.type === 'project') {
+              this.projectList = list
+            } else if (this.type === 'model') {
+              this.modelList = list
+            }
           })
         })
       }
@@ -187,8 +202,12 @@ export default {
   },
   mounted () {
     if (this.type === 'project') {
-      ERD.core.indexedDB.list([], list => {
+      ERD.core.indexedDB.list(this.type, [], list => {
         this.projectList = list
+      })
+    } else if (this.type === 'model') {
+      ERD.core.indexedDB.list(this.type, [], list => {
+        this.modelList = list
       })
     }
   }
@@ -297,7 +316,7 @@ export default {
         }
         ul.modal_content {
           background-color: black;
-          height: 200px;
+          height: 400px;
           overflow: auto;
           overflow-x: hidden;
 
@@ -326,6 +345,14 @@ export default {
 
             span {
               cursor: pointer;
+
+              &.model {
+                cursor: default;
+                width: 295px;
+                display: inline-block;
+                text-overflow: ellipsis;
+                overflow: hidden;
+              }
             }
 
             &:hover {
