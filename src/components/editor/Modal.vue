@@ -187,17 +187,15 @@ export default {
     },
     // 삭제
     historyDelete (id) {
-      if (confirm('Are you sure you want to delete it?')) {
-        ERD.core.indexedDB.delete(this.type, id, () => {
-          ERD.core.indexedDB.list(this.type, [], list => {
-            if (this.type === 'project') {
-              this.projectList = list
-            } else if (this.type === 'model') {
-              this.modelList = list
-            }
-          })
+      ERD.core.indexedDB.delete(this.type, id, () => {
+        ERD.core.indexedDB.list(this.type, [], list => {
+          if (this.type === 'project') {
+            this.projectList = list
+          } else if (this.type === 'model') {
+            this.modelList = list
+          }
         })
-      }
+      })
     }
   },
   mounted () {
