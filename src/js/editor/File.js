@@ -139,19 +139,9 @@ class File {
 
   // download
   execute (blob, fileName) {
-    if (window.chrome.fileSystem) {
-      window.chrome.fileSystem.chooseEntry({ type: 'saveFile', suggestedName: fileName }, writableEntry => {
-        writableEntry.createWriter(writer => {
-          writer.write(blob)
-        }, () => {
-          alert('save error')
-        })
-      })
-    } else {
-      this.a.href = window.URL.createObjectURL(blob)
-      this.a.download = fileName
-      this.a.click()
-    }
+    this.a.href = window.URL.createObjectURL(blob)
+    this.a.download = fileName
+    this.a.click()
   }
 
   // json 데이터 정제
