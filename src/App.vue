@@ -47,7 +47,6 @@ export default {
   #erd {
     display: flex;
     z-index: 2;
-    background-color: #282828;
 
     .canvas {
       display: flex;
