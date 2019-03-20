@@ -459,12 +459,12 @@ class Event {
   onCursor (type, cursor) {
     switch (type) {
       case 'start':
-        document.body.setAttribute('style', `width: ${this.core.erd.store().state.CANVAS_WIDTH}px; height: ${this.core.erd.store().state.CANVAS_HEIGHT}px; cursor: url("${relationship(cursor)}") 16 16, auto;`)
+        document.body.setAttribute('style', `cursor: url("${relationship(cursor)}") 16 16, auto;`)
         this.isCursor = true
         this.cursor = cursor
         break
       case 'stop':
-        document.body.setAttribute('style', `width: ${this.core.erd.store().state.CANVAS_WIDTH}px; height: ${this.core.erd.store().state.CANVAS_HEIGHT}px;`)
+        document.body.removeAttribute('style')
         this.isCursor = false
         this.cursor = null
         this.onDraw('stop')

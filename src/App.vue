@@ -1,5 +1,5 @@
 <template lang="pug">
-  #erd(:style="`width: ${CANVAS_WIDTH}px; height: ${CANVAS_HEIGHT}px;`")
+  #erd
     canvas-menu
     quick-menu
     .canvas
@@ -21,18 +21,6 @@ export default {
     QuickMenu,
     CanvasMain,
     CanvasSvg
-  },
-  computed: {
-    CANVAS_WIDTH () {
-      const width = ERD.store().state.CANVAS_WIDTH
-      document.body.setAttribute('style', `width: ${width}px; height: ${ERD.store().state.CANVAS_HEIGHT}px;`)
-      return width
-    },
-    CANVAS_HEIGHT () {
-      const heigth = ERD.store().state.CANVAS_HEIGHT
-      document.body.setAttribute('style', `width: ${ERD.store().state.CANVAS_WIDTH}px; height: ${heigth}px;`)
-      return heigth
-    }
   },
   destroyed () {
     // 객체 정리
