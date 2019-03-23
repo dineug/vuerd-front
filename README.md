@@ -1,8 +1,8 @@
 # vuerd
 ![logo](https://vuerd.github.io/vuerd-front/verd.png)
 ---
-![use](./public/img/01_vuerd.png)  
-![use](./public/img/02_vuerd.png)
+![use](https://user-images.githubusercontent.com/45829489/54869528-2ecfeb00-4ddd-11e9-8f7b-40df329646fa.png)  
+![use](https://user-images.githubusercontent.com/45829489/54869529-2f688180-4ddd-11e9-810c-60c78a776bf5.png)
 ---
 # vuerd-web
 ## ERD
